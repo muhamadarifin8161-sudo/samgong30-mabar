@@ -9,11 +9,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
+        html, body {
             background-color: #0b0f19;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -22,7 +23,7 @@
         }
         .top-bar {
             background: #111827;
-            padding: 6px 10px;
+            padding: 5px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -34,7 +35,7 @@
             background: #059669;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: bold;
@@ -52,12 +53,12 @@
         .poker-table {
             position: relative;
             width: 100%;
-            max-width: 340px;
+            max-width: 320px;
             height: 100%;
-            max-height: 380px;
+            max-height: 340px;
             background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
-            border: 5px solid #78350f;
-            border-radius: 120px;
+            border: 4px solid #78350f;
+            border-radius: 110px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
@@ -65,22 +66,22 @@
         }
         .center-info {
             background: rgba(0, 0, 0, 0.7);
-            padding: 5px 10px;
-            border-radius: 8px;
+            padding: 4px 8px;
+            border-radius: 6px;
             border: 1px solid rgba(34, 197, 94, 0.3);
             text-align: center;
             z-index: 5;
         }
-        .center-info div:first-child { font-size: 9px; color: #d1d5db; }
-        .center-info div:last-child { font-size: 10px; color: #facc15; font-weight: bold; }
+        .center-info div:first-child { font-size: 8px; color: #d1d5db; }
+        .center-info div:last-child { font-size: 9px; color: #facc15; font-weight: bold; }
 
         .seat {
             position: absolute;
             background: #111827;
             border: 2px solid #374151;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 2px;
-            width: 85px;
+            width: 80px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
@@ -90,19 +91,19 @@
         .seat-name { font-size: 8px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .seat-status { font-size: 6px; color: #9ca3af; margin-top: 1px; }
 
-        #seat-0 { bottom: -6px; left: 50%; transform: translateX(-50%); width: 95px; }
-        #seat-1 { bottom: 45px; left: 2px; }
-        #seat-2 { top: 50px; left: 2px; }
-        #seat-3 { top: -6px; left: 22%; transform: translateX(-50%); }
-        #seat-4 { top: -6px; right: 22%; transform: translateX(50%); }
-        #seat-5 { top: 50px; right: 2px; }
-        #seat-6 { bottom: 45px; right: 2px; }
+        #seat-0 { bottom: -4px; left: 50%; transform: translateX(-50%); width: 90px; }
+        #seat-1 { bottom: 40px; left: 2px; }
+        #seat-2 { top: 45px; left: 2px; }
+        #seat-3 { top: -4px; left: 22%; transform: translateX(-50%); }
+        #seat-4 { top: -4px; right: 22%; transform: translateX(50%); }
+        #seat-5 { top: 45px; right: 2px; }
+        #seat-6 { bottom: 40px; right: 2px; }
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 22px; margin: 1px 0; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 20px; margin: 1px 0; }
         .card {
-            width: 16px; height: 22px; background: #fff; border-radius: 2px;
+            width: 14px; height: 20px; background: #fff; border-radius: 2px;
             display: inline-flex; flex-direction: column; justify-content: space-between;
-            padding: 1px; font-weight: bold; font-size: 6px; line-height: 1; margin-left: -6px;
+            padding: 1px; font-weight: bold; font-size: 6px; line-height: 1; margin-left: -5px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .card:first-child { margin-left: 0; }
@@ -194,7 +195,7 @@
         </div>
     </div>
 
-    <!-- Panel Kontrol yang Sekarang Pasti Kelihatan di Bawah -->
+    <!-- Panel Kontrol yang Dipaksa Naik ke Layar -->
     <div class="control-panel">
         <div class="btn-group">
             <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit</button>
