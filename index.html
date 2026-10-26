@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Samgong 30 - Mabar Realtime</title>
+    <title>Samgong 30 - Mabar Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Firebase SDK (Realtime Sync) -->
+    <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -73,7 +73,7 @@
             <i class="fas fa-clover text-green-500 text-lg"></i>
             <div>
                 <h1 class="font-bold text-sm text-yellow-500 tracking-wide">SAMGONG 30</h1>
-                <span class="text-[10px] text-gray-400" id="roomDisplayLabel">Room: Memuat...</span>
+                <span class="text-[10px] text-gray-400" id="roomDisplayLabel">Menghubungkan Room...</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -84,59 +84,53 @@
         </div>
     </div>
 
-    <!-- Layout Meja Poker 7 Bangku (Landscape) -->
+    <!-- Layout Meja Poker 7 Bangku -->
     <div class="relative w-full my-1 flex-grow flex items-center justify-center">
         <div class="poker-table w-full h-full max-w-5xl absolute inset-0 m-auto flex items-center justify-center">
             
             <!-- Teks Informasi Tengah Meja -->
             <div class="text-center bg-black/50 px-5 py-2 rounded-xl border border-green-500/30 backdrop-blur-md z-0">
-                <div class="text-[11px] text-gray-300 font-semibold" id="gameStatusText">Menunggu Pemain...</div>
+                <div class="text-[11px] text-gray-300 font-semibold" id="gameStatusText">Status: Menunggu Pemain</div>
                 <div class="text-yellow-400 font-bold text-xs" id="turnStatusText">Silakan Pilih Bangku</div>
             </div>
 
-            <!-- Bangku 0: Bawah Tengah -->
+            <!-- 7 Bangku Meja -->
             <div id="seat-0" onclick="claimSeat(0)" class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-36 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-yellow-400 truncate" id="name-0">Bangku 1 (Kosong)</div>
                 <div class="card-container my-1" id="cards-0"></div>
                 <div class="text-[9px] text-gray-400" id="status-0">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 1: Kiri Bawah -->
             <div id="seat-1" onclick="claimSeat(1)" class="absolute bottom-6 left-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-1">Bangku 2 (Kosong)</div>
                 <div class="card-container my-1" id="cards-1"></div>
                 <div class="text-[9px] text-gray-400" id="status-1">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 2: Kiri Atas -->
             <div id="seat-2" onclick="claimSeat(2)" class="absolute top-6 left-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-2">Bangku 3 (Kosong)</div>
                 <div class="card-container my-1" id="cards-2"></div>
                 <div class="text-[9px] text-gray-400" id="status-2">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 3: Atas Kiri -->
             <div id="seat-3" onclick="claimSeat(3)" class="absolute top-1 left-1/3 -translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-3">Bangku 4 (Kosong)</div>
                 <div class="card-container my-1" id="cards-3"></div>
                 <div class="text-[9px] text-gray-400" id="status-3">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 4: Atas Kanan -->
             <div id="seat-4" onclick="claimSeat(4)" class="absolute top-1 right-1/3 translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-4">Bangku 5 (Kosong)</div>
                 <div class="card-container my-1" id="cards-4"></div>
                 <div class="text-[9px] text-gray-400" id="status-4">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 5: Kanan Atas -->
             <div id="seat-5" onclick="claimSeat(5)" class="absolute top-6 right-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-5">Bangku 6 (Kosong)</div>
                 <div class="card-container my-1" id="cards-5"></div>
                 <div class="text-[9px] text-gray-400" id="status-5">Ketuk untuk duduk</div>
             </div>
 
-            <!-- Bangku 6: Kanan Bawah -->
             <div id="seat-6" onclick="claimSeat(6)" class="absolute bottom-6 right-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
                 <div class="text-[11px] font-bold text-gray-200 truncate" id="name-6">Bangku 7 (Kosong)</div>
                 <div class="card-container my-1" id="cards-6"></div>
@@ -146,7 +140,7 @@
         </div>
     </div>
 
-    <!-- Panel Kontrol Aksi Pemain & Mulai Ronde Baru -->
+    <!-- Panel Kontrol Aksi Pemain -->
     <div class="bg-gray-900 p-2.5 rounded-xl border border-gray-800 flex justify-between items-center z-20">
         <div class="flex space-x-2">
             <button id="btnHit" onclick="playerHit()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-5 py-2 rounded-lg shadow disabled:opacity-30 transition flex items-center space-x-1.5 text-xs">
@@ -170,20 +164,20 @@
         </div>
     </div>
 
-    <!-- Modal Pop-up Konfirmasi Showdown -->
+    <!-- Modal Pop-up Showdown -->
     <div id="modalShowdown" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border-2 border-yellow-500 rounded-2xl p-5 max-w-sm w-full text-center shadow-2xl">
             <i class="fas fa-eye text-3xl text-yellow-400 mb-2"></i>
             <h2 class="text-lg font-bold text-yellow-400 mb-1">SHOWDOWN! Kartu Terbuka</h2>
-            <p class="text-xs text-gray-300 mb-4">Semua kartu pemain telah dibuka transparan di meja. Verifikasi hasil sebelum ronde baru dimulai.</p>
+            <p class="text-xs text-gray-300 mb-4">Semua kartu pemain telah dibuka di meja.</p>
             <button onclick="confirmNewRound()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2 rounded-lg w-full text-xs py-2.5">
-                <i class="fas fa-check-circle mr-1"></i> Setuju Ronde Baru
+                <i class="fas fa-check-circle mr-1"></i> Lanjut Ronde Baru
             </button>
         </div>
     </div>
 
     <script>
-        // Konfigurasi Firebase Publik Gratis untuk Sinkronisasi Realtime Mabar
+        // Konfigurasi Firebase Publik
         const firebaseConfig = {
             databaseURL: "https://samgong-mabar-default-rtdb.firebaseio.com/"
         };
@@ -192,28 +186,52 @@
         }
         const db = firebase.database();
 
-        // Ambil atau Buat Room dari URL Hash (Contoh: #room-xyz)
-        let roomId = window.location.hash.substring(1);
+        // Ambil atau Buat Room dari URL Hash secara Aman
+        let roomId = window.location.hash.replace('#', '').trim();
         if (!roomId) {
             roomId = 'room-' + Math.random().toString(36).substring(2, 8);
             window.location.hash = roomId;
         }
         document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
 
-        let mySeat = null; // Bangku yang dipilih pemain di HP ini
-        const myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
+        // ID Unik Perangkat Ini (Disimpan di localStorage agar tetap konsisten)
+        let myPlayerId = localStorage.getItem('samgong_pid');
+        if (!myPlayerId) {
+            myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
+            localStorage.setItem('samgong_pid', myPlayerId);
+        }
+
+        let mySeat = null;
+        let roomRef = db.ref('rooms/' + roomId);
 
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-        let roomRef = db.ref('rooms/' + roomId);
-
-        // Listener Realtime dari Firebase
+        // Sinkronisasi Realtime dari Firebase
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 updateUI(data);
+                // Deteksi otomatis jika perangkat ini sudah duduk di bangku tertentu sebelumnya
+                if (data.seats) {
+                    for (let i = 0; i < 7; i++) {
+                        if (data.seats[i] && data.seats[i].playerId === myPlayerId) {
+                            mySeat = i;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // Inisialisasi data awal room jika masih kosong total di database
+                roomRef.set({
+                    currentTurn: 0,
+                    isShowdown: false,
+                    seats: {}
+                });
             }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
         });
 
         function copyWhatsAppLink() {
@@ -224,29 +242,28 @@
             });
         }
 
-        // Sistem Pilih Bangku Realtime (Langsung Responsif)
+        // Fungsi Pilih Bangku Real-time (Anti-Bentrok)
         function claimSeat(seatIndex) {
             if (mySeat !== null && mySeat !== seatIndex) {
                 alert("Kamu sudah duduk di bangku lain!");
                 return;
             }
 
-            roomRef.child('seats/' + seatIndex).once('value', (snapshot) => {
-                const seatData = snapshot.val();
-                
-                if (!seatData || seatData.playerId === myPlayerId) {
-                    roomRef.child('seats/' + seatIndex).set({
+            let seatRef = roomRef.child('seats/' + seatIndex);
+            seatRef.transaction((currentSeat) => {
+                if (!currentSeat || currentSeat.playerId === myPlayerId) {
+                    return {
                         playerId: myPlayerId,
                         name: `Pemain ${seatIndex + 1}`,
                         isStopped: false,
                         cards: []
-                    }).then(() => {
-                        mySeat = seatIndex;
-                        alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
-                    }).catch((err) => {
-                        console.error(err);
-                        alert("Gagal duduk, coba lagi.");
-                    });
+                    };
+                }
+                return; // Batalkan jika sudah diambil orang lain
+            }, (error, committed, snapshot) => {
+                if (committed) {
+                    mySeat = seatIndex;
+                    alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
                 } else {
                     alert("Maaf, bangku ini sudah diambil pemain lain!");
                 }
@@ -257,18 +274,14 @@
             if (!cards) return 0;
             let total = 0;
             for (let card of cards) {
-                if (['J', 'Q', 'K', '10'].includes(card.value)) {
-                    total += 10;
-                } else if (card.value === 'A') {
-                    total += 1;
-                } else {
-                    total += parseInt(card.value);
-                }
+                if (['J', 'Q', 'K', '10'].includes(card.value)) total += 10;
+                else if (card.value === 'A') total += 1;
+                else total += parseInt(card.value);
             }
             return total;
         }
 
-        // Host / Pemain memulai game baru
+        // Mulai Game Baru / Bagikan Kartu ke Semua Pemain yang Duduk
         function startNewGame() {
             let deck = [];
             for (let suit of suits) {
@@ -278,20 +291,27 @@
             }
             deck.sort(() => Math.random() - 0.5);
 
-            roomRef.child('seats').once('value', (snapshot) => {
-                const seats = snapshot.val() || [];
+            roomRef.once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const seats = data.seats || {};
                 let updates = {};
-                let firstTurnIndex = 0;
 
-                seats.forEach((seat, idx) => {
-                    if (seat) {
+                let activeSeatsCount = 0;
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
                         let pCards = [deck.pop(), deck.pop(), deck.pop()];
-                        updates[`seats/${idx}/cards`] = pCards;
-                        updates[`seats/${idx}/isStopped`] = false;
+                        updates[`seats/${i}/cards`] = pCards;
+                        updates[`seats/${i}/isStopped`] = false;
+                        activeSeatsCount++;
                     }
-                });
+                }
 
-                updates['currentTurn'] = firstTurnIndex;
+                if (activeSeatsCount === 0) {
+                    alert("Belum ada pemain yang duduk di meja!");
+                    return;
+                }
+
+                updates['currentTurn'] = 0;
                 updates['isShowdown'] = false;
                 updates['deck'] = deck;
 
@@ -302,13 +322,14 @@
         function playerHit() {
             if (mySeat === null) return;
             roomRef.once('value', (snap) => {
-                const data = snap.val();
-                if (!data || data.currentTurn !== mySeat || data.isShowdown) return;
+                const data = snap.val() || {};
+                if (data.currentTurn !== mySeat || data.isShowdown) return;
 
-                let seats = data.seats || [];
+                let seats = data.seats || {};
                 let player = seats[mySeat];
-                if (player && player.cards && player.cards.length < 7 && data.deck && data.deck.length > 0) {
-                    let deck = data.deck;
+                let deck = data.deck || [];
+
+                if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let newCard = deck.pop();
                     player.cards.push(newCard);
 
@@ -323,15 +344,15 @@
         function playerStand() {
             if (mySeat === null) return;
             roomRef.once('value', (snap) => {
-                const data = snap.val();
-                if (!data || data.currentTurn !== mySeat || data.isShowdown) return;
+                const data = snap.val() || {};
+                if (data.currentTurn !== mySeat || data.isShowdown) return;
 
-                let seats = data.seats || [];
+                let seats = data.seats || {};
                 if (seats[mySeat]) {
                     seats[mySeat].isStopped = true;
                 }
 
-                // Cari giliran berikutnya yang belum stop
+                // Cari giliran pemain berikutnya yang belum stop
                 let nextTurn = (mySeat + 1) % 7;
                 let checkCount = 0;
                 while ((!seats[nextTurn] || seats[nextTurn].isStopped) && checkCount < 7) {
@@ -340,7 +361,6 @@
                 }
 
                 if (checkCount >= 7) {
-                    // Semua selesai -> Showdown otomatis
                     triggerShowdown();
                 } else {
                     roomRef.update({
@@ -356,13 +376,12 @@
         }
 
         function confirmNewRound() {
-            roomRef.child('isShowdown').set(false);
             startNewGame();
         }
 
-        // Render Tampilan Berdasarkan Data Firebase Realtime
+        // Render Tampilan Layar Sesuai Data Real-time Firebase
         function updateUI(data) {
-            const seats = data.seats || [];
+            const seats = data.seats || {};
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
 
@@ -386,13 +405,15 @@
                 }
 
                 if (player) {
-                    nameElem.innerText = player.name + (player.playerId === myPlayerId ? ' (Anda)' : '');
+                    let isMe = (player.playerId === myPlayerId || mySeat === i);
+                    nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
                     cardsElem.innerHTML = '';
                     
                     if (player.cards) {
                         player.cards.forEach((card) => {
                             const cardDiv = document.createElement('div');
-                            if (i === mySeat || isShowdown) {
+                            // Kartu sendiri dibuka, kartu pemain lain ditutup kecuali saat showdown
+                            if (isMe || isShowdown) {
                                 const isRed = card.suit === '♥' || card.suit === '♦';
                                 cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
                                 cardDiv.innerHTML = `<div>${card.value}</div><div style="text-align:right;">${card.suit}</div>`;
@@ -405,11 +426,11 @@
 
                     if (isShowdown) {
                         const total = calculateScore(player.cards);
-                        statusElem.innerHTML = `<span class="text-yellow-400 font-bold">Total Nilai: ${total}</span>`;
+                        statusElem.innerHTML = `<span class="text-yellow-400 font-bold">Total: ${total}</span>`;
                     } else if (player.isStopped) {
-                        statusElem.innerHTML = `<span class="text-rose-400 font-semibold">STOP (${player.cards ? player.cards.length : 0} Kartu)</span>`;
+                        statusElem.innerHTML = `<span class="text-rose-400 font-semibold">STOP</span>`;
                     } else {
-                        statusElem.innerHTML = `<span class="text-gray-400">Sedang Main</span>`;
+                        statusElem.innerHTML = `<span class="text-gray-400">Main</span>`;
                     }
                 } else {
                     nameElem.innerText = `Bangku ${i + 1} (Kosong)`;
@@ -420,12 +441,11 @@
 
             document.getElementById('turnStatusText').innerText = `Giliran: Bangku ${currentTurn + 1}`;
             
-            // Kontrol tombol aksi hanya aktif jika giliran pemain di HP ini
             const btnHit = document.getElementById('btnHit');
             const btnStand = document.getElementById('btnStand');
             const isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
             
-            btnHit.disabled = !isMyTrust = !isMyTurn; // aman
+            btnHit.disabled = !isMyTurn;
             btnStand.disabled = !isMyTurn;
         }
     </script>
