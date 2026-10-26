@@ -195,7 +195,7 @@
         // Ambil atau Buat Room dari URL Hash (Contoh: #room-xyz)
         let roomId = window.location.hash.substring(1);
         if (!roomId) {
-            roomId = 'room-' + Math.random().toString(36.substring(2, 8));
+            roomId = 'room-' + Math.random().toString(36).substring(2, 8);
             window.location.hash = roomId;
         }
         document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
@@ -228,7 +228,7 @@
         function claimSeat(seatIndex) {
             roomRef.child('seats/' + seatIndex).transaction((currentSeat) => {
                 if (!currentSeat || currentSeat.playerId === myPlayerId) {
-                    return { playerId: myPlayerId, name: `Pemain (Kursi ${seatIndex + 1})`, isStopped: false, cards: [] };
+                    return { playerId: myPlayerId, name: `Pemain ${seatIndex + 1}`, isStopped: false, cards: [] };
                 }
                 return; // Batalkan jika sudah diisi pemain lain
             }, (error, committed) => {
@@ -256,7 +256,7 @@
             return total;
         }
 
-        // Host / Pemain pertama memulai game baru
+        // Host / Pemain memulai game baru
         function startNewGame() {
             let deck = [];
             for (let suit of suits) {
@@ -267,14 +267,9 @@
             deck.sort(() => Math.random() - 0.5);
 
             roomRef.child('seats').once('value', (snapshot) => {
-                const seats = snapshot.val() || {};
+                const seats = snapshot.val() || [];
                 let updates = {};
                 let firstTurnIndex = 0;
-
-                // Ambil pemenang sebelumnya jika ada untuk jadi giliran pertama
-                roomRef.child('lastWinnerIndex').once('winSnap', (wSnap) => {
-                    if (wSnap.val() !== null) firstTurnIndex = wSnap.val();
-                });
 
                 seats.forEach((seat, idx) => {
                     if (seat) {
@@ -296,10 +291,11 @@
             if (mySeat === null) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val();
-                if (data.currentTurn !== mySeat || data.isShowdown) return;
+                if (!data || data.currentTurn !== mySeat || data.isShowdown) return;
 
-                let player = data.seats[mySeat];
-                if (player.cards.length < 7 && data.deck && data.deck.length > 0) {
+                let seats = data.seats || [];
+                let player = seats[mySeat];
+                if (player && player.cards && player.cards.length < 7 && data.deck && data.deck.length > 0) {
                     let deck = data.deck;
                     let newCard = deck.pop();
                     player.cards.push(newCard);
@@ -316,10 +312,12 @@
             if (mySeat === null) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val();
-                if (data.currentTurn !== mySeat || data.isShowdown) return;
+                if (!data || data.currentTurn !== mySeat || data.isShowdown) return;
 
-                let seats = data.seats;
-                seats[mySeat].isStopped = true;
+                let seats = data.seats || [];
+                if (seats[mySeat]) {
+                    seats[mySeat].isStopped = true;
+                }
 
                 // Cari giliran berikutnya yang belum stop
                 let nextTurn = (mySeat + 1) % 7;
@@ -352,7 +350,7 @@
 
         // Render Tampilan Berdasarkan Data Firebase Realtime
         function updateUI(data) {
-            const seats = data.seats || {};
+            const seats = data.seats || [];
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
 
@@ -399,7 +397,7 @@
                     } else if (player.isStopped) {
                         statusElem.innerHTML = `<span class="text-rose-400 font-semibold">STOP (${player.cards ? player.cards.length : 0} Kartu)</span>`;
                     } else {
-                        statusElem.innerHTML = `<span class="text-gray-400">Rahasia</span>`;
+                        statusElem.innerHTML = `<span class="text-gray-400">Sedang Main</span>`;
                     }
                 } else {
                     nameElem.innerText = `Bangku ${i + 1} (Kosong)`;
