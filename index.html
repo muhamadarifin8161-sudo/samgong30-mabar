@@ -1,3 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Samgong 30 - Mabar Online</title>
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            user-select: none;
+            position: fixed;
+        }
+        .top-bar {
+            background: #111827;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+            z-index: 20;
+            flex-shrink: 0;
+            height: 45px;
+        }
+        .wa-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .table-area {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            overflow: hidden;
+        }
+        .poker-table {
+            position: relative;
+            width: 320px;
+            height: 420px;
+            background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
+            border: 6px solid #78350f;
+            border-radius: 140px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .center-info {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            text-align: center;
+            z-index: 5;
+        }
+        .center-info div:first-child { font-size: 9px; color: #d1d5db; }
+        .center-info div:last-child { font-size: 11px; color: #facc15; font-weight: bold; }
+
+        .seat {
+            position: absolute;
+            background: #111827;
+            border: 2px solid #374151;
+            border-radius: 8px;
+            padding: 3px;
+            width: 90px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
+        .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seat-status { font-size: 7px; color: #9ca3af; margin-top: 1px; }
+
+        #seat-0 { bottom: -10px; left: 50%; transform: translateX(-50%); width: 100px; }
+        #seat-1 { bottom: 60px; left: -10px; }
+        #seat-2 { top: 75px; left: -10px; }
+        #seat-3 { top: -10px; left: 22%; transform: translateX(-50%); }
+        #seat-4 { top: -10px; right: 22%; transform: translateX(50%); }
+        #seat-5 { top: 75px; right: -10px; }
+        #seat-6 { bottom: 60px; right: -10px; }
+
+        .card-container { display: flex; justify-content: center; align-items: center; height: 24px; margin: 1px 0; }
+        .card {
+            width: 16px; height: 24px; background: #fff; border-radius: 2px;
+            display: inline-flex; flex-direction: column; justify-content: space-between;
+            padding: 1px; font-weight: bold; font-size: 7px; line-height: 1; margin-left: -6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .card:first-child { margin-left: 0; }
+        .card.back { background: linear-gradient(135deg, #b91c1c, #991b1b); border: 1px solid #fff; }
+        .card.red { color: #dc2626; }
+        .card.black { color: #111827; }
+
+        .control-panel {
+            background: #111827;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #1f2937;
+            z-index: 20;
+            flex-shrink: 0;
+            height: 55px;
+        }
+        .btn-group { display: flex; gap: 6px; }
+        .btn {
+            padding: 7px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+            white-space: nowrap;
+        }
+        .btn-hit { background: #059669; }
+        .btn-stand { background: #e11d48; }
+        .btn-deal { background: #2563eb; }
+        .btn-round { background: linear-gradient(to right, #f59e0b, #eab308); color: #030712; font-weight: 800; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
+            align-items: center; justify-content: center; z-index: 50; padding: 15px;
+        }
+        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 260px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div>
+            <div style="font-size: 11px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
+            <div style="font-size: 8px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
+        </div>
+        <button class="wa-btn" onclick="copyWhatsAppLink()">Salin Link Mabar</button>
+    </div>
+
+    <div class="table-area">
+        <div class="poker-table">
+            <div class="center-info">
+                <div id="gameStatusText">Status: Menunggu Pemain</div>
+                <div id="turnStatusText">Silakan Pilih Bangku</div>
+            </div>
+
+            <div id="seat-0" class="seat" onclick="claimSeat(0)">
+                <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
+                <div class="card-container" id="cards-0"></div>
+                <div class="seat-status" id="status-0">Ketuk duduk</div>
+            </div>
+            <div id="seat-1" class="seat" onclick="claimSeat(1)">
+                <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
+                <div class="card-container" id="cards-1"></div>
+                <div class="seat-status" id="status-1">Ketuk duduk</div>
+            </div>
+            <div id="seat-2" class="seat" onclick="claimSeat(2)">
+                <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
+                <div class="card-container" id="cards-2"></div>
+                <div class="seat-status" id="status-2">Ketuk duduk</div>
+            </div>
+            <div id="seat-3" class="seat" onclick="claimSeat(3)">
+                <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
+                <div class="card-container" id="cards-3"></div>
+                <div class="seat-status" id="status-3">Ketuk duduk</div>
+            </div>
+            <div id="seat-4" class="seat" onclick="claimSeat(4)">
+                <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
+                <div class="card-container" id="cards-4"></div>
+                <div class="seat-status" id="status-4">Ketuk duduk</div>
+            </div>
+            <div id="seat-5" class="seat" onclick="claimSeat(5)">
+                <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
+                <div class="card-container" id="cards-5"></div>
+                <div class="seat-status" id="status-5">Ketuk duduk</div>
+            </div>
+            <div id="seat-6" class="seat" onclick="claimSeat(6)">
+                <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
+                <div class="card-container" id="cards-6"></div>
+                <div class="seat-status" id="status-6">Ketuk duduk</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <div class="btn-group">
+            <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit</button>
+            <button id="btnStand" class="btn btn-stand" onclick="playerStand()" disabled>Stop</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-deal" onclick="startNewGame()">Mulai Game</button>
+            <button class="btn btn-round" onclick="triggerShowdown()">Showdown</button>
+        </div>
+    </div>
+
+    <div id="modalShowdown" class="modal">
+        <div class="modal-box">
+            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px;">SHOWDOWN!</h3>
+            <p style="font-size: 9px; color: #d1d5db; margin-bottom: 8px;">Semua kartu terbuka. Cek skor di meja.</p>
+            <button class="btn btn-deal" style="width:100%;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -82,7 +300,6 @@
             });
         }
 
-        // Aturan Hitung Skor Samgong (J, Q, K, 10 = 10 poin; A = 1 poin; lainnya sesuai angka)
         function calculateScore(cards) {
             if (!cards) return 0;
             let total = 0;
@@ -121,7 +338,6 @@
                     return;
                 }
 
-                // Tentukan siapa yang jalan duluan berdasarkan pemenang ronde sebelumnya
                 let startSeat = data.lastWinnerSeat ?? 0;
                 if (!seats[startSeat]) {
                     startSeat = getFirstActiveSeat(seats);
@@ -248,11 +464,9 @@
                     let topScorePlayers = nonBust.filter(p => p.score === highScore);
 
                     if (topScorePlayers.length === 1) {
-                        // Hanya ada 1 pemenang tunggal
                         winnerSeatIndex = topScorePlayers[0].index;
                         winnerText = `🏆 Pemenang: ${topScorePlayers[0].name} (Skor: ${topScorePlayers[0].score})`;
                     } else {
-                        // Poin sama (misal sama-sama 27), aturan mutlak: IMBANG / SERI!
                         winnerSeatIndex = null; 
                         winnerText = `🤝 Seri / Imbang: ${topScorePlayers.map(p => p.name).join(', ')} (Skor: ${highScore})`;
                     }
@@ -260,13 +474,11 @@
                     winnerText = "⚠️ Semua pemain Hangus (Bust > 30)!";
                 }
 
-                // Simpan pemenang ke database jika ada pemenang tunggal. Jika seri/imbang, gunakan kursi aktif pertama atau biarkan round sebelumnya.
                 if (winnerSeatIndex !== null) {
                     if (data.lastWinnerSeat !== winnerSeatIndex) {
                         roomRef.update({ lastWinnerSeat: winnerSeatIndex });
                     }
                 } else {
-                    // Jika seri, jika ingin ronde berikutnya mulai dari pemain pertama dari yang seri (atau dibiarkan), kita set ke index pemain seri pertama
                     let nonBust = validPlayers.filter(p => !p.isBust);
                     if (nonBust.length > 0) {
                         let highScore = Math.max(...nonBust.map(p => p.score));
@@ -347,3 +559,5 @@
             document.getElementById('btnStand').disabled = !isMyTurn;
         }
     </script>
+</body>
+</html>
