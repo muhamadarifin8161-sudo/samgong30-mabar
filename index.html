@@ -82,11 +82,11 @@
         }
         .poker-table {
             position: relative;
-            width: 320px;
-            height: 440px;
+            width: 340px;
+            height: 480px;
             background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
             border: 6px solid #78350f;
-            border-radius: 140px;
+            border-radius: 150px;
             box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
@@ -109,8 +109,8 @@
             background: #111827;
             border: 2px solid #374151;
             border-radius: 8px;
-            padding: 4px;
-            width: 105px;
+            padding: 6px;
+            width: 130px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
@@ -118,7 +118,7 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
         
-        /* Khusus Bangku Sendiri (Seat 0 di bawah) - Dibuat jauh lebih besar untuk menampung kartu ukuran 2x lipat */
+        /* Semua Bangku Dibuat Luas untuk Menampung Kartu Besar */
         .seat.is-me {
             width: 195px;
             border-color: #059669;
@@ -126,24 +126,34 @@
             z-index: 25;
         }
 
-        .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seat-name { font-size: 10px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .seat-status { font-size: 8px; color: #9ca3af; margin-top: 2px; font-weight: 600; }
 
         #seat-0 { bottom: -20px; left: 50%; transform: translateX(-50%); }
-        #seat-1 { bottom: 60px; left: -14px; }
-        #seat-2 { top: 70px; left: -14px; }
-        #seat-3 { top: -12px; left: 22%; transform: translateX(-50%); }
-        #seat-4 { top: -12px; right: 22%; transform: translateX(50%); }
-        #seat-5 { top: 70px; right: -14px; }
-        #seat-6 { bottom: 60px; right: -14px; }
+        #seat-1 { bottom: 65px; left: -18px; }
+        #seat-2 { top: 75px; left: -18px; }
+        #seat-3 { top: -14px; left: 22%; transform: translateX(-50%); }
+        #seat-4 { top: -14px; right: 22%; transform: translateX(50%); }
+        #seat-5 { top: 75px; right: -18px; }
+        #seat-6 { bottom: 65px; right: -18px; }
 
-        /* Kartu Pemain Lain (Standar yang sudah diperbesar sebelumnya) */
-        .card-container { display: flex; justify-content: center; align-items: center; height: 38px; margin: 3px 0; }
+        /* KARTU SEMUA PEMAIN: DIJADIKAN BESAR (2x Lipat dari Standar Sebelumnya) */
+        .card-container { display: flex; justify-content: center; align-items: center; height: 102px; margin: 5px 0; }
         .card {
-            width: 24px; height: 36px; background: #fff; border-radius: 3px;
-            display: inline-flex; flex-direction: column; justify-content: space-between;
-            padding: 2px; font-weight: bold; font-size: 10px; line-height: 1; margin-left: -7px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            width: 68px; 
+            height: 96px; 
+            background: #fff; 
+            border-radius: 6px;
+            display: inline-flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            padding: 6px; 
+            font-weight: bold; 
+            font-size: 22px; 
+            line-height: 1; 
+            margin-left: -18px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+            border: 1px solid #d1d5db;
         }
         .card:first-child { margin-left: 0; }
         .card.back { 
@@ -154,18 +164,6 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* KARTU KHUSUS PEMILIK HP: DIJADIKAN 2 KALI LIPAT LEBIH BESAR */
-        .seat.is-me .card-container { height: 102px; margin: 6px 0; }
-        .seat.is-me .card {
-            width: 68px; 
-            height: 96px; 
-            border-radius: 6px; 
-            font-size: 22px; 
-            padding: 6px; 
-            margin-left: -18px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-            border: 1px solid #d1d5db;
-        }
         .seat.is-me .seat-name { font-size: 12px; }
         .seat.is-me .seat-status { font-size: 11px; }
 
@@ -295,6 +293,8 @@
             localStorage.setItem('samgong_pid', myPlayerId);
         }
 
+        let savedMyName = localStorage.getItem('samgong_pname') || '';
+
         let mySeat = null;
         let roomRef = db.ref('samgong_rooms/' + roomId);
 
@@ -338,11 +338,18 @@
             seatRef.once('value', (snap) => {
                 let seatData = snap.val();
                 if (!seatData || seatData.playerId === myPlayerId) {
+                    let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
+                    if (!inputName || inputName.trim() === "") return;
+                    let playerName = inputName.trim().substring(0, 15);
+                    
+                    localStorage.setItem('samgong_pname', playerName);
+                    savedMyName = playerName;
+
                     seatRef.set({
                         playerId: myPlayerId,
-                        name: `Pemain ${seatIndex + 1}`,
+                        name: playerName,
                         isStopped: false,
-                        cards: []
+                        cards: seatData && seatData.cards ? seatData.cards : []
                     }).then(() => {
                         mySeat = seatIndex;
                     });
