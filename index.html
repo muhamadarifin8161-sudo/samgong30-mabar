@@ -118,16 +118,17 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
         
-        /* Khusus Bangku Sendiri (Seat 0 di bawah) dibuat sedikit lebih besar area dan kartunya */
+        /* Khusus Bangku Sendiri (Seat 0 di bawah) dibuat jauh lebih besar area dan kartunya */
         .seat.is-me {
-            width: 110px;
+            width: 125px;
             border-color: #059669;
+            padding: 6px;
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .seat-status { font-size: 7px; color: #9ca3af; margin-top: 2px; }
 
-        #seat-0 { bottom: -12px; left: 50%; transform: translateX(-50%); }
+        #seat-0 { bottom: -15px; left: 50%; transform: translateX(-50%); }
         #seat-1 { bottom: 60px; left: -12px; }
         #seat-2 { top: 75px; left: -12px; }
         #seat-3 { top: -12px; left: 22%; transform: translateX(-50%); }
@@ -148,13 +149,13 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* Kartu Khusus Pemilik HP (Lebih Besar & Jelas) */
-        .seat.is-me .card-container { height: 42px; margin: 3px 0; }
+        /* Kartu Khusus Pemilik HP (Jauh Lebih Besar & Jelas) */
+        .seat.is-me .card-container { height: 50px; margin: 4px 0; }
         .seat.is-me .card {
-            width: 28px; height: 40px; border-radius: 3px; font-size: 11px; padding: 2px; margin-left: -8px;
+            width: 34px; height: 48px; border-radius: 4px; font-size: 13px; padding: 3px; margin-left: -10px;
         }
-        .seat.is-me .seat-name { font-size: 10px; }
-        .seat.is-me .seat-status { font-size: 8px; }
+        .seat.is-me .seat-name { font-size: 11px; }
+        .seat.is-me .seat-status { font-size: 9px; }
 
         .control-panel {
             background: #111827;
@@ -167,7 +168,6 @@
             flex-shrink: 0;
             height: 55px;
         }
-        .btn-group { display: flex; gap: 6px; }
         .btn {
             padding: 7px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
             white-space: nowrap;
@@ -405,11 +405,13 @@
                 let seats = data.seats || {};
                 let player = seats[mySeat];
                 let deck = data.deck || [];
+                
+                // Batas maksimal kartu adalah 7, poin > 30 tidak lagi auto-stop (bebas ambil asal belum 7 kartu)
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     player.cards.push(deck.pop());
                     
                     let currentScore = calculateScore(player.cards);
-                    let autoStop = player.cards.length >= 7 || currentScore >= 30;
+                    let autoStop = player.cards.length >= 7; // Hanya auto-stop jika sudah genap 7 kartu
                     if (autoStop) player.isStopped = true;
 
                     let updates = {
@@ -551,7 +553,6 @@
 
                 let isMe = (player && (player.playerId === myPlayerId || mySeat === i));
 
-                // Tandai khusus bangku milik sendiri agar tampil lebih besar
                 if (isMe) {
                     seatElem.classList.add('is-me');
                 } else {
