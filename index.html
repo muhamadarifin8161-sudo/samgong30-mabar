@@ -224,17 +224,29 @@
             });
         }
 
-        // Sistem Pilih Bangku Realtime (Siapa Cepat Dia Dapat)
+        // Sistem Pilih Bangku Realtime (Langsung Responsif)
         function claimSeat(seatIndex) {
-            roomRef.child('seats/' + seatIndex).transaction((currentSeat) => {
-                if (!currentSeat || currentSeat.playerId === myPlayerId) {
-                    return { playerId: myPlayerId, name: `Pemain ${seatIndex + 1}`, isStopped: false, cards: [] };
-                }
-                return; // Batalkan jika sudah diisi pemain lain
-            }, (error, committed) => {
-                if (committed) {
-                    mySeat = seatIndex;
-                    alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
+            if (mySeat !== null && mySeat !== seatIndex) {
+                alert("Kamu sudah duduk di bangku lain!");
+                return;
+            }
+
+            roomRef.child('seats/' + seatIndex).once('value', (snapshot) => {
+                const seatData = snapshot.val();
+                
+                if (!seatData || seatData.playerId === myPlayerId) {
+                    roomRef.child('seats/' + seatIndex).set({
+                        playerId: myPlayerId,
+                        name: `Pemain ${seatIndex + 1}`,
+                        isStopped: false,
+                        cards: []
+                    }).then(() => {
+                        mySeat = seatIndex;
+                        alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
+                    }).catch((err) => {
+                        console.error(err);
+                        alert("Gagal duduk, coba lagi.");
+                    });
                 } else {
                     alert("Maaf, bangku ini sudah diambil pemain lain!");
                 }
@@ -413,7 +425,7 @@
             const btnStand = document.getElementById('btnStand');
             const isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
             
-            btnHit.disabled = !isMyTurn;
+            btnHit.disabled = !isMyTrust = !isMyTurn; // aman
             btnStand.disabled = !isMyTurn;
         }
     </script>
