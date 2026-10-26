@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Samgong 30 - Mabar Realtime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK (Realtime Sync) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+        .poker-table {
+            background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
+            border: 10px solid #78350f;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 25px rgba(0,0,0,0.9);
+            border-radius: 120px;
+        }
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 48px;
+        }
+        .card {
+            width: 32px;
+            height: 46px;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2px;
+            font-weight: bold;
+            font-size: 10px;
+            line-height: 1;
+            margin-left: -16px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .card:first-child { margin-left: 0; }
+        .card.back {
+            background: linear-gradient(135deg, #b91c1c 25%, #991b1b 25%, #991b1b 50%, #b91c1c 50%, #b91c1c 75%, #991b1b 75%);
+            background-size: 8px 8px;
+            border: 1.5px solid #ffffff;
+        }
+        .card.red { color: #dc2626; }
+        .card.black { color: #111827; }
+        .active-turn {
+            box-shadow: 0 0 15px #facc15, 0 0 25px #facc15;
+            border-color: #facc15 !important;
+            animation: pulse-turn 1.5s infinite alternate;
+        }
+        @keyframes pulse-turn {
+            from { border-color: #eab308; box-shadow: 0 0 10px #eab308; }
+            to { border-color: #fef08a; box-shadow: 0 0 20px #fef08a; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-between p-2 select-none">
+
+    <!-- Top Bar: Room & WhatsApp Share -->
+    <div class="flex justify-between items-center bg-gray-900/90 px-4 py-2 rounded-xl border border-gray-800 z-20">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-clover text-green-500 text-lg"></i>
+            <div>
+                <h1 class="font-bold text-sm text-yellow-500 tracking-wide">SAMGONG 30</h1>
+                <span class="text-[10px] text-gray-400" id="roomDisplayLabel">Room: Memuat...</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="copyWhatsAppLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1 shadow">
+                <i class="fab fa-whatsapp text-sm"></i>
+                <span>Salin Link Mabar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout Meja Poker 7 Bangku (Landscape) -->
+    <div class="relative w-full my-1 flex-grow flex items-center justify-center">
+        <div class="poker-table w-full h-full max-w-5xl absolute inset-0 m-auto flex items-center justify-center">
+            
+            <!-- Teks Informasi Tengah Meja -->
+            <div class="text-center bg-black/50 px-5 py-2 rounded-xl border border-green-500/30 backdrop-blur-md z-0">
+                <div class="text-[11px] text-gray-300 font-semibold" id="gameStatusText">Menunggu Pemain...</div>
+                <div class="text-yellow-400 font-bold text-xs" id="turnStatusText">Silakan Pilih Bangku</div>
+            </div>
+
+            <!-- Bangku 0: Bawah Tengah -->
+            <div id="seat-0" onclick="claimSeat(0)" class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-36 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-yellow-400 truncate" id="name-0">Bangku 1 (Kosong)</div>
+                <div class="card-container my-1" id="cards-0"></div>
+                <div class="text-[9px] text-gray-400" id="status-0">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 1: Kiri Bawah -->
+            <div id="seat-1" onclick="claimSeat(1)" class="absolute bottom-6 left-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-1">Bangku 2 (Kosong)</div>
+                <div class="card-container my-1" id="cards-1"></div>
+                <div class="text-[9px] text-gray-400" id="status-1">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 2: Kiri Atas -->
+            <div id="seat-2" onclick="claimSeat(2)" class="absolute top-6 left-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-2">Bangku 3 (Kosong)</div>
+                <div class="card-container my-1" id="cards-2"></div>
+                <div class="text-[9px] text-gray-400" id="status-2">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 3: Atas Kiri -->
+            <div id="seat-3" onclick="claimSeat(3)" class="absolute top-1 left-1/3 -translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-3">Bangku 4 (Kosong)</div>
+                <div class="card-container my-1" id="cards-3"></div>
+                <div class="text-[9px] text-gray-400" id="status-3">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 4: Atas Kanan -->
+            <div id="seat-4" onclick="claimSeat(4)" class="absolute top-1 right-1/3 translate-x-1/2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-4">Bangku 5 (Kosong)</div>
+                <div class="card-container my-1" id="cards-4"></div>
+                <div class="text-[9px] text-gray-400" id="status-4">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 5: Kanan Atas -->
+            <div id="seat-5" onclick="claimSeat(5)" class="absolute top-6 right-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-5">Bangku 6 (Kosong)</div>
+                <div class="card-container my-1" id="cards-5"></div>
+                <div class="text-[9px] text-gray-400" id="status-5">Ketuk untuk duduk</div>
+            </div>
+
+            <!-- Bangku 6: Kanan Bawah -->
+            <div id="seat-6" onclick="claimSeat(6)" class="absolute bottom-6 right-2 bg-gray-900/95 border-2 border-gray-700 rounded-xl p-1.5 w-32 text-center z-10 shadow-lg cursor-pointer hover:border-yellow-400 transition">
+                <div class="text-[11px] font-bold text-gray-200 truncate" id="name-6">Bangku 7 (Kosong)</div>
+                <div class="card-container my-1" id="cards-6"></div>
+                <div class="text-[9px] text-gray-400" id="status-6">Ketuk untuk duduk</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Panel Kontrol Aksi Pemain & Mulai Ronde Baru -->
+    <div class="bg-gray-900 p-2.5 rounded-xl border border-gray-800 flex justify-between items-center z-20">
+        <div class="flex space-x-2">
+            <button id="btnHit" onclick="playerHit()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-5 py-2 rounded-lg shadow disabled:opacity-30 transition flex items-center space-x-1.5 text-xs">
+                <i class="fas fa-plus"></i>
+                <span>Ambil (Hit)</span>
+            </button>
+            <button id="btnStand" onclick="playerStand()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold px-5 py-2 rounded-lg shadow disabled:opacity-30 transition flex items-center space-x-1.5 text-xs">
+                <i class="fas fa-hand-paper"></i>
+                <span>Stop (Stand)</span>
+            </button>
+        </div>
+
+        <div class="flex space-x-2">
+            <button id="btnDeal" onclick="startNewGame()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-xs">
+                Mulai Game / Bagi Kartu
+            </button>
+            <button id="btnNewRound" onclick="triggerShowdown()" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-gray-950 font-extrabold px-5 py-2 rounded-lg shadow-lg active:scale-95 transition flex items-center space-x-1.5 text-xs">
+                <i class="fas fa-redo-alt"></i>
+                <span>Mulai Ronde Baru</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Pop-up Konfirmasi Showdown -->
+    <div id="modalShowdown" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 border-2 border-yellow-500 rounded-2xl p-5 max-w-sm w-full text-center shadow-2xl">
+            <i class="fas fa-eye text-3xl text-yellow-400 mb-2"></i>
+            <h2 class="text-lg font-bold text-yellow-400 mb-1">SHOWDOWN! Kartu Terbuka</h2>
+            <p class="text-xs text-gray-300 mb-4">Semua kartu pemain telah dibuka transparan di meja. Verifikasi hasil sebelum ronde baru dimulai.</p>
+            <button onclick="confirmNewRound()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2 rounded-lg w-full text-xs py-2.5">
+                <i class="fas fa-check-circle mr-1"></i> Setuju Ronde Baru
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase Publik Gratis untuk Sinkronisasi Realtime Mabar
+        const firebaseConfig = {
+            databaseURL: "https://samgong-mabar-default-rtdb.firebaseio.com/"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Ambil atau Buat Room dari URL Hash (Contoh: #room-xyz)
+        let roomId = window.location.hash.substring(1);
+        if (!roomId) {
+            roomId = 'room-' + Math.random().toString(36.substring(2, 8));
+            window.location.hash = roomId;
+        }
+        document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
+
+        let mySeat = null; // Bangku yang dipilih pemain di HP ini
+        const myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
+
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+        let roomRef = db.ref('rooms/' + roomId);
+
+        // Listener Realtime dari Firebase
+        roomRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                updateUI(data);
+            }
+        });
+
+        function copyWhatsAppLink() {
+            const currentUrl = window.location.href;
+            const message = `Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${currentUrl}`;
+            navigator.clipboard.writeText(message).then(() => {
+                alert("Link mabar berhasil disalin! Silakan tempel (paste) ke grup WhatsApp.");
+            });
+        }
+
+        // Sistem Pilih Bangku Realtime (Siapa Cepat Dia Dapat)
+        function claimSeat(seatIndex) {
+            roomRef.child('seats/' + seatIndex).transaction((currentSeat) => {
+                if (!currentSeat || currentSeat.playerId === myPlayerId) {
+                    return { playerId: myPlayerId, name: `Pemain (Kursi ${seatIndex + 1})`, isStopped: false, cards: [] };
+                }
+                return; // Batalkan jika sudah diisi pemain lain
+            }, (error, committed) => {
+                if (committed) {
+                    mySeat = seatIndex;
+                    alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
+                } else {
+                    alert("Maaf, bangku ini sudah diambil pemain lain!");
+                }
+            });
+        }
+
+        function calculateScore(cards) {
+            if (!cards) return 0;
+            let total = 0;
+            for (let card of cards) {
+                if (['J', 'Q', 'K', '10'].includes(card.value)) {
+                    total += 10;
+                } else if (card.value === 'A') {
+                    total += 1;
+                } else {
+                    total += parseInt(card.value);
+                }
+            }
+            return total;
+        }
+
+        // Host / Pemain pertama memulai game baru
+        function startNewGame() {
+            let deck = [];
+            for (let suit of suits) {
+                for (let val of values) {
+                    deck.push({ suit, value: val });
+                }
+            }
+            deck.sort(() => Math.random() - 0.5);
+
+            roomRef.child('seats').once('value', (snapshot) => {
+                const seats = snapshot.val() || {};
+                let updates = {};
+                let firstTurnIndex = 0;
+
+                // Ambil pemenang sebelumnya jika ada untuk jadi giliran pertama
+                roomRef.child('lastWinnerIndex').once('winSnap', (wSnap) => {
+                    if (wSnap.val() !== null) firstTurnIndex = wSnap.val();
+                });
+
+                seats.forEach((seat, idx) => {
+                    if (seat) {
+                        let pCards = [deck.pop(), deck.pop(), deck.pop()];
+                        updates[`seats/${idx}/cards`] = pCards;
+                        updates[`seats/${idx}/isStopped`] = false;
+                    }
+                });
+
+                updates['currentTurn'] = firstTurnIndex;
+                updates['isShowdown'] = false;
+                updates['deck'] = deck;
+
+                roomRef.update(updates);
+            });
+        }
+
+        function playerHit() {
+            if (mySeat === null) return;
+            roomRef.once('value', (snap) => {
+                const data = snap.val();
+                if (data.currentTurn !== mySeat || data.isShowdown) return;
+
+                let player = data.seats[mySeat];
+                if (player.cards.length < 7 && data.deck && data.deck.length > 0) {
+                    let deck = data.deck;
+                    let newCard = deck.pop();
+                    player.cards.push(newCard);
+
+                    roomRef.update({
+                        [`seats/${mySeat}/cards`]: player.cards,
+                        deck: deck
+                    });
+                }
+            });
+        }
+
+        function playerStand() {
+            if (mySeat === null) return;
+            roomRef.once('value', (snap) => {
+                const data = snap.val();
+                if (data.currentTurn !== mySeat || data.isShowdown) return;
+
+                let seats = data.seats;
+                seats[mySeat].isStopped = true;
+
+                // Cari giliran berikutnya yang belum stop
+                let nextTurn = (mySeat + 1) % 7;
+                let checkCount = 0;
+                while ((!seats[nextTurn] || seats[nextTurn].isStopped) && checkCount < 7) {
+                    nextTurn = (nextTurn + 1) % 7;
+                    checkCount++;
+                }
+
+                if (checkCount >= 7) {
+                    // Semua selesai -> Showdown otomatis
+                    triggerShowdown();
+                } else {
+                    roomRef.update({
+                        [`seats/${mySeat}/isStopped`]: true,
+                        currentTurn: nextTurn
+                    });
+                }
+            });
+        }
+
+        function triggerShowdown() {
+            roomRef.update({ isShowdown: true });
+        }
+
+        function confirmNewRound() {
+            roomRef.child('isShowdown').set(false);
+            startNewGame();
+        }
+
+        // Render Tampilan Berdasarkan Data Firebase Realtime
+        function updateUI(data) {
+            const seats = data.seats || {};
+            const currentTurn = data.currentTurn ?? 0;
+            const isShowdown = data.isShowdown ?? false;
+
+            if (isShowdown) {
+                document.getElementById('modalShowdown').classList.remove('hidden');
+            } else {
+                document.getElementById('modalShowdown').classList.add('hidden');
+            }
+
+            for (let i = 0; i < 7; i++) {
+                const seatElem = document.getElementById(`seat-${i}`);
+                const cardsElem = document.getElementById(`cards-${i}`);
+                const statusElem = document.getElementById(`status-${i}`);
+                const nameElem = document.getElementById(`name-${i}`);
+                const player = seats[i];
+
+                if (currentTurn === i && !isShowdown && player) {
+                    seatElem.classList.add('active-turn');
+                } else {
+                    seatElem.classList.remove('active-turn');
+                }
+
+                if (player) {
+                    nameElem.innerText = player.name + (player.playerId === myPlayerId ? ' (Anda)' : '');
+                    cardsElem.innerHTML = '';
+                    
+                    if (player.cards) {
+                        player.cards.forEach((card) => {
+                            const cardDiv = document.createElement('div');
+                            if (i === mySeat || isShowdown) {
+                                const isRed = card.suit === '♥' || card.suit === '♦';
+                                cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
+                                cardDiv.innerHTML = `<div>${card.value}</div><div style="text-align:right;">${card.suit}</div>`;
+                            } else {
+                                cardDiv.className = 'card back';
+                            }
+                            cardsElem.appendChild(cardDiv);
+                        });
+                    }
+
+                    if (isShowdown) {
+                        const total = calculateScore(player.cards);
+                        statusElem.innerHTML = `<span class="text-yellow-400 font-bold">Total Nilai: ${total}</span>`;
+                    } else if (player.isStopped) {
+                        statusElem.innerHTML = `<span class="text-rose-400 font-semibold">STOP (${player.cards ? player.cards.length : 0} Kartu)</span>`;
+                    } else {
+                        statusElem.innerHTML = `<span class="text-gray-400">Rahasia</span>`;
+                    }
+                } else {
+                    nameElem.innerText = `Bangku ${i + 1} (Kosong)`;
+                    cardsElem.innerHTML = '';
+                    statusElem.innerHTML = `Ketuk untuk duduk`;
+                }
+            }
+
+            document.getElementById('turnStatusText').innerText = `Giliran: Bangku ${currentTurn + 1}`;
+            
+            // Kontrol tombol aksi hanya aktif jika giliran pemain di HP ini
+            const btnHit = document.getElementById('btnHit');
+            const btnStand = document.getElementById('btnStand');
+            const isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
+            
+            btnHit.disabled = !isMyTurn;
+            btnStand.disabled = !isMyTurn;
+        }
+    </script>
+</body>
+</html>
