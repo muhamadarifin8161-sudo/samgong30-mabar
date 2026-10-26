@@ -32,18 +32,45 @@
             border-bottom: 1px solid #1f2937;
             z-index: 20;
             flex-shrink: 0;
-            height: 45px;
+            height: 50px;
+        }
+        .top-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
         }
         .wa-btn {
             background: #059669;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
         }
+        .btn-top-stop {
+            background: #e11d48;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-top-showdown {
+            background: linear-gradient(to right, #f59e0b, #eab308);
+            color: #030712;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
+
         .table-area {
             position: relative;
             flex-grow: 1;
@@ -82,36 +109,52 @@
             background: #111827;
             border: 2px solid #374151;
             border-radius: 8px;
-            padding: 3px;
-            width: 90px;
+            padding: 4px;
+            width: 95px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             z-index: 10;
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
+        
+        /* Khusus Bangku Sendiri (Seat 0 di bawah) dibuat sedikit lebih besar area dan kartunya */
+        .seat.is-me {
+            width: 110px;
+            border-color: #059669;
+        }
+
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .seat-status { font-size: 7px; color: #9ca3af; margin-top: 1px; }
+        .seat-status { font-size: 7px; color: #9ca3af; margin-top: 2px; }
 
-        #seat-0 { bottom: -10px; left: 50%; transform: translateX(-50%); width: 100px; }
-        #seat-1 { bottom: 60px; left: -10px; }
-        #seat-2 { top: 75px; left: -10px; }
-        #seat-3 { top: -10px; left: 22%; transform: translateX(-50%); }
-        #seat-4 { top: -10px; right: 22%; transform: translateX(50%); }
-        #seat-5 { top: 75px; right: -10px; }
-        #seat-6 { bottom: 60px; right: -10px; }
+        #seat-0 { bottom: -12px; left: 50%; transform: translateX(-50%); }
+        #seat-1 { bottom: 60px; left: -12px; }
+        #seat-2 { top: 75px; left: -12px; }
+        #seat-3 { top: -12px; left: 22%; transform: translateX(-50%); }
+        #seat-4 { top: -12px; right: 22%; transform: translateX(50%); }
+        #seat-5 { top: 75px; right: -12px; }
+        #seat-6 { bottom: 60px; right: -12px; }
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 24px; margin: 1px 0; }
+        /* Kartu Pemain Lain (Kecil) */
+        .card-container { display: flex; justify-content: center; align-items: center; height: 26px; margin: 2px 0; }
         .card {
             width: 16px; height: 24px; background: #fff; border-radius: 2px;
             display: inline-flex; flex-direction: column; justify-content: space-between;
-            padding: 1px; font-weight: bold; font-size: 7px; line-height: 1; margin-left: -6px;
+            padding: 1px; font-weight: bold; font-size: 7px; line-height: 1; margin-left: -5px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .card:first-child { margin-left: 0; }
         .card.back { background: linear-gradient(135deg, #b91c1c, #991b1b); border: 1px solid #fff; }
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
+
+        /* Kartu Khusus Pemilik HP (Lebih Besar & Jelas) */
+        .seat.is-me .card-container { height: 42px; margin: 3px 0; }
+        .seat.is-me .card {
+            width: 28px; height: 40px; border-radius: 3px; font-size: 11px; padding: 2px; margin-left: -8px;
+        }
+        .seat.is-me .seat-name { font-size: 10px; }
+        .seat.is-me .seat-status { font-size: 8px; }
 
         .control-panel {
             background: #111827;
@@ -126,14 +169,11 @@
         }
         .btn-group { display: flex; gap: 6px; }
         .btn {
-            padding: 7px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+            padding: 7px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
             white-space: nowrap;
         }
         .btn-hit { background: #059669; }
-        .btn-stand { background: #e11d48; }
         .btn-deal { background: #2563eb; }
-        .btn-round { background: linear-gradient(to right, #f59e0b, #eab308); color: #030712; font-weight: 800; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
@@ -146,10 +186,16 @@
 
     <div class="top-bar">
         <div>
-            <div style="font-size: 11px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
-            <div style="font-size: 8px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
+            <button class="btn-top-stop" id="btnTopStop" onclick="playerStand()" disabled>Stop</button>
         </div>
-        <button class="wa-btn" onclick="copyWhatsAppLink()">Salin Link Mabar</button>
+        <div style="text-align: center;">
+            <div style="font-size: 10px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
+            <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
+        </div>
+        <div class="top-actions">
+            <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
+            <button class="btn-top-showdown" onclick="triggerShowdown()">Showdown</button>
+        </div>
     </div>
 
     <div class="table-area">
@@ -198,14 +244,8 @@
     </div>
 
     <div class="control-panel">
-        <div class="btn-group">
-            <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit</button>
-            <button id="btnStand" class="btn btn-stand" onclick="playerStand()" disabled>Stop</button>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-deal" onclick="startNewGame()">Mulai Game</button>
-            <button class="btn btn-round" onclick="triggerShowdown()">Showdown</button>
-        </div>
+        <button id="btnHit" class="btn btn-hit" style="width: 48%;" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
+        <button class="btn btn-deal" style="width: 48%;" onclick="startNewGame()">Mulai Game Baru</button>
     </div>
 
     <div id="modalShowdown" class="modal">
@@ -509,6 +549,15 @@
                 const nameElem = document.getElementById(`name-${i}`);
                 const player = seats[i];
 
+                let isMe = (player && (player.playerId === myPlayerId || mySeat === i));
+
+                // Tandai khusus bangku milik sendiri agar tampil lebih besar
+                if (isMe) {
+                    seatElem.classList.add('is-me');
+                } else {
+                    seatElem.classList.remove('is-me');
+                }
+
                 if (currentTurn === i && !isShowdown && player) {
                     seatElem.classList.add('active-turn');
                 } else {
@@ -516,7 +565,6 @@
                 }
 
                 if (player) {
-                    let isMe = (player.playerId === myPlayerId || mySeat === i);
                     nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
                     cardsElem.innerHTML = '';
                     
@@ -554,9 +602,10 @@
                 }
             }
             document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`;
+            
             let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
             document.getElementById('btnHit').disabled = !isMyTurn;
-            document.getElementById('btnStand').disabled = !isMyTurn;
+            document.getElementById('btnTopStop').disabled = !isMyTurn;
         }
     </script>
 </body>
