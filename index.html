@@ -177,9 +177,9 @@
     </div>
 
     <script>
-        // Konfigurasi Firebase Publik
+        // Menggunakan Database Firebase Pribadi Milik Kamu (Asia-Southeast1)
         const firebaseConfig = {
-            databaseURL: "https://samgong-mabar-default-rtdb.firebaseio.com/"
+            databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
@@ -194,7 +194,7 @@
         }
         document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
 
-        // ID Unik Perangkat Ini (Disimpan di localStorage agar tetap konsisten)
+        // ID Unik Perangkat Ini (Disimpan di localStorage)
         let myPlayerId = localStorage.getItem('samgong_pid');
         if (!myPlayerId) {
             myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
@@ -202,17 +202,16 @@
         }
 
         let mySeat = null;
-        let roomRef = db.ref('rooms/' + roomId);
+        let roomRef = db.ref('samgong_rooms/' + roomId);
 
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-        // Sinkronisasi Realtime dari Firebase
+        // Sinkronisasi Realtime dari Firebase Pribadi
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 updateUI(data);
-                // Deteksi otomatis jika perangkat ini sudah duduk di bangku tertentu sebelumnya
                 if (data.seats) {
                     for (let i = 0; i < 7; i++) {
                         if (data.seats[i] && data.seats[i].playerId === myPlayerId) {
@@ -222,7 +221,6 @@
                     }
                 }
             } else {
-                // Inisialisasi data awal room jika masih kosong total di database
                 roomRef.set({
                     currentTurn: 0,
                     isShowdown: false,
@@ -242,7 +240,7 @@
             });
         }
 
-        // Fungsi Pilih Bangku Real-time (Anti-Bentrok)
+        // Fungsi Pilih Bangku Pakai Metode .set() Langsung (Dijamin Responsif)
         function claimSeat(seatIndex) {
             if (mySeat !== null && mySeat !== seatIndex) {
                 alert("Kamu sudah duduk di bangku lain!");
@@ -250,20 +248,20 @@
             }
 
             let seatRef = roomRef.child('seats/' + seatIndex);
-            seatRef.transaction((currentSeat) => {
-                if (!currentSeat || currentSeat.playerId === myPlayerId) {
-                    return {
+            seatRef.once('value', (snap) => {
+                let seatData = snap.val();
+                if (!seatData || seatData.playerId === myPlayerId) {
+                    seatRef.set({
                         playerId: myPlayerId,
                         name: `Pemain ${seatIndex + 1}`,
                         isStopped: false,
                         cards: []
-                    };
-                }
-                return; // Batalkan jika sudah diambil orang lain
-            }, (error, committed, snapshot) => {
-                if (committed) {
-                    mySeat = seatIndex;
-                    alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
+                    }).then(() => {
+                        mySeat = seatIndex;
+                        alert(`Berhasil duduk di Bangku ${seatIndex + 1}!`);
+                    }).catch(err => {
+                        alert("Gagal duduk, periksa aturan Rules di Firebase kamu.");
+                    });
                 } else {
                     alert("Maaf, bangku ini sudah diambil pemain lain!");
                 }
@@ -281,7 +279,6 @@
             return total;
         }
 
-        // Mulai Game Baru / Bagikan Kartu ke Semua Pemain yang Duduk
         function startNewGame() {
             let deck = [];
             for (let suit of suits) {
@@ -352,7 +349,6 @@
                     seats[mySeat].isStopped = true;
                 }
 
-                // Cari giliran pemain berikutnya yang belum stop
                 let nextTurn = (mySeat + 1) % 7;
                 let checkCount = 0;
                 while ((!seats[nextTurn] || seats[nextTurn].isStopped) && checkCount < 7) {
@@ -379,7 +375,6 @@
             startNewGame();
         }
 
-        // Render Tampilan Layar Sesuai Data Real-time Firebase
         function updateUI(data) {
             const seats = data.seats || {};
             const currentTurn = data.currentTurn ?? 0;
@@ -412,7 +407,6 @@
                     if (player.cards) {
                         player.cards.forEach((card) => {
                             const cardDiv = document.createElement('div');
-                            // Kartu sendiri dibuka, kartu pemain lain ditutup kecuali saat showdown
                             if (isMe || isShowdown) {
                                 const isRed = card.suit === '♥' || card.suit === '♦';
                                 cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
