@@ -118,12 +118,12 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
         
-        /* Semua Bangku Dibuat Luas untuk Menampung Kartu Besar */
         .seat.is-me {
             width: 195px;
             border-color: #059669;
             padding: 8px;
             z-index: 25;
+            position: relative;
         }
 
         .seat-name { font-size: 10px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -137,8 +137,7 @@
         #seat-5 { top: 75px; right: -18px; }
         #seat-6 { bottom: 65px; right: -18px; }
 
-        /* KARTU SEMUA PEMAIN: DIJADIKAN BESAR (2x Lipat dari Standar Sebelumnya) */
-        .card-container { display: flex; justify-content: center; align-items: center; height: 102px; margin: 5px 0; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 102px; margin: 5px 0; position: relative; }
         .card {
             width: 68px; 
             height: 96px; 
@@ -166,6 +165,27 @@
 
         .seat.is-me .seat-name { font-size: 12px; }
         .seat.is-me .seat-status { font-size: 11px; }
+
+        /* Styling Indikator Titik LED Stealth Mode */
+        @keyframes blink-indicator {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        .stealth-led {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 40;
+            pointer-events: none;
+            box-shadow: 0 0 6px currentColor;
+            animation: blink-indicator 0.5s ease-in-out 3;
+        }
+        .stealth-led.on { background-color: #22c55e; color: #22c55e; }
+        .stealth-led.off { background-color: #ef4444; color: #ef4444; }
 
         .control-panel {
             background: #111827;
@@ -272,12 +292,11 @@
         let stealthModeActive = false;
         let lastTapTime = 0;
 
-        // Prompt Sandi Admin Saat Pertama Kali Membuka Halaman
+        // Prompt Sandi Admin Saat Pertama Kali Membuka Halaman (Tanpa alert konfirmasi terbuka)
         window.addEventListener('load', () => {
             const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
             if (secretPass === "mstr890") {
                 isAdmin = true;
-                alert("Mode Admin Dikonfirmasi.");
             }
         });
 
@@ -448,14 +467,12 @@
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let drawnCard = null;
 
-                    // Logika Stealth Mode untuk Admin
+                    // Logika Smart Draw Stealth Mode untuk Admin
                     if (stealthModeActive) {
                         let currentScore = calculateScore(player.cards);
-                        let safeIndex = -1;
                         let bestCardIndex = -1;
                         let maxSafeScore = -1;
 
-                        // Cari kartu dari sisa deck yang tidak bikin Bust (<= 30) dan memberikan nilai tertinggi
                         for (let i = deck.length - 1; i >= 0; i--) {
                             let val = getCardValue(deck[i].value);
                             if (currentScore + val <= 30) {
@@ -470,11 +487,9 @@
                         if (bestCardIndex !== -1) {
                             drawnCard = deck.splice(bestCardIndex, 1)[0];
                         } else {
-                            // Jika semua pilihan akan bust, ambil kartu biasa
                             drawnCard = deck.pop();
                         }
                     } else {
-                        // Pengambilan kartu standar untuk pemain biasa
                         drawnCard = deck.pop();
                     }
 
@@ -545,6 +560,21 @@
 
         function confirmNewRound() { 
             startNewGame(); 
+        }
+
+        // Fungsi pembantu untuk memicu kedipan titik LED indikator Stealth
+        function triggerStealthLed(seatElem, state) {
+            let existingLed = seatElem.querySelector('.stealth-led');
+            if (existingLed) existingLed.remove();
+
+            const led = document.createElement('div');
+            led.className = `stealth-led ${state ? 'on' : 'off'}`;
+            seatElem.appendChild(led);
+
+            // Hilangkan otomatis setelah animasi berkedip selesai (1.5 detik)
+            setTimeout(() => {
+                if (led) led.remove();
+            }, 1500);
         }
 
         function updateUI(data) {
@@ -625,15 +655,15 @@
                 if (isMe) {
                     seatElem.classList.add('is-me');
                     
-                    // Event Double-Tap pada area kartu sendiri untuk mengaktifkan Stealth Mode (Khusus Admin)
+                    // Event Double-Tap pada area kartu sendiri untuk toggle Stealth Mode (Tanpa alert teks)
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
                         if (!isAdmin) return;
                         const currentTime = new Date().getTime();
                         const tapLength = currentTime - lastTapTime;
                         if (tapLength < 350 && tapLength > 0) {
-                            stealthModeActive = true;
-                            alert("Stealth Mode Aktif!");
+                            stealthModeActive = !stealthModeActive;
+                            triggerStealthLed(seatElem, stealthModeActive);
                         }
                         lastTapTime = currentTime;
                     };
