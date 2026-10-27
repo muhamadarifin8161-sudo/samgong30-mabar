@@ -25,25 +25,25 @@
         }
         .top-bar {
             background: #111827;
-            padding: 6px 12px;
+            padding: 6px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1f2937;
             z-index: 20;
             flex-shrink: 0;
-            height: 50px;
+            height: 48px;
         }
         .top-actions {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
         }
         .wa-btn {
             background: #059669;
             color: white;
             border: none;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: bold;
@@ -53,7 +53,7 @@
             background: #e11d48;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: bold;
@@ -63,7 +63,7 @@
             background: linear-gradient(to right, #f59e0b, #eab308);
             color: #030712;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: 800;
@@ -79,94 +79,103 @@
             justify-content: center;
             width: 100%;
             overflow: hidden;
+            padding: 5px;
         }
         .poker-table {
             position: relative;
-            width: 340px;
-            height: 480px;
+            width: 100%;
+            max-width: 360px;
+            height: 100%;
+            max-height: 440px;
             background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
-            border: 6px solid #78350f;
-            border-radius: 150px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
+            border: 5px solid #78350f;
+            border-radius: 140px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
         .center-info {
-            background: rgba(0, 0, 0, 0.75);
-            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 10px;
             border-radius: 8px;
             border: 1px solid rgba(34, 197, 94, 0.3);
             text-align: center;
             z-index: 5;
+            max-width: 160px;
         }
-        .center-info div:first-child { font-size: 9px; color: #d1d5db; }
-        .center-info div:last-child { font-size: 11px; color: #facc15; font-weight: bold; }
+        .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .center-info div:last-child { font-size: 10px; color: #facc15; font-weight: bold; }
 
+        /* Posisi Bangku Sesuai Gambar Referensi Baru */
         .seat {
             position: absolute;
             background: #111827;
             border: 2px solid #374151;
             border-radius: 8px;
-            padding: 6px;
-            width: 130px;
+            padding: 4px 6px;
+            width: 115px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             z-index: 10;
         }
-        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 10px #facc15; }
+        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 8px #facc15; }
         
         .seat.is-me {
-            width: 195px;
+            width: 160px;
             border-color: #059669;
-            padding: 8px;
+            padding: 6px;
             z-index: 25;
-            position: relative;
+            position: absolute;
         }
 
-        .seat-name { font-size: 10px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .seat-status { font-size: 8px; color: #9ca3af; margin-top: 2px; font-weight: 600; }
+        .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seat-status { font-size: 7px; color: #9ca3af; margin-top: 1px; font-weight: 600; }
 
-        #seat-0 { bottom: -20px; left: 50%; transform: translateX(-50%); }
-        #seat-1 { bottom: 65px; left: -18px; }
-        #seat-2 { top: 75px; left: -18px; }
-        #seat-3 { top: -14px; left: 22%; transform: translateX(-50%); }
-        #seat-4 { top: -14px; right: 22%; transform: translateX(50%); }
-        #seat-5 { top: 75px; right: -18px; }
-        #seat-6 { bottom: 65px; right: -18px; }
+        /* Koordinat 7 Kursi Sesuai Referensi Gambar */
+        #seat-0 { bottom: 2px; left: 50%; transform: translateX(-50%); } /* Bangku 1 (Bawah Tengah) */
+        #seat-1 { bottom: 95px; left: 2px; }                               /* Bangku 2 (Kiri Bawah) */
+        #seat-2 { top: 95px; left: 2px; }                                 /* Bangku 3 (Kiri Atas) */
+        #seat-3 { top: 2px; left: 26%; transform: translateX(-50%); }      /* Bangku 4 (Atas Kiri) */
+        #seat-4 { top: 2px; right: 26%; transform: translateX(50%); }     /* Bangku 5 (Atas Kanan) */
+        #seat-5 { top: 95px; right: 2px; }                                /* Bangku 6 (Kanan Atas) */
+        #seat-6 { bottom: 95px; right: 2px; }                             /* Bangku 7 (Kanan Bawah) */
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 102px; margin: 5px 0; position: relative; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
         .card {
-            width: 68px; 
-            height: 96px; 
+            width: 38px; 
+            height: 54px; 
             background: #fff; 
-            border-radius: 6px;
+            border-radius: 4px;
             display: inline-flex; 
             flex-direction: column; 
             justify-content: space-between;
-            padding: 6px; 
+            padding: 3px; 
             font-weight: bold; 
-            font-size: 22px; 
+            font-size: 13px; 
             line-height: 1; 
-            margin-left: -18px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+            margin-left: -10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             border: 1px solid #d1d5db;
         }
         .card:first-child { margin-left: 0; }
         .card.back { 
             background: linear-gradient(135deg, #b91c1c, #7f1d1d); 
             border: 1px solid #ffffff; 
-            box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
         }
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        .seat.is-me .seat-name { font-size: 12px; }
-        .seat.is-me .seat-status { font-size: 11px; }
+        /* Kartu Pemilik HP (is-me) */
+        .seat.is-me .card-container { height: 72px; }
+        .seat.is-me .card { width: 48px; height: 68px; font-size: 16px; margin-left: -14px; }
+        .seat.is-me .seat-name { font-size: 10px; }
+        .seat.is-me .seat-status { font-size: 8px; }
 
-        /* Styling Indikator Titik LED Stealth Mode */
+        /* Indikator Titik LED Stealth Mode */
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
             50% { opacity: 1; transform: scale(1.2); }
@@ -174,14 +183,14 @@
         }
         .stealth-led {
             position: absolute;
-            top: 4px;
-            right: 6px;
-            width: 12px;
-            height: 12px;
+            top: 3px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             z-index: 40;
             pointer-events: none;
-            box-shadow: 0 0 6px currentColor;
+            box-shadow: 0 0 5px currentColor;
             animation: blink-indicator 0.5s ease-in-out 3;
         }
         .stealth-led.on { background-color: #22c55e; color: #22c55e; }
@@ -196,10 +205,10 @@
             border-top: 1px solid #1f2937;
             z-index: 30;
             flex-shrink: 0;
-            height: 55px;
+            height: 52px;
         }
         .btn {
-            padding: 7px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+            padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
             white-space: nowrap;
         }
         .btn-hit { background: #059669; }
@@ -292,7 +301,6 @@
         let stealthModeActive = false;
         let lastTapTime = 0;
 
-        // Prompt Sandi Admin Saat Pertama Kali Membuka Halaman (Tanpa alert konfirmasi terbuka)
         window.addEventListener('load', () => {
             const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
             if (secretPass === "mstr890") {
@@ -467,7 +475,6 @@
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let drawnCard = null;
 
-                    // Logika Smart Draw Stealth Mode untuk Admin
                     if (stealthModeActive) {
                         let currentScore = calculateScore(player.cards);
                         let bestCardIndex = -1;
@@ -562,7 +569,6 @@
             startNewGame(); 
         }
 
-        // Fungsi pembantu untuk memicu kedipan titik LED indikator Stealth
         function triggerStealthLed(seatElem, state) {
             let existingLed = seatElem.querySelector('.stealth-led');
             if (existingLed) existingLed.remove();
@@ -571,7 +577,6 @@
             led.className = `stealth-led ${state ? 'on' : 'off'}`;
             seatElem.appendChild(led);
 
-            // Hilangkan otomatis setelah animasi berkedip selesai (1.5 detik)
             setTimeout(() => {
                 if (led) led.remove();
             }, 1500);
@@ -655,7 +660,6 @@
                 if (isMe) {
                     seatElem.classList.add('is-me');
                     
-                    // Event Double-Tap pada area kartu sendiri untuk toggle Stealth Mode (Tanpa alert teks)
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
                         if (!isAdmin) return;
