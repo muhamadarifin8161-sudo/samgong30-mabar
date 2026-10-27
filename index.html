@@ -120,9 +120,9 @@
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
         .seat.is-me {
-            width: 200px;
+            width: 180px;
             border-color: #059669;
-            padding: 6px 8px;
+            padding: 8px;
             z-index: 25;
             position: absolute;
             bottom: 2px;
@@ -191,13 +191,13 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* Tampilan Kartu Pribadi Diperbesar di Tengah Bawah */
-        .seat.is-me .card-container { height: 75px; }
-        .seat.is-me .card { width: 48px; height: 68px; font-size: 13px; margin-left: -12px; padding: 3px 4px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 11px; }
-        .seat.is-me .card .card-center { font-size: 22px; }
-        .seat.is-me .seat-name { font-size: 10px; }
-        .seat.is-me .seat-status { font-size: 9px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        /* Tampilan Kartu Pribadi Diperbesar 2x Lipat di Tengah Bawah */
+        .seat.is-me .card-container { height: 85px; }
+        .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
+        .seat.is-me .card .card-center { font-size: 26px; }
+        .seat.is-me .seat-name { font-size: 11px; }
+        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -367,6 +367,7 @@
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
+                // Auto-Reconnect Check
                 if (data.seats) {
                     let foundMySeat = null;
                     for (let i = 0; i < 7; i++) {
@@ -657,6 +658,12 @@
                 winnerElem.innerHTML = rankingHtml;
             }
 
+            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
+            // Jika pemain belum duduk, gunakan sudut standar berdasar indeks aslinya (0 s.d. 6).
+            // Jika sudah duduk di bangku 'mySeat', rotasi layout agar bangku miliknya selalu berada di posisi bawah (index 0 / 6 o'clock).
+            const radiusX = 115; // Jarak horizontal dari pusat meja
+            const radiusY = 145; // Jarak vertikal dari pusat meja
+
             for (let i = 0; i < 7; i++) {
                 const seatElem = document.getElementById(`seat-${i}`);
                 const cardsElem = document.getElementById(`cards-${i}`);
@@ -666,21 +673,25 @@
 
                 let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
 
+                // Hitung posisi relatif melingkar
                 let visualPosIndex = i;
                 if (mySeat !== null) {
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
 
+                // Tentukan koordinat CSS berdasarkan sudut melingkar (0 = Bawah, bergerak searah jarum jam)
+                // 7 posisi melingkar penuh (0 s.d. 6)
                 const angles = [
-                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
-                    { bottom: '70px', left: '2px', transform: 'none' },
-                    { top: '70px', left: '2px', transform: 'none' },
-                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },
-                    { top: '2px', right: '22%', transform: 'translateX(50%)' },
-                    { top: '70px', right: '2px', transform: 'none' },
-                    { bottom: '70px', right: '2px', transform: 'none' }
+                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
+                    { bottom: '70px', left: '2px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
+                    { top: '70px', left: '2px', transform: 'none' },                                     // Posisi 2: Kiri Atas
+                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },                          // Posisi 3: Atas Kiri
+                    { top: '2px', right: '22%', transform: 'translateX(50%)' },                          // Posisi 4: Atas Kanan
+                    { top: '70px', right: '2px', transform: 'none' },                                    // Posisi 5: Kanan Atas
+                    { bottom: '70px', right: '2px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
                 ];
 
+                // Terapkan posisi ke elemen bangku
                 seatElem.style.bottom = '';
                 seatElem.style.top = '';
                 seatElem.style.left = '';
@@ -694,6 +705,7 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
+                    // Paksa posisi persis di tengah bawah untuk diri sendiri
                     seatElem.style.bottom = '2px';
                     seatElem.style.left = '50%';
                     seatElem.style.right = '';
