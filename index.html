@@ -102,7 +102,7 @@
             align-items: center;
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; }
+        .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
 
         .seat {
             position: absolute;
@@ -116,19 +116,31 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             z-index: 10;
         }
-        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 8px #facc15; }
+        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
         .seat.is-me {
-            width: 160px;
+            width: 180px;
             border-color: #059669;
-            padding: 6px;
+            padding: 8px;
             z-index: 25;
             position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .seat-status { font-size: 7px; color: #9ca3af; margin-top: 1px; font-weight: 600; }
+        .seat-status { 
+            font-size: 7px; 
+            color: #38bdf8; 
+            margin-top: 2px; 
+            font-weight: bold; 
+            text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+        }
 
+        /* Posisi Melingkar Bangku 1 s.d. 7 */
         #seat-0 { bottom: 2px; left: 50%; transform: translateX(-50%); } 
         #seat-1 { bottom: 95px; left: 2px; }                               
         #seat-2 { top: 95px; left: 2px; }                                 
@@ -187,12 +199,13 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        .seat.is-me .card-container { height: 72px; }
-        .seat.is-me .card { width: 48px; height: 68px; font-size: 14px; margin-left: -14px; padding: 3px 4px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 12px; }
-        .seat.is-me .card .card-center { font-size: 22px; }
-        .seat.is-me .seat-name { font-size: 10px; }
-        .seat.is-me .seat-status { font-size: 8px; }
+        /* Tampilan Kartu Pribadi Diperbesar 2x Lipat di Tengah Bawah */
+        .seat.is-me .card-container { height: 85px; }
+        .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
+        .seat.is-me .card .card-center { font-size: 26px; }
+        .seat.is-me .seat-name { font-size: 11px; }
+        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -246,7 +259,7 @@
             <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
         </div>
         <div style="text-align: center;">
-            <div style="font-size: 10px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
+            <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
             <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
@@ -261,6 +274,7 @@
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
             </div>
 
+            <!-- Penomoran Bangku 1 s.d. 7 (Indeks Internal 0 s.d. 6) -->
             <div id="seat-0" class="seat" onclick="claimSeat(0)">
                 <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
                 <div class="card-container" id="cards-0"></div>
@@ -306,7 +320,7 @@
 
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
-            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px;">HASIL / PENGUMUMAN</h3>
+            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
             <div id="winnerAnnouncement" style="font-size: 10px; color: #22c55e; font-weight: bold; margin-bottom: 8px; text-align: left; max-height: 150px; overflow-y: auto;"></div>
             <button class="btn" style="width:100%; background:#2563eb;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
         </div>
@@ -523,7 +537,6 @@
                         deck: deck
                     };
 
-                    // Jika pemain mencapai 7 kartu secara otomatis di-stop, giliran berpindah/showdown
                     if (player.cards.length >= 7) {
                         player.isStopped = true;
                         updates[`seats/${mySeat}/isStopped`] = true;
@@ -615,7 +628,6 @@
                     return { ...p, score, isBust: score > 30 };
                 });
 
-                // Urutkan peringkat dari skor tertinggi ke terendah (Paling tinggi di atas, paling rendah di bawah)
                 validPlayers.sort((a, b) => {
                     if (a.isBust && !b.isBust) return 1;
                     if (!a.isBust && b.isBust) return -1;
@@ -685,6 +697,8 @@
                     seatElem.classList.remove('active-turn');
                 }
 
+                let seatNumDisplay = i + 1;
+
                 if (player) {
                     nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
                     cardsElem.innerHTML = '';
@@ -725,7 +739,7 @@
                         }
                     }
                 } else {
-                    nameElem.innerText = `Bangku ${i + 1} (Kosong)`;
+                    nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
                     cardsElem.innerHTML = '';
                     statusElem.innerText = `Ketuk duduk`;
                 }
