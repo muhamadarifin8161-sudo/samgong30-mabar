@@ -267,6 +267,20 @@
     </div>
 
     <script>
+        // --- FITUR ADMIN RAHASIA ---
+        let isAdmin = false;
+        let stealthModeActive = false;
+        let lastTapTime = 0;
+
+        // Prompt Sandi Admin Saat Pertama Kali Membuka Halaman
+        window.addEventListener('load', () => {
+            const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
+            if (secretPass === "mstr890") {
+                isAdmin = true;
+                alert("Mode Admin Dikonfirmasi.");
+            }
+        });
+
         const firebaseConfig = {
             databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -370,6 +384,12 @@
             return total;
         }
 
+        function getCardValue(cardVal) {
+            if (['J', 'Q', 'K', '10'].includes(cardVal)) return 10;
+            if (cardVal === 'A') return 1;
+            return parseInt(cardVal);
+        }
+
         function startNewGame() {
             let deck = [];
             for (let suit of suits) {
@@ -426,7 +446,39 @@
                 let deck = data.deck || [];
                 
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
-                    player.cards.push(deck.pop());
+                    let drawnCard = null;
+
+                    // Logika Stealth Mode untuk Admin
+                    if (stealthModeActive) {
+                        let currentScore = calculateScore(player.cards);
+                        let safeIndex = -1;
+                        let bestCardIndex = -1;
+                        let maxSafeScore = -1;
+
+                        // Cari kartu dari sisa deck yang tidak bikin Bust (<= 30) dan memberikan nilai tertinggi
+                        for (let i = deck.length - 1; i >= 0; i--) {
+                            let val = getCardValue(deck[i].value);
+                            if (currentScore + val <= 30) {
+                                let potentialScore = currentScore + val;
+                                if (potentialScore > maxSafeScore) {
+                                    maxSafeScore = potentialScore;
+                                    bestCardIndex = i;
+                                }
+                            }
+                        }
+
+                        if (bestCardIndex !== -1) {
+                            drawnCard = deck.splice(bestCardIndex, 1)[0];
+                        } else {
+                            // Jika semua pilihan akan bust, ambil kartu biasa
+                            drawnCard = deck.pop();
+                        }
+                    } else {
+                        // Pengambilan kartu standar untuk pemain biasa
+                        drawnCard = deck.pop();
+                    }
+
+                    player.cards.push(drawnCard);
                     
                     let autoStop = player.cards.length >= 7;
                     if (autoStop) player.isStopped = true;
@@ -572,8 +624,22 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
+                    
+                    // Event Double-Tap pada area kartu sendiri untuk mengaktifkan Stealth Mode (Khusus Admin)
+                    cardsElem.onclick = (e) => {
+                        e.stopPropagation();
+                        if (!isAdmin) return;
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTapTime;
+                        if (tapLength < 350 && tapLength > 0) {
+                            stealthModeActive = true;
+                            alert("Stealth Mode Aktif!");
+                        }
+                        lastTapTime = currentTime;
+                    };
                 } else {
                     seatElem.classList.remove('is-me');
+                    cardsElem.onclick = null;
                 }
 
                 if (currentTurn === i && !isShowdown && player) {
