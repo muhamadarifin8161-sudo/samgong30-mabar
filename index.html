@@ -80,8 +80,8 @@
             position: relative;
             width: 94%;
             max-width: 420px;
-            height: 64%;
-            max-height: 310px;
+            height: 60%;
+            max-height: 290px;
             background: radial-gradient(circle, #15803d 0%, #166534 65%, #052e16 100%);
             border: 8px solid #572b0c;
             border-radius: 160px;
@@ -90,6 +90,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            margin-bottom: 35px; /* Ruang ekstra agar meja tidak menabrak kotak bawah (.is-me) */
         }
         /* Border dalam meja kasino (felt border line) */
         .poker-table::before {
@@ -135,18 +136,18 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
-        /* Kotak Pemain Sendiri (.is-me) Diperbesar & Memanjang di Bagian Bawah */
+        /* Kotak Pemain Sendiri (.is-me) Diperbesar & Turun Pas di Atas Tombol Kontrol */
         .seat.is-me {
             width: 96%;
             max-width: 400px;
             border-color: #059669;
-            padding: 6px 10px;
+            padding: 5px 10px;
             z-index: 25;
             position: absolute;
-            bottom: 2px;
+            bottom: 4px; /* Diturunkan lebih dekat ke batas bawah */
             left: 50%;
             transform: translateX(-50%) !important;
-            background: rgba(15, 23, 42, 0.96);
+            background: rgba(15, 23, 42, 0.98);
             box-shadow: 0 -4px 20px rgba(5, 150, 105, 0.45);
             border-radius: 12px;
             display: flex;
@@ -171,7 +172,7 @@
             text-shadow: 0 0 4px rgba(56, 189, 248, 0.7);
         }
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 44px; margin: 1px 0; position: relative; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 42px; margin: 1px 0; position: relative; }
         
         .card {
             width: 30px; 
@@ -204,20 +205,20 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* KARTU SAYA (.seat.is-me): Tinggi & lebar disesuaikan persis setinggi jarak visual antara baris E-I-Z-N keypad QWERTY HP */
-        .seat.is-me .card-container { height: 72px; margin: 2px 0; }
+        /* KARTU SAYA (.seat.is-me): Disesuaikan agar proporsional dan pas di bagian bawah layar */
+        .seat.is-me .card-container { height: 64px; margin: 2px 0; }
         .seat.is-me .card { 
-            width: 48px; 
-            height: 68px; 
-            font-size: 13px; 
-            margin-left: -12px; 
+            width: 44px; 
+            height: 60px; 
+            font-size: 12px; 
+            margin-left: -10px; 
             padding: 3px; 
         }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 10px; }
-        .seat.is-me .card .card-center { font-size: 20px; }
-        .seat.is-me .seat-name { font-size: 10.5px; }
-        .seat.is-me .seat-coin { font-size: 9.5px; }
-        .seat.is-me .seat-status { font-size: 8.5px; text-shadow: 0 0 6px rgba(56, 189, 248, 0.9); }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 9px; }
+        .seat.is-me .card .card-center { font-size: 18px; }
+        .seat.is-me .seat-name { font-size: 10px; }
+        .seat.is-me .seat-coin { font-size: 9px; }
+        .seat.is-me .seat-status { font-size: 8px; text-shadow: 0 0 6px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -830,13 +831,13 @@
 
             // Koordinat Posisi Melingkar Meja Poker Kasino (Player-Centric View)
             const angles = [
-                { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
-                { bottom: '65px', left: '4px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
-                { top: '65px', left: '4px', transform: 'none' },                                     // Posisi 2: Kiri Atas
+                { bottom: '4px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
+                { bottom: '62px', left: '4px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
+                { top: '55px', left: '4px', transform: 'none' },                                     // Posisi 2: Kiri Atas
                 { top: '2px', left: '22%', transform: 'translateX(-50%)' },                          // Posisi 3: Atas Kiri
                 { top: '2px', right: '22%', transform: 'translateX(50%)' },                          // Posisi 4: Atas Kanan
-                { top: '65px', right: '4px', transform: 'none' },                                    // Posisi 5: Kanan Atas
-                { bottom: '65px', right: '4px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
+                { top: '55px', right: '4px', transform: 'none' },                                    // Posisi 5: Kanan Atas
+                { bottom: '62px', right: '4px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
             ];
 
             for (let i = 0; i < 7; i++) {
@@ -867,7 +868,7 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    seatElem.style.bottom = '2px';
+                    seatElem.style.bottom = '4px';
                     seatElem.style.left = '50%';
                     seatElem.style.right = '';
                     seatElem.style.top = '';
