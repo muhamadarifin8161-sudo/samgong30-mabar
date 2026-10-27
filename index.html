@@ -49,26 +49,6 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .btn-top-stop {
-            background: #e11d48;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-top-showdown {
-            background: linear-gradient(to right, #f59e0b, #eab308);
-            color: #030712;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 800;
-            cursor: pointer;
-        }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .table-area {
@@ -97,16 +77,33 @@
             flex-shrink: 0;
         }
         .center-info {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 5px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(34, 197, 94, 0.4);
             text-align: center;
             z-index: 5;
-            max-width: 160px;
+            max-width: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .center-info div:last-child { font-size: 10px; color: #facc15; font-weight: bold; }
+        .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; }
+        
+        /* Tombol Mulai Game Baru di Tengah Meja */
+        .btn-center-deal {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 2px;
+        }
 
         /* Posisi Bangku Sesuai Gambar Referensi Baru */
         .seat {
@@ -238,21 +235,21 @@
             padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
             white-space: nowrap;
         }
-        .btn-hit { background: #059669; }
-        .btn-deal { background: #2563eb; }
+        .btn-stop { background: #e11d48; width: 48%; }
+        .btn-hit { background: #059669; width: 48%; }
 
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
             align-items: center; justify-content: center; z-index: 50; padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 270px; width: 100%; }
+        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 290px; width: 100%; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <div>
-            <button class="btn-top-stop" id="btnTopStop" onclick="playerStand()" disabled>Stop</button>
+            <!-- Tombol Stop dihapus dari atas, dipindah ke panel bawah kiri -->
         </div>
         <div style="text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
@@ -260,7 +257,6 @@
         </div>
         <div class="top-actions">
             <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
-            <button class="btn-top-showdown" onclick="triggerShowdown()">Showdown</button>
         </div>
     </div>
 
@@ -269,6 +265,8 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
+                <!-- Tombol Mulai Game Baru dipindah ke tengah meja -->
+                <button id="btnCenterDeal" class="btn-center-deal" onclick="startNewGame()">Mulai Game Baru</button>
             </div>
 
             <div id="seat-0" class="seat" onclick="claimSeat(0)">
@@ -309,16 +307,17 @@
         </div>
     </div>
 
+    <!-- Panel Kontrol Bawah: Stop di Kiri, Hit di Kanan -->
     <div class="control-panel">
-        <button id="btnHit" class="btn btn-hit" style="width: 48%;" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
-        <button class="btn btn-deal" style="width: 48%;" onclick="startNewGame()">Mulai Game Baru</button>
+        <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
+        <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
     </div>
 
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
-            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px;">SHOWDOWN!</h3>
-            <p style="font-size: 9px; color: #d1d5db; margin-bottom: 8px;">Semua kartu terbuka. Cek skor di meja.</p>
-            <button class="btn btn-deal" style="width:100%;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
+            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px;">HASIL / PENGUMUMAN</h3>
+            <div id="winnerAnnouncement" style="font-size: 10px; color: #22c55e; font-weight: bold; margin-bottom: 8px; text-align: left; max-height: 150px; overflow-y: auto;"></div>
+            <button class="btn" style="width:100%; background:#2563eb;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
         </div>
     </div>
 
@@ -538,13 +537,11 @@
                         deck: deck
                     };
 
-                    if (autoStop) {
-                        let nextTurn = findNextTurn(seats, mySeat);
-                        if (nextTurn === null) {
-                            updates['isShowdown'] = true;
-                        } else {
-                            updates['currentTurn'] = nextTurn;
-                        }
+                    let nextTurn = findNextTurn(seats, mySeat);
+                    if (nextTurn === null) {
+                        updates['isShowdown'] = true;
+                    } else {
+                        updates['currentTurn'] = nextTurn;
                     }
 
                     roomRef.update(updates);
@@ -588,10 +585,6 @@
             return null;
         }
 
-        function triggerShowdown() { 
-            roomRef.update({ isShowdown: true }); 
-        }
-
         function confirmNewRound() { 
             startNewGame(); 
         }
@@ -615,13 +608,15 @@
             const isShowdown = data.isShowdown ?? false;
 
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
+            // Tombol Mulai Game Baru di tengah meja dinonaktifkan saat permainan sedang berjalan (belum showdown)
+            document.getElementById('btnCenterDeal').disabled = !isShowdown && data.deck && data.deck.length > 0;
 
             let activePlayers = [];
             for (let i = 0; i < 7; i++) {
                 if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
             }
 
-            let winnerText = "Menentukan Pemenang...";
+            let rankingHtml = "";
             let winnerSeatIndex = null;
 
             if (isShowdown && activePlayers.length > 0) {
@@ -630,49 +625,40 @@
                     return { ...p, score, isBust: score > 30 };
                 });
 
+                // Urutkan peringkat dari skor tertinggi ke terendah (yang tidak bust di atas, lalu bust di bawah)
+                validPlayers.sort((a, b) => {
+                    if (a.isBust && !b.isBust) return 1;
+                    if (!a.isBust && b.isBust) return -1;
+                    return b.score - a.score;
+                });
+
                 let nonBust = validPlayers.filter(p => !p.isBust);
-
                 if (nonBust.length > 0) {
-                    let highScore = Math.max(...nonBust.map(p => p.score));
+                    let highScore = nonBust[0].score;
                     let topScorePlayers = nonBust.filter(p => p.score === highScore);
-
                     if (topScorePlayers.length === 1) {
                         winnerSeatIndex = topScorePlayers[0].index;
-                        winnerText = `🏆 Pemenang: ${topScorePlayers[0].name} (Skor: ${topScorePlayers[0].score})`;
-                    } else {
-                        winnerSeatIndex = null; 
-                        winnerText = `🤝 Seri / Imbang: ${topScorePlayers.map(p => p.name).join(', ')} (Skor: ${highScore})`;
                     }
-                } else {
-                    winnerText = "⚠️ Semua pemain Hangus (Bust > 30)!";
                 }
 
-                if (winnerSeatIndex !== null) {
-                    if (data.lastWinnerSeat !== winnerSeatIndex) {
-                        roomRef.update({ lastWinnerSeat: winnerSeatIndex });
-                    }
-                } else {
-                    let nonBust = validPlayers.filter(p => !p.isBust);
-                    if (nonBust.length > 0) {
-                        let highScore = Math.max(...nonBust.map(p => p.score));
-                        let topScorePlayers = nonBust.filter(p => p.score === highScore);
-                        if (topScorePlayers.length > 1) {
-                            roomRef.update({ lastWinnerSeat: topScorePlayers[0].index });
-                        }
-                    }
+                rankingHtml += "<ol style='padding-left: 15px; margin: 0;'>";
+                validPlayers.forEach((p, idx) => {
+                    let badge = idx === 0 ? "👑 " : "";
+                    let statusText = p.isBust ? ` (Bust: ${p.score})` : ` (Skor: ${p.score})`;
+                    rankingHtml += `<li style="margin-bottom: 3px;">${badge}<b>${p.name}</b>${statusText}</li>`;
+                });
+                rankingHtml += "</ol>";
+
+                if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
+                    roomRef.update({ lastWinnerSeat: winnerSeatIndex });
                 }
+            } else {
+                rankingHtml = "Permainan sedang berlangsung...";
             }
             
-            let modalBox = document.querySelector('.modal-box');
             let winnerElem = document.getElementById('winnerAnnouncement');
-            if (!winnerElem && modalBox) {
-                winnerElem = document.createElement('div');
-                winnerElem.id = 'winnerAnnouncement';
-                winnerElem.style.cssText = "font-size: 11px; color: #22c55e; font-weight: bold; margin-bottom: 10px;";
-                modalBox.insertBefore(winnerElem, modalBox.lastElementChild);
-            }
             if (winnerElem) {
-                winnerElem.innerText = winnerText;
+                winnerElem.innerHTML = rankingHtml;
             }
 
             for (let i = 0; i < 7; i++) {
@@ -758,7 +744,7 @@
             
             let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
             document.getElementById('btnHit').disabled = !isMyTurn;
-            document.getElementById('btnTopStop').disabled = !isMyTurn;
+            document.getElementById('btnStop').disabled = !isMyTurn;
         }
     </script>
 </body>
