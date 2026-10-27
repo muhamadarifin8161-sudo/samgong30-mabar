@@ -61,6 +61,16 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .btn-secondary-top {
+            background: #4b5563;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .table-area {
@@ -90,7 +100,7 @@
         }
         .center-info {
             background: rgba(0, 0, 0, 0.85);
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 10px;
             border: 1px solid rgba(34, 197, 94, 0.4);
             text-align: center;
@@ -98,7 +108,7 @@
             max-width: 180px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 3px;
             align-items: center;
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -241,7 +251,17 @@
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
             align-items: center; justify-content: center; z-index: 50; padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 290px; width: 100%; }
+        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 320px; width: 100%; }
+        
+        .badge-net {
+            font-size: 7px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 3px;
+            font-weight: bold;
+        }
+        .badge-online { background: #059669; color: #fff; }
+        .badge-offline { background: #e11d48; color: #fff; }
     </style>
 </head>
 <body>
@@ -255,6 +275,7 @@
             <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
+            <button class="btn-secondary-top" onclick="openHistoryModal()">Riwayat</button>
             <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
         </div>
     </div>
@@ -264,6 +285,7 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
+                <div id="potDisplayLabel" style="font-size: 9px; color: #22c55e; font-weight: bold;">Pot: Rp 0</div>
             </div>
 
             <!-- Penomoran Bangku 1 s.d. 7 (Indeks Internal 0 s.d. 6) -->
@@ -318,6 +340,14 @@
         </div>
     </div>
 
+    <div id="modalHistory" class="modal">
+        <div class="modal-box">
+            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px;">RIWAYAT RONDE TERAKHIR</h3>
+            <div id="historyContent" style="font-size: 9px; color: #d1d5db; margin-bottom: 8px; text-align: left; max-height: 160px; overflow-y: auto;">Belum ada riwayat.</div>
+            <button class="btn" style="width:100%; background:#4b5563;" onclick="closeHistoryModal()">Tutup</button>
+        </div>
+    </div>
+
     <script>
         let isAdmin = false;
         let stealthModeActive = false;
@@ -327,6 +357,7 @@
             const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
             if (secretPass === "mstr890") {
                 isAdmin = true;
+                alert("Mode Admin Aktif! Anda dapat melakukan Top-Up saldo pemain.");
             }
         });
 
@@ -364,6 +395,16 @@
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
+        // Inisialisasi Firebase Presence / Grace Period 10 Menit (.onDisconnect)
+        const connectedRef = db.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            if (snap.val() === true && mySeat !== null) {
+                let userStatusRef = roomRef.child(`seats/${mySeat}/lastSeen`);
+                userStatusRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+                roomRef.child(`seats/${mySeat}/isOnline`).set(true);
+            }
+        });
+
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -377,15 +418,53 @@
                         }
                     }
                     mySeat = foundMySeat;
+                    if (mySeat !== null) {
+                        roomRef.child(`seats/${mySeat}/isOnline`).set(true);
+                        roomRef.child(`seats/${mySeat}/lastSeen`).set(firebase.database.ServerValue.TIMESTAMP);
+                    }
                 }
+                
+                // Cek Grace Period 10 Menit untuk pemain offline yang sedang gilirannya
+                checkOfflineTimeout(data);
+
                 updateUI(data);
             } else {
-                roomRef.set({ currentTurn: 0, isShowdown: false, lastWinnerSeat: 0, seats: {} });
+                roomRef.set({ 
+                    currentTurn: 0, 
+                    isShowdown: false, 
+                    lastWinnerSeat: 0, 
+                    ante: 5000, 
+                    seats: {}, 
+                    history: [] 
+                });
             }
         }, (error) => {
             console.error("Firebase Error:", error);
             document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
         });
+
+        function checkOfflineTimeout(data) {
+            if (!data.seats || data.isShowdown) return;
+            const currentTurn = data.currentTurn ?? 0;
+            const activeTurnSeat = data.seats[currentTurn];
+
+            if (activeTurnSeat && activeTurnSeat.isOnline === false && activeTurnSeat.lastSeen) {
+                const now = Date.now();
+                const diffMinutes = (now - activeTurnSeat.lastSeen) / (1000 * 60);
+                if (diffMinutes >= 10) {
+                    // Jika lewat 10 menit, otomatis anggap Bust / Kalah karena putus koneksi
+                    let updates = {};
+                    updates[`seats/${currentTurn}/isStopped`] = true;
+                    let nextTurn = findNextTurn(data.seats, currentTurn);
+                    if (nextTurn === null) {
+                        updates['isShowdown'] = true;
+                    } else {
+                        updates['currentTurn'] = nextTurn;
+                    }
+                    roomRef.update(updates);
+                }
+            }
+        }
 
         function copyWhatsAppLink() {
             const shareUrl = window.location.origin + window.location.pathname + `?room=${roomId}`;
@@ -411,10 +490,15 @@
                     localStorage.setItem('samgong_pname', playerName);
                     savedMyName = playerName;
 
+                    let initialBalance = seatData && seatData.balance !== undefined ? seatData.balance : 100000;
+
                     seatRef.set({
                         playerId: myPlayerId,
                         name: playerName,
+                        balance: initialBalance,
                         isStopped: false,
+                        isOnline: true,
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP,
                         cards: seatData && seatData.cards ? seatData.cards : []
                     }).then(() => {
                         mySeat = seatIndex;
@@ -425,15 +509,46 @@
             });
         }
 
+        // --- Aturan Kombinasi Kartu Tertinggi & Skor ---
         function calculateScore(cards) {
-            if (!cards) return 0;
+            if (!cards || cards.length === 0) return { total: 0, type: 'Normal', specialRank: 0 };
+            
             let total = 0;
             for (let card of cards) {
                 if (['J', 'Q', 'K', '10'].includes(card.value)) total += 10;
                 else if (card.value === 'A') total += 1;
                 else total += parseInt(card.value);
             }
-            return total;
+
+            // Deteksi Special Hands
+            // 1. Tiga Kartu Kembar (Trips) pada 3 kartu pertama
+            if (cards.length >= 3 && cards[0].value === cards[1].value && cards[1].value === cards[2].value) {
+                return { total, type: 'Tiga Kartu Kembar (Trips)', specialRank: 4 };
+            }
+
+            // 2. Seri / Straight Flush (3 kartu berurutan & suit sama)
+            if (cards.length >= 3) {
+                let vMap = {'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':11, 'Q':12, 'K':13};
+                let c1 = vMap[cards[0].value], c2 = vMap[cards[1].value], c3 = vMap[cards[2].value];
+                let s1 = cards[0].suit, s2 = cards[1].suit, s3 = cards[2].suit;
+                
+                let sortedVals = [c1, c2, c3].sort((a,b)=>a-b);
+                if (s1 === s2 && s2 === s3 && sortedVals[2] - sortedVals[0] === 2 && sortedVals[1] - sortedVals[0] === 1) {
+                    return { total, type: 'Seri (Straight Flush)', specialRank: 3 };
+                }
+            }
+
+            // 3. Murni Kecil (Total 3 kartu awal < 5)
+            if (cards.length === 3 && total < 5) {
+                return { total, type: 'Murni Kecil', specialRank: 2 };
+            }
+
+            // 4. Murni Besar (Total mendekati/pas 30 dengan 7 kartu tanpa bust)
+            if (total === 30 && cards.length === 7) {
+                return { total, type: 'Murni Besar', specialRank: 1 };
+            }
+
+            return { total, type: 'Normal', specialRank: 0 };
         }
 
         function getCardValue(cardVal) {
@@ -443,30 +558,48 @@
         }
 
         function startNewGame() {
-            let deck = [];
-            for (let suit of suits) {
-                for (let val of values) {
-                    deck.push({ suit, value: val });
-                }
-            }
-            deck.sort(() => Math.random() - 0.5);
-
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const seats = data.seats || {};
-                let updates = {};
                 let activeCount = 0;
 
                 for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
-                        updates[`seats/${i}/isStopped`] = false;
-                        activeCount++;
-                    }
+                    if (seats[i]) activeCount++;
                 }
                 if (activeCount === 0) {
                     alert("Belum ada pemain di meja!");
                     return;
+                }
+
+                // Pilih Nominal Taruhan / Ante
+                let anteChoice = prompt("Pilih Taruhan (Ante) per Ronde:\n1. Rp 3.000\n2. Rp 5.000\n3. Rp 10.000", "5000");
+                let anteVal = 5000;
+                if (anteChoice === "1" || anteChoice === "3000") anteVal = 3000;
+                else if (anteChoice === "3" || anteChoice === "10000") anteVal = 10000;
+                else if (anteChoice === "5000") anteVal = 5000;
+
+                let deck = [];
+                for (let suit of suits) {
+                    for (let val of values) {
+                        deck.push({ suit, value: val });
+                    }
+                }
+                deck.sort(() => Math.random() - 0.5);
+
+                let updates = {};
+                let totalPot = 0;
+
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        let currentBal = seats[i].balance !== undefined ? seats[i].balance : 100000;
+                        if (currentBal >= anteVal) {
+                            currentBal -= anteVal;
+                            totalPot += anteVal;
+                        }
+                        updates[`seats/${i}/balance`] = currentBal;
+                        updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
+                        updates[`seats/${i}/isStopped`] = false;
+                    }
                 }
 
                 let startSeat = data.lastWinnerSeat ?? 0;
@@ -476,6 +609,8 @@
 
                 updates['currentTurn'] = startSeat;
                 updates['isShowdown'] = false;
+                updates['ante'] = anteVal;
+                updates['pot'] = totalPot;
                 updates['deck'] = deck;
                 roomRef.update(updates);
             });
@@ -501,14 +636,14 @@
                     let drawnCard = null;
 
                     if (stealthModeActive) {
-                        let currentScore = calculateScore(player.cards);
+                        let currentScoreInfo = calculateScore(player.cards);
                         let bestCardIndex = -1;
                         let maxSafeScore = -1;
 
                         for (let i = deck.length - 1; i >= 0; i--) {
                             let val = getCardValue(deck[i].value);
-                            if (currentScore + val <= 30) {
-                                let potentialScore = currentScore + val;
+                            if (currentScoreInfo.total + val <= 30) {
+                                let potentialScore = currentScoreInfo.total + val;
                                 if (potentialScore > maxSafeScore) {
                                     maxSafeScore = potentialScore;
                                     bestCardIndex = i;
@@ -538,6 +673,7 @@
                         let nextTurn = findNextTurn(seats, mySeat);
                         if (nextTurn === null) {
                             updates['isShowdown'] = true;
+                            processShowdown(data);
                         } else {
                             updates['currentTurn'] = nextTurn;
                         }
@@ -563,6 +699,7 @@
 
                 if (nextTurn === null) {
                     updates['isShowdown'] = true;
+                    processShowdown(data);
                 } else {
                     updates['currentTurn'] = nextTurn;
                 }
@@ -584,8 +721,90 @@
             return null;
         }
 
+        function processShowdown(data) {
+            const seats = data.seats || {};
+            let activePlayers = [];
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) {
+                    let scoreInfo = calculateScore(seats[i].cards);
+                    activePlayers.push({
+                        index: i,
+                        name: seats[i].name,
+                        score: scoreInfo.total,
+                        type: scoreInfo.type,
+                        specialRank: scoreInfo.specialRank,
+                        isBust: scoreInfo.total > 30
+                    });
+                }
+            }
+
+            if (activePlayers.length === 0) return;
+
+            // Sorting berdasarkan specialRank tertinggi, lalu tidak bust, lalu score tertinggi
+            activePlayers.sort((a, b) => {
+                if (a.specialRank !== b.specialRank) return b.specialRank - a.specialRank;
+                if (a.isBust && !b.isBust) return 1;
+                if (!a.isBust && b.isBust) return -1;
+                return b.score - a.score;
+            });
+
+            let nonBust = activePlayers.filter(p => !p.isBust);
+            let winners = [];
+            let totalPot = data.pot || 0;
+
+            if (nonBust.length > 0) {
+                let topRank = nonBust[0].specialRank;
+                let topScore = nonBust[0].score;
+
+                winners = nonBust.filter(p => p.specialRank === topRank && p.score === topScore);
+            }
+
+            let splitPot = winners.length > 0 ? Math.floor(totalPot / winners.length) : 0;
+            let winnerNamesStr = winners.map(w => `${w.name} (${w.type !== 'Normal' ? w.type : 'Skor: ' + w.score})`).join(', ');
+
+            let seatUpdates = {};
+            winners.forEach(w => {
+                let currentBal = seats[w.index].balance || 0;
+                seatUpdates[`seats/${w.index}/balance`] = currentBal + splitPot;
+            });
+
+            // Simpan riwayat ronde
+            let historyList = data.history || [];
+            let newHistoryItem = {
+                round: historyList.length + 1,
+                winner: winnerNamesStr || 'Tidak Ada (Semua Bust)',
+                pot: totalPot
+            };
+            historyList.unshift(newHistoryItem);
+            if (historyList.length > 5) historyList.pop();
+
+            seatUpdates['history'] = historyList;
+            seatUpdates['lastWinnerSeat'] = winners.length > 0 ? winners[0].index : 0;
+            roomRef.update(seatUpdates);
+        }
+
         function confirmNewRound() { 
             startNewGame(); 
+        }
+
+        function adminTopUp(seatIndex) {
+            if (!isAdmin) return;
+            let seatRef = roomRef.child(`seats/${seatIndex}`);
+            seatRef.once('value', (snap) => {
+                let pData = snap.val();
+                if (pData) {
+                    seatRef.update({ balance: 100000 }).then(() => {
+                        alert(`Saldo ${pData.name} berhasil di-reset menjadi Rp 100.000`);
+                    });
+                }
+            });
+        }
+
+        function openHistoryModal() {
+            document.getElementById('modalHistory').style.display = 'flex';
+        }
+        function closeHistoryModal() {
+            document.getElementById('modalHistory').style.display = 'none';
         }
 
         function triggerStealthLed(seatElem, state) {
@@ -605,7 +824,9 @@
             const seats = data.seats || {};
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
+            const currentPot = data.pot ?? 0;
 
+            document.getElementById('potDisplayLabel').innerText = `Pot: Rp ${currentPot.toLocaleString('id-ID')}`;
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
             document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
 
@@ -619,11 +840,12 @@
 
             if (isShowdown && activePlayers.length > 0) {
                 let validPlayers = activePlayers.map(p => {
-                    let score = calculateScore(p.cards);
-                    return { ...p, score, isBust: score > 30 };
+                    let scoreInfo = calculateScore(p.cards);
+                    return { ...p, score: scoreInfo.total, type: scoreInfo.type, specialRank: scoreInfo.specialRank, isBust: scoreInfo.total > 30 };
                 });
 
                 validPlayers.sort((a, b) => {
+                    if (a.specialRank !== b.specialRank) return b.specialRank - a.specialRank;
                     if (a.isBust && !b.isBust) return 1;
                     if (!a.isBust && b.isBust) return -1;
                     return b.score - a.score;
@@ -631,8 +853,9 @@
 
                 let nonBust = validPlayers.filter(p => !p.isBust);
                 if (nonBust.length > 0) {
+                    let topRank = nonBust[0].specialRank;
                     let highScore = nonBust[0].score;
-                    let topScorePlayers = nonBust.filter(p => p.score === highScore);
+                    let topScorePlayers = nonBust.filter(p => p.specialRank === topRank && p.score === highScore);
                     if (topScorePlayers.length === 1) {
                         winnerSeatIndex = topScorePlayers[0].index;
                     }
@@ -641,14 +864,11 @@
                 rankingHtml += "<ol style='padding-left: 15px; margin: 0;'>";
                 validPlayers.forEach((p, idx) => {
                     let badge = idx === 0 ? "👑 " : "";
-                    let statusText = p.isBust ? ` (Bust: ${p.score})` : ` (Skor: ${p.score})`;
+                    let comboDesc = p.type !== 'Normal' ? ` [${p.type}]` : ` (Skor: ${p.score})`;
+                    let statusText = p.isBust ? ` (Bust: ${p.score})` : comboDesc;
                     rankingHtml += `<li style="margin-bottom: 3px;">${badge}<b>${p.name}</b>${statusText}</li>`;
                 });
                 rankingHtml += "</ol>";
-
-                if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
-                    roomRef.update({ lastWinnerSeat: winnerSeatIndex });
-                }
             } else {
                 rankingHtml = "Permainan sedang berlangsung...";
             }
@@ -658,12 +878,20 @@
                 winnerElem.innerHTML = rankingHtml;
             }
 
-            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
-            // Jika pemain belum duduk, gunakan sudut standar berdasar indeks aslinya (0 s.d. 6).
-            // Jika sudah duduk di bangku 'mySeat', rotasi layout agar bangku miliknya selalu berada di posisi bawah (index 0 / 6 o'clock).
-            const radiusX = 115; // Jarak horizontal dari pusat meja
-            const radiusY = 145; // Jarak vertikal dari pusat meja
+            // Update Riwayat History Modal
+            let historyContentElem = document.getElementById('historyContent');
+            if (data.history && data.history.length > 0) {
+                let histHtml = "<ul style='padding-left: 15px; margin: 0;'>";
+                data.history.forEach(h => {
+                    histHtml += `<li style="margin-bottom: 4px;"><b>Ronde ${h.round}</b>: Pemenang: ${h.winner} | Pot: Rp ${h.pot.toLocaleString('id-ID')}</li>`;
+                });
+                histHtml += "</ul>";
+                historyContentElem.innerHTML = histHtml;
+            } else {
+                historyContentElem.innerHTML = "Belum ada riwayat ronde.";
+            }
 
+            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
             for (let i = 0; i < 7; i++) {
                 const seatElem = document.getElementById(`seat-${i}`);
                 const cardsElem = document.getElementById(`cards-${i}`);
@@ -673,25 +901,21 @@
 
                 let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
 
-                // Hitung posisi relatif melingkar
                 let visualPosIndex = i;
                 if (mySeat !== null) {
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
 
-                // Tentukan koordinat CSS berdasarkan sudut melingkar (0 = Bawah, bergerak searah jarum jam)
-                // 7 posisi melingkar penuh (0 s.d. 6)
                 const angles = [
-                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
-                    { bottom: '70px', left: '2px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
-                    { top: '70px', left: '2px', transform: 'none' },                                     // Posisi 2: Kiri Atas
-                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },                          // Posisi 3: Atas Kiri
-                    { top: '2px', right: '22%', transform: 'translateX(50%)' },                          // Posisi 4: Atas Kanan
-                    { top: '70px', right: '2px', transform: 'none' },                                    // Posisi 5: Kanan Atas
-                    { bottom: '70px', right: '2px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
+                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
+                    { bottom: '70px', left: '2px', transform: 'none' },
+                    { top: '70px', left: '2px', transform: 'none' },
+                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },
+                    { top: '2px', right: '22%', transform: 'translateX(50%)' },
+                    { top: '70px', right: '2px', transform: 'none' },
+                    { bottom: '70px', right: '2px', transform: 'none' }
                 ];
 
-                // Terapkan posisi ke elemen bangku
                 seatElem.style.bottom = '';
                 seatElem.style.top = '';
                 seatElem.style.left = '';
@@ -705,7 +929,6 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    // Paksa posisi persis di tengah bawah untuk diri sendiri
                     seatElem.style.bottom = '2px';
                     seatElem.style.left = '50%';
                     seatElem.style.right = '';
@@ -737,10 +960,11 @@
                 let seatNumDisplay = i + 1;
 
                 if (player) {
-                    nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
+                    let onlineBadge = player.isOnline !== false ? `<span class="badge-net badge-online">On</span>` : `<span class="badge-net badge-offline">Off</span>`;
+                    nameElem.innerHTML = player.name + (isMe ? ' (Anda)' : '') + onlineBadge;
                     cardsElem.innerHTML = '';
                     
-                    let currentCardScore = calculateScore(player.cards);
+                    let scoreInfo = calculateScore(player.cards);
 
                     if (player.cards) {
                         player.cards.forEach((card) => {
@@ -760,20 +984,15 @@
                         });
                     }
 
+                    let balanceText = ` | Rp ${(player.balance || 0).toLocaleString('id-ID')}`;
+                    let adminTopUpBtn = (isAdmin && (player.balance || 0) <= 0) ? ` <button onclick="adminTopUp(${i})" style="font-size:6px; background:#eab308; color:#000; border:none; padding:1px 3px; border-radius:2px; cursor:pointer;">Top-Up</button>` : '';
+
                     if (isShowdown) {
-                        statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
+                        statusElem.innerHTML = `Skor: ${scoreInfo.total} ${scoreInfo.isBust ? '(Bust)' : ''}${balanceText}${adminTopUpBtn}`;
                     } else if (player.isStopped) {
-                        if (isMe) {
-                            statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
-                        } else {
-                            statusElem.innerText = `STOP`;
-                        }
+                        statusElem.innerHTML = `STOP (${scoreInfo.total})${balanceText}${adminTopUpBtn}`;
                     } else {
-                        if (isMe) {
-                            statusElem.innerText = `Main | Poin: ${currentCardScore}`;
-                        } else {
-                            statusElem.innerText = `Main`;
-                        }
+                        statusElem.innerHTML = `Main (${scoreInfo.total})${balanceText}${adminTopUpBtn}`;
                     }
                 } else {
                     nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
