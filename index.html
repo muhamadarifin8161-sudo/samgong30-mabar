@@ -39,11 +39,24 @@
             gap: 5px;
             align-items: center;
         }
+        /* Style Tombol Mulai Game di Kiri Atas */
+        .btn-top-start {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-top-start:hover { background: #1d4ed8; }
+        
         .wa-btn {
             background: #059669;
             color: white;
             border: none;
-            padding: 4px 8px;
+            padding: 5px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: bold;
@@ -91,21 +104,8 @@
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; }
-        
-        /* Tombol Mulai Game Baru di Tengah Meja */
-        .btn-center-deal {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 9px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 2px;
-        }
 
-        /* Posisi Bangku Sesuai Gambar Referensi Baru */
+        /* Posisi 7 Bangku */
         .seat {
             position: absolute;
             background: #111827;
@@ -131,18 +131,18 @@
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .seat-status { font-size: 7px; color: #9ca3af; margin-top: 1px; font-weight: 600; }
 
-        /* Koordinat 7 Kursi Sesuai Referensi Gambar */
-        #seat-0 { bottom: 2px; left: 50%; transform: translateX(-50%); } /* Bangku 1 (Bawah Tengah) */
-        #seat-1 { bottom: 95px; left: 2px; }                               /* Bangku 2 (Kiri Bawah) */
-        #seat-2 { top: 95px; left: 2px; }                                 /* Bangku 3 (Kiri Atas) */
-        #seat-3 { top: 2px; left: 26%; transform: translateX(-50%); }      /* Bangku 4 (Atas Kiri) */
-        #seat-4 { top: 2px; right: 26%; transform: translateX(50%); }     /* Bangku 5 (Atas Kanan) */
-        #seat-5 { top: 95px; right: 2px; }                                /* Bangku 6 (Kanan Atas) */
-        #seat-6 { bottom: 95px; right: 2px; }                             /* Bangku 7 (Kanan Bawah) */
+        /* Koordinat 7 Kursi */
+        #seat-0 { bottom: 2px; left: 50%; transform: translateX(-50%); } 
+        #seat-1 { bottom: 95px; left: 2px; }                               
+        #seat-2 { top: 95px; left: 2px; }                                 
+        #seat-3 { top: 2px; left: 26%; transform: translateX(-50%); }      
+        #seat-4 { top: 2px; right: 26%; transform: translateX(50%); }     
+        #seat-5 { top: 95px; right: 2px; }                                
+        #seat-6 { bottom: 95px; right: 2px; }                             
 
         .card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
         
-        /* Desain Kartu Standar Remi */
+        /* Desain Kartu Remi */
         .card {
             width: 38px; 
             height: 54px; 
@@ -249,7 +249,8 @@
 
     <div class="top-bar">
         <div>
-            <!-- Tombol Stop dihapus dari atas, dipindah ke panel bawah kiri -->
+            <!-- Poin 3: Tombol Mulai Game dipindahkan ke paling atas sebelah kiri -->
+            <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
         </div>
         <div style="text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #facc15;">SAMGONG 30</div>
@@ -265,8 +266,6 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
-                <!-- Tombol Mulai Game Baru dipindah ke tengah meja -->
-                <button id="btnCenterDeal" class="btn-center-deal" onclick="startNewGame()">Mulai Game Baru</button>
             </div>
 
             <div id="seat-0" class="seat" onclick="claimSeat(0)">
@@ -307,7 +306,7 @@
         </div>
     </div>
 
-    <!-- Panel Kontrol Bawah: Stop di Kiri, Hit di Kanan -->
+    <!-- Panel Kontrol Bawah -->
     <div class="control-panel">
         <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
         <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
@@ -470,6 +469,7 @@
                     return;
                 }
 
+                // Poin 1: Menggunakan lastWinnerSeat dari ronde sebelumnya sebagai giliran awal
                 let startSeat = data.lastWinnerSeat ?? 0;
                 if (!seats[startSeat]) {
                     startSeat = getFirstActiveSeat(seats);
@@ -498,6 +498,7 @@
                 let player = seats[mySeat];
                 let deck = data.deck || [];
                 
+                // Poin 2: Pemain tetap diizinkan Hit walau sudah Bust, hingga maksimal 7 kartu
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let drawnCard = null;
 
@@ -608,8 +609,8 @@
             const isShowdown = data.isShowdown ?? false;
 
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
-            // Tombol Mulai Game Baru di tengah meja dinonaktifkan saat permainan sedang berjalan (belum showdown)
-            document.getElementById('btnCenterDeal').disabled = !isShowdown && data.deck && data.deck.length > 0;
+            // Tombol Mulai Game di Kiri Atas dinonaktifkan saat game berlangsung
+            document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
 
             let activePlayers = [];
             for (let i = 0; i < 7; i++) {
@@ -625,7 +626,7 @@
                     return { ...p, score, isBust: score > 30 };
                 });
 
-                // Urutkan peringkat dari skor tertinggi ke terendah (yang tidak bust di atas, lalu bust di bawah)
+                // Urutkan peringkat dari skor tertinggi ke terendah (yang tidak bust di atas)
                 validPlayers.sort((a, b) => {
                     if (a.isBust && !b.isBust) return 1;
                     if (!a.isBust && b.isBust) return -1;
@@ -636,6 +637,9 @@
                 if (nonBust.length > 0) {
                     let highScore = nonBust[0].score;
                     let topScorePlayers = nonBust.filter(p => p.score === highScore);
+                    // Poin 1: Jika ada pemenang tunggal, catat bangkunya. 
+                    // Jika terjadi SERI (tie/topScorePlayers > 1), lastWinnerSeat TIDAK diubah, 
+                    // sehingga ronde baru tetap dimulai dari pemenang ronde sebelumnya.
                     if (topScorePlayers.length === 1) {
                         winnerSeatIndex = topScorePlayers[0].index;
                     }
