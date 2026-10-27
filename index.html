@@ -10,7 +10,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            background-color: #0b0f19;
+            background-color: #07090e;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             width: 100vw;
@@ -24,15 +24,15 @@
             position: fixed;
         }
         .top-bar {
-            background: #111827;
-            padding: 6px 10px;
+            background: linear-gradient(180deg, #111827 0%, #0b0f19 100%);
+            padding: 6px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1f2937;
             z-index: 20;
             flex-shrink: 0;
-            height: 48px;
+            height: 45px;
         }
         .top-actions {
             display: flex;
@@ -40,7 +40,7 @@
             align-items: center;
         }
         .btn-top-start {
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border: none;
             padding: 5px 10px;
@@ -48,21 +48,24 @@
             font-size: 10px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(37,99,235,0.3);
         }
         .btn-top-start:hover { background: #1d4ed8; }
         
         .wa-btn {
-            background: #059669;
+            background: linear-gradient(135deg, #059669, #047857);
             color: white;
             border: none;
-            padding: 5px 8px;
+            padding: 5px 9px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(5,150,105,0.3);
         }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* Area Meja Poker Oval Kasino */
         .table-area {
             position: relative;
             flex-grow: 1;
@@ -71,68 +74,80 @@
             justify-content: center;
             width: 100%;
             overflow: hidden;
-            padding: 5px;
+            padding: 2px;
         }
         .poker-table {
             position: relative;
-            width: 100%;
-            max-width: 360px;
-            height: 100%;
-            max-height: 380px;
-            background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
-            border: 5px solid #78350f;
-            border-radius: 140px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
+            width: 94%;
+            max-width: 420px;
+            height: 64%;
+            max-height: 310px;
+            background: radial-gradient(circle, #15803d 0%, #166534 65%, #052e16 100%);
+            border: 8px solid #572b0c;
+            border-radius: 160px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.85), 0 8px 20px rgba(0,0,0,0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
+        /* Border dalam meja kasino (felt border line) */
+        .poker-table::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 145px;
+            pointer-events: none;
+        }
+
         .center-info {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 6px 10px;
-            border-radius: 10px;
-            border: 1px solid rgba(34, 197, 94, 0.4);
+            background: rgba(11, 15, 25, 0.88);
+            padding: 5px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(234, 179, 8, 0.4);
             text-align: center;
             z-index: 5;
-            max-width: 190px;
+            max-width: 170px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
-        .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 6px rgba(250, 204, 21, 0.8); }
+        .center-info div:first-child { font-size: 7.5px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; letter-spacing: 0.5px; }
+        .center-info div:nth-child(2) { font-size: 9.5px; color: #facc15; font-weight: bold; text-shadow: 0 0 6px rgba(250, 204, 21, 0.8); }
         .center-pot { font-size: 9px; color: #38bdf8; font-weight: bold; }
 
+        /* Kursi Pemain Melingkar di Tepi Meja */
         .seat {
             position: absolute;
-            background: #111827;
+            background: rgba(17, 24, 39, 0.92);
             border: 2px solid #374151;
             border-radius: 8px;
-            padding: 4px 6px;
-            width: 110px;
+            padding: 3px 5px;
+            width: 95px;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.6);
             z-index: 10;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
-        /* Penyesuaian Kotak Pemain Sendiri (.is-me) Memanjang ke Bawah */
+        /* Kotak Pemain Sendiri (.is-me) Diperbesar & Memanjang di Bagian Bawah */
         .seat.is-me {
             width: 96%;
-            max-width: 380px;
+            max-width: 400px;
             border-color: #059669;
-            padding: 8px 12px;
+            padding: 6px 10px;
             z-index: 25;
             position: absolute;
-            bottom: 4px;
+            bottom: 2px;
             left: 50%;
             transform: translateX(-50%) !important;
-            background: #0f172a;
-            box-shadow: 0 -4px 18px rgba(5, 150, 105, 0.5);
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 -4px 20px rgba(5, 150, 105, 0.45);
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -144,42 +159,42 @@
             justify-content: space-between;
             width: 100%;
             align-items: center;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
-        .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seat-name { font-size: 8.5px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .seat-coin { font-size: 8px; color: #facc15; font-weight: bold; }
         .seat-status { 
-            font-size: 7px; 
+            font-size: 6.5px; 
             color: #38bdf8; 
-            margin-top: 2px; 
+            margin-top: 1px; 
             font-weight: bold; 
-            text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+            text-shadow: 0 0 4px rgba(56, 189, 248, 0.7);
         }
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 52px; margin: 2px 0; position: relative; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 44px; margin: 1px 0; position: relative; }
         
         .card {
-            width: 36px; 
-            height: 50px; 
+            width: 30px; 
+            height: 42px; 
             background: #fff; 
             border-radius: 4px;
             display: flex; 
             flex-direction: column; 
             justify-content: space-between;
-            padding: 2px 3px; 
+            padding: 2px; 
             font-weight: bold; 
-            font-size: 11px; 
+            font-size: 9px; 
             line-height: 1; 
-            margin-left: -10px;
+            margin-left: -8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             border: 1px solid #d1d5db;
             position: relative;
         }
         .card:first-child { margin-left: 0; }
         
-        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 9px; }
-        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15px; }
-        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 9px; transform: rotate(180deg); }
+        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 8px; }
+        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 13px; }
+        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 8px; transform: rotate(180deg); }
 
         .card.back { 
             background: linear-gradient(135deg, #b91c1c, #7f1d1d); 
@@ -189,14 +204,20 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* Tampilan Kartu & Elemen Pribadi Diperbesar di Kotak Bawah */
-        .seat.is-me .card-container { height: 75px; margin: 4px 0; }
-        .seat.is-me .card { width: 50px; height: 70px; font-size: 14px; margin-left: -14px; padding: 3px 4px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 11px; }
-        .seat.is-me .card .card-center { font-size: 22px; }
-        .seat.is-me .seat-name { font-size: 11px; }
-        .seat.is-me .seat-coin { font-size: 10px; }
-        .seat.is-me .seat-status { font-size: 9px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        /* KARTU SAYA (.seat.is-me): Tinggi & lebar disesuaikan persis setinggi jarak visual antara baris E-I-Z-N keypad QWERTY HP */
+        .seat.is-me .card-container { height: 72px; margin: 2px 0; }
+        .seat.is-me .card { 
+            width: 48px; 
+            height: 68px; 
+            font-size: 13px; 
+            margin-left: -12px; 
+            padding: 3px; 
+        }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 10px; }
+        .seat.is-me .card .card-center { font-size: 20px; }
+        .seat.is-me .seat-name { font-size: 10.5px; }
+        .seat.is-me .seat-coin { font-size: 9.5px; }
+        .seat.is-me .seat-status { font-size: 8.5px; text-shadow: 0 0 6px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -207,8 +228,8 @@
             position: absolute;
             top: 3px;
             right: 5px;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             z-index: 40;
             pointer-events: none;
@@ -220,27 +241,27 @@
 
         .control-panel {
             background: #111827;
-            padding: 8px 12px;
+            padding: 6px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #1f2937;
             z-index: 30;
             flex-shrink: 0;
-            height: 52px;
+            height: 48px;
         }
         .btn {
-            padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
             white-space: nowrap;
         }
-        .btn-stop { background: #e11d48; width: 48%; }
-        .btn-hit { background: #059669; width: 48%; }
+        .btn-stop { background: linear-gradient(135deg, #e11d48, #be123c); width: 48%; box-shadow: 0 2px 4px rgba(225,29,72,0.3); }
+        .btn-hit { background: linear-gradient(135deg, #059669, #047857); width: 48%; box-shadow: 0 2px 4px rgba(5,150,105,0.3); }
 
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
             align-items: center; justify-content: center; z-index: 50; padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 290px; width: 100%; }
+        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 290px; width: 100%; box-shadow: 0 8px 25px rgba(0,0,0,0.9); }
         .input-setting { width: 100%; padding: 6px; margin: 6px 0; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 5px; text-align: center; font-size: 12px; }
     </style>
 </head>
@@ -251,7 +272,7 @@
             <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
         </div>
         <div style="text-align: center;">
-            <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
+            <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7); letter-spacing: 0.5px;">SAMGONG 30</div>
             <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
@@ -520,7 +541,6 @@
                     return;
                 }
 
-                // Jika ronde pertama atau diatur ulang, tampilkan modal setting koin/taruhan
                 if (!data.deck || data.deck.length === 0) {
                     document.getElementById('modalSettings').style.display = 'flex';
                     return;
@@ -541,7 +561,6 @@
                     betAmount: betAmt
                 };
                 
-                // Berikan koin awal jika pemain belum punya koin
                 for (let i = 0; i < 7; i++) {
                     if (seats[i] && (seats[i].coins === undefined || seats[i].coins === null)) {
                         updates[`seats/${i}/coins`] = initCoins;
@@ -573,7 +592,6 @@
             for (let i = 0; i < 7; i++) {
                 if (seats[i]) {
                     let pCoins = seats[i].coins || 0;
-                    // Cek koin cukup untuk taruhan
                     if (pCoins >= betAmt) {
                         updates[`seats/${i}/coins`] = pCoins - betAmt;
                         updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
@@ -581,7 +599,6 @@
                         totalPot += betAmt;
                         activeCount++;
                     } else {
-                        // Koin kurang / otomatis fold/absen di ronde ini
                         updates[`seats/${i}/cards`] = [];
                         updates[`seats/${i}/isStopped`] = true;
                     }
@@ -702,7 +719,6 @@
             let next = (currentSeat + 1) % 7;
             let checked = 0;
             while (checked < 7) {
-                // Hanya pilih yang ikut ronde (kartu ada & belum stop)
                 if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
                     return next;
                 }
@@ -812,15 +828,15 @@
                 winnerElem.innerHTML = rankingHtml;
             }
 
-            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
+            // Koordinat Posisi Melingkar Meja Poker Kasino (Player-Centric View)
             const angles = [
                 { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
-                { bottom: '75px', left: '2px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
-                { top: '75px', left: '2px', transform: 'none' },                                     // Posisi 2: Kiri Atas
+                { bottom: '65px', left: '4px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
+                { top: '65px', left: '4px', transform: 'none' },                                     // Posisi 2: Kiri Atas
                 { top: '2px', left: '22%', transform: 'translateX(-50%)' },                          // Posisi 3: Atas Kiri
                 { top: '2px', right: '22%', transform: 'translateX(50%)' },                          // Posisi 4: Atas Kanan
-                { top: '75px', right: '2px', transform: 'none' },                                    // Posisi 5: Kanan Atas
-                { bottom: '75px', right: '2px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
+                { top: '65px', right: '4px', transform: 'none' },                                    // Posisi 5: Kanan Atas
+                { bottom: '65px', right: '4px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
             ];
 
             for (let i = 0; i < 7; i++) {
@@ -907,11 +923,11 @@
                     }
 
                     if (isShowdown) {
-                        statusElem.innerText = player.cards && player.cards.length > 0 ? `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}` : `Absen (Koin Kurang)`;
+                        statusElem.innerText = player.cards && player.cards.length > 0 ? `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}` : `Absen`;
                     } else if (player.isStopped) {
-                        statusElem.innerText = isMe ? `STOP (Poin: ${currentCardScore})` : `STOP`;
+                        statusElem.innerText = isMe ? `STOP (${currentCardScore})` : `STOP`;
                     } else {
-                        statusElem.innerText = player.cards && player.cards.length > 0 ? (isMe ? `Main | Poin: ${currentCardScore}` : `Main`) : `Absen`;
+                        statusElem.innerText = player.cards && player.cards.length > 0 ? (isMe ? `Main | ${currentCardScore}` : `Main`) : `Absen`;
                     }
                 } else {
                     nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
@@ -920,7 +936,7 @@
                     statusElem.innerText = `Ketuk duduk`;
                 }
             }
-            document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`;
+            document.getElementById('turnStatusText').innerText = isShowdown ? "Showdown Selesai" : `Giliran: Bangku ${currentTurn + 1}`;
             
             let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
             document.getElementById('btnHit').disabled = !isMyTurn;
