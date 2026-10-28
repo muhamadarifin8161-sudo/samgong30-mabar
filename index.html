@@ -7,6 +7,7 @@
     <style>
         :root {
             --bg-dark: #0f172a;
+            --card-bg: #1e293b;
             --table-green: #064e3b;
             --gold: #f59e0b;
             --text-light: #f8fafc;
@@ -16,7 +17,7 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
             margin: 0;
-            padding: 10px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -24,168 +25,230 @@
         .container {
             width: 100%;
             max-width: 480px;
-            background: #1e293b;
+            background: var(--card-bg);
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
+            box-sizing: border-box;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .header-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+        /* Lobby Section */
+        .lobby-box {
             background: #334155;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 12px;
         }
-        .stat-box span {
-            display: block;
-            font-size: 11px;
-            color: #94a3b8;
-        }
-        .stat-box strong {
-            font-size: 14px;
+        .lobby-box h2 {
             color: var(--gold);
+            margin-top: 0;
+            font-size: 18px;
         }
-        .control-panel {
-            background: #334155;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
+        .input-group {
+            margin-bottom: 10px;
+            text-align: left;
         }
-        .control-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 3px;
         }
         input, select, button {
-            padding: 6px 10px;
+            width: 100%;
+            padding: 8px 10px;
             border-radius: 6px;
             border: 1px solid #475569;
             background: #0f172a;
             color: white;
-            font-size: 13px;
+            font-size: 14px;
+            box-sizing: border-box;
         }
-        button {
+        .btn-gold {
             background: var(--gold);
             color: #000;
             font-weight: bold;
             cursor: pointer;
             border: none;
+            margin-top: 5px;
         }
-        button:active {
-            opacity: 0.8;
-        }
-        .game-table {
-            background: var(--table-green);
-            border-radius: 12px;
-            padding: 15px;
-            min-height: 250px;
-            text-align: center;
-            border: 4px solid #047857;
-            position: relative;
-        }
-        .seats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .seat {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed #10b981;
-            padding: 12px 8px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
-        .btn-action {
-            width: 100%;
-            padding: 10px;
+        .btn-green {
             background: #10b981;
             color: white;
             font-weight: bold;
-            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+        button:active { opacity: 0.8; }
+
+        /* Game Layout (Sesuai Desain Canva) */
+        .top-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            background: #1e293b;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        .stat-item span {
+            font-size: 11px;
+            color: #94a3b8;
+            display: block;
+        }
+        .stat-item strong {
+            font-size: 14px;
+            color: var(--gold);
+        }
+        
+        .connection-status {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        .connection-status strong { color: #10b981; }
+
+        .form-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .form-row label {
+            font-size: 13px;
+            min-width: 55px;
+        }
+
+        .action-btn-row {
+            margin-bottom: 10px;
+        }
+
+        /* Meja Hijau */
+        .game-table {
+            background: var(--table-green);
+            border-radius: 12px;
+            padding: 12px;
+            min-height: 220px;
+            border: 3px solid #047857;
+            text-align: center;
             margin-top: 10px;
+            position: relative;
+        }
+        .table-info {
+            font-size: 12px;
+            color: #a7f3d0;
+            margin-bottom: 8px;
+        }
+        .seats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .seat-card {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1.5px dashed #10b981;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .seat-card strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #e2e8f0;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Panel Lobby / Masuk Room -->
-        <div id="lobbySection" class="control-panel">
-            <h3 style="margin: 0 0 10px 0; color: var(--gold); text-align: center;">Samgong 30 Online Lobby</h3>
-            <div class="control-row">
-                <label>Nama Pemain:</label>
-                <input type="text" id="playerName" placeholder="Nama Anda" value="Player1">
+        <!-- LOBBY AWAL -->
+        <div id="lobbySection" class="lobby-box">
+            <h2>Masuk Room Samgong 30</h2>
+            <div class="input-group">
+                <label>Nama Anda:</label>
+                <input type="text" id="playerName" placeholder="Ketik nama...">
             </div>
-            <div class="control-row">
+            <div class="input-group">
                 <label>ID Room:</label>
-                <input type="text" id="roomID" placeholder="Misal: room01" value="room01">
+                <input type="text" id="roomID" value="room01">
             </div>
-            <button onclick="gabungRoom()" style="width: 100%; padding: 10px; background: #10b981; color: white;">Masuk / Buat Room</button>
+            <button class="btn-green" onclick="gabungRoom()" style="padding: 10px; margin-top: 8px;">Masuk Meja</button>
         </div>
 
-        <!-- Panel Game Utama (Ditampilkan setelah masuk room) -->
-        <div id="gameSection" style="display:none;">
-            <div class="header-stats">
-                <div class="stat-box">
+        <!-- TAMPILAN UTAMA GAME (PERSIS CANVA) -->
+        <div id="gameSection" style="display: none;">
+            <!-- Baris 1: Saldo, Pot, Ronde -->
+            <div class="top-stats">
+                <div class="stat-item">
                     <span>Saldo Anda</span>
-                    <strong id="saldoDisplay">Rp 50.000</strong>
+                    <strong id="saldoDisplay">Rp 0</strong>
                 </div>
-                <div class="stat-box">
+                <div class="stat-item">
                     <span>Pot</span>
                     <strong id="potDisplay">Rp 0</strong>
                 </div>
-                <div class="stat-box">
+                <div class="stat-item">
                     <span>Ronde</span>
                     <strong id="roundDisplay">0</strong>
                 </div>
             </div>
 
-            <div class="control-panel">
-                <div class="control-row">
-                    <span>Room: <strong id="currentRoomText" style="color: #10b981;">-</strong></span>
-                    <button onclick="mulaiGame()">Mulai Ronde</button>
-                </div>
-                <div class="control-row">
-                    <label>Ante:</label>
-                    <select id="anteSelect">
-                        <option value="3000">Rp 3.000</option>
-                        <option value="5000">Rp 5.000</option>
-                        <option value="10000">Rp 10.000</option>
-                    </select>
-                </div>
+            <!-- Baris 2: Koneksi & Tombol Mulai -->
+            <div class="connection-status">
+                Koneksi: <strong id="connStatus">Online</strong>
             </div>
 
+            <div class="form-row">
+                <label>Ante</label>
+                <select id="anteSelect" style="flex: 1;">
+                    <option value="3000">Rp 3.000</option>
+                    <option value="5000">Rp 5.000</option>
+                    <option value="10000">Rp 10.000</option>
+                </select>
+                <button class="btn-gold" style="width: auto; padding: 8px 15px;" onclick="mulaiGame()">Mulai Game</button>
+            </div>
+
+            <!-- Baris 3: Top-up -->
+            <div class="form-row">
+                <label>Top-up</label>
+                <select id="topupSelect" style="width: 90px;">
+                    <option value="20000">Rp 20rb</option>
+                    <option value="50000">Rp 50rb</option>
+                    <option value="100000">Rp 100rb</option>
+                </select>
+                <input type="number" id="customNominal" placeholder="Jumlah Rp" style="flex: 1;">
+            </div>
+            <div class="action-btn-row">
+                <button class="btn-green" onclick="topupSaldo()">Top-up saldo</button>
+            </div>
+
+            <!-- Meja Permainan Hijau -->
             <div class="game-table">
-                <p id="statusRoomText" style="margin: 0; font-size: 13px; color: #a7f3d0;">Menunggu pemain lain...</p>
+                <div class="table-info" id="statusMejaText">Terhubung ke room.</div>
                 
-                <div class="seats-grid">
-                    <div class="seat">
-                        <strong>Bangku 1</strong>
-                        <p id="player1Slot">Kosong</p>
+                <div class="seats-container">
+                    <div class="seat-card">
+                        <strong id="seat1Title">Bangku 1</strong>
+                        <span id="seat1Info">Ketuk untuk duduk</span>
                     </div>
-                    <div class="seat">
-                        <strong>Bangku 2</strong>
-                        <p id="player2Slot">Kosong</p>
+                    <div class="seat-card">
+                        <strong id="seat2Title">Bangku 2</strong>
+                        <span id="seat2Info">Ketuk untuk duduk</span>
                     </div>
                 </div>
 
-                <button class="btn-action" onclick="tarikKartu()" id="btnAction" style="display:none;">Ambil Kartu (Hit)</button>
+                <button class="btn-green" id="btnAction" style="display:none; margin-top: 12px;" onclick="tarikKartu()">Ambil Kartu (Hit)</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK (Modular v10) -->
+    <!-- Firebase SDK Modular v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
@@ -195,62 +258,71 @@
 
         let myName = "";
         let currentRoom = "";
-        let playerSaldo = 50000;
+        let mySaldo = 50000;
 
         window.gabungRoom = function() {
             myName = document.getElementById('playerName').value.trim();
             currentRoom = document.getElementById('roomID').value.trim();
 
-            if (!myName || !currentRoom) {
-                alert("Mohon isi nama dan ID Room!");
+            if (!myName) {
+                alert("Masukkan nama Anda terlebih dahulu!");
                 return;
             }
 
             document.getElementById('lobbySection').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
-            document.getElementById('currentRoomText').innerText = currentRoom;
+            document.getElementById('saldoDisplay').innerText = "Rp " + mySaldo.toLocaleString('id-ID');
 
-            // Referensi Room di Database
             const roomRef = ref(db, 'samgong_rooms/' + currentRoom);
-
-            // Set data pemain ke database real-time
             update(roomRef, {
-                status: "Menunggu",
-                pot: 0,
-                ronde: 0,
-                [myName]: { saldo: playerSaldo, status: "Duduk" }
+                [myName]: { saldo: mySaldo, status: "Duduk" }
             });
 
-            // Dengarkan perubahan data secara real-time dari Firebase
+            // Sinkronisasi Real-time Database
             onValue(roomRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     document.getElementById('potDisplay').innerText = "Rp " + (data.pot || 0).toLocaleString('id-ID');
                     document.getElementById('roundDisplay').innerText = data.ronde || 0;
+
+                    let players = Object.keys(data).filter(k => k !== 'pot' && k !== 'ronde' && k !== 'status');
                     
-                    let players = Object.keys(data).filter(k => k !== 'status' && k !== 'pot' && k !== 'ronde');
-                    document.getElementById('player1Slot').innerText = players[0] ? `${players[0]} (Aktif)` : 'Kosong';
-                    document.getElementById('player2Slot').innerText = players[1] ? `${players[1]} (Aktif)` : 'Kosong';
+                    document.getElementById('seat1Title').innerText = players[0] ? `Bangku 1 · ${players[0]}` : "Bangku 1";
+                    document.getElementById('seat1Info').innerText = players[0] ? "Siap Bermain" : "Ketuk untuk duduk";
+
+                    document.getElementById('seat2Title').innerText = players[1] ? `Bangku 2 · ${players[1]}` : "Bangku 2";
+                    document.getElementById('seat2Info').innerText = players[1] ? "Siap Bermain" : "Ketuk untuk duduk";
                 }
             });
         };
 
+        window.topupSaldo = function() {
+            let nominal = parseInt(document.getElementById('customNominal').value) || parseInt(document.getElementById('topupSelect').value);
+            mySaldo += nominal;
+            document.getElementById('saldoDisplay').innerText = "Rp " + mySaldo.toLocaleString('id-ID');
+            alert("Top-up berhasil! Saldo bertambah.");
+        };
+
         window.mulaiGame = function() {
-            if (!currentRoom) return;
             let ante = parseInt(document.getElementById('anteSelect').value);
+            if (mySaldo < ante) {
+                alert("Saldo tidak cukup untuk membayar Ante!");
+                return;
+            }
+            mySaldo -= ante;
+            document.getElementById('saldoDisplay').innerText = "Rp " + mySaldo.toLocaleString('id-ID');
+
             const roomRef = ref(db, 'samgong_rooms/' + currentRoom);
-            
             update(roomRef, {
-                status: "Permainan Dimulai",
-                ronde: Math.floor(Math.random() * 10) + 1,
-                pot: ante * 2
+                pot: ante * 2,
+                ronde: Math.floor(Math.random() * 5) + 1
             });
             document.getElementById('btnAction').style.display = 'block';
-            document.getElementById('statusRoomText').innerText = "Giliran Anda bermain!";
+            document.getElementById('statusMejaText').innerText = "Giliran Anda bermain!";
         };
 
         window.tarikKartu = function() {
-            alert("Aksi ambil kartu dikirim ke room!");
+            alert("Kartu ditarik!");
             document.getElementById('btnAction').style.display = 'none';
         };
     </script>
