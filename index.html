@@ -63,7 +63,6 @@
         }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* FITUR BARU: Tombol Tambahan Top Bar */
         .btn-top-admin {
             background: #d97706;
             color: white;
@@ -73,7 +72,7 @@
             font-size: 10px;
             font-weight: bold;
             cursor: pointer;
-            display: none; /* Muncul jika admin */
+            display: none;
         }
         .btn-top-log {
             background: #4b5563;
@@ -127,7 +126,6 @@
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
 
-        /* FITUR BARU: Tampilan Pot Taruhan Meja */
         .pot-display {
             font-size: 11px;
             color: #4ade80;
@@ -167,7 +165,6 @@
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        /* FITUR BARU: Tampilan Saldo Pemain di Bangku */
         .seat-balance { font-size: 8px; color: #facc15; font-weight: bold; }
         .seat-status { 
             font-size: 7px; 
@@ -227,7 +224,6 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* Tampilan Kartu Pribadi Diperbesar 2x Lipat di Tengah Bawah */
         .seat.is-me .card-container { height: 85px; }
         .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
         .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
@@ -280,7 +276,6 @@
         }
         .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 320px; width: 100%; }
 
-        /* FITUR BARU: Style Modal Khusus Taruhan, Log & Admin */
         .modal-input {
             width: 100%;
             padding: 8px;
@@ -339,11 +334,9 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
-                <!-- FITUR BARU: Display Pot Taruhan Meja -->
                 <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
             </div>
 
-            <!-- Penomoran Bangku 1 s.d. 7 (Indeks Internal 0 s.d. 6) -->
             <div id="seat-0" class="seat" onclick="claimSeat(0)">
                 <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
                 <div class="seat-balance" id="balance-0"></div>
@@ -394,7 +387,6 @@
         <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
     </div>
 
-    <!-- Modal Showdown Original -->
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
@@ -403,7 +395,6 @@
         </div>
     </div>
 
-    <!-- FITUR BARU: Modal Pengaturan Taruhan Sebelum Game -->
     <div id="modalBetting" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 6px;">KESEPAKATAN TARUHAN</h3>
@@ -424,7 +415,6 @@
         </div>
     </div>
 
-    <!-- FITUR BARU: Modal Admin Top Up Saldo -->
     <div id="modalAdmin" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL ADMIN - TOP UP SALDO</h3>
@@ -437,7 +427,6 @@
         </div>
     </div>
 
-    <!-- FITUR BARU: Modal Riwayat Transaksi (Log) -->
     <div id="modalLog" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
@@ -495,13 +484,11 @@
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-        // FITUR BARU: Helper Format Rupiah
         function formatRupiah(amount) {
             let val = Math.floor(amount || 0);
             return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // FITUR BARU: Catat Riwayat Transaksi / Log ke Firebase
         function addTransactionLog(message) {
             let logRef = roomRef.child('logs').push();
             let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -514,7 +501,6 @@
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Auto-Reconnect Check
                 if (data.seats) {
                     let foundMySeat = null;
                     for (let i = 0; i < 7; i++) {
@@ -543,7 +529,6 @@
             document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
         });
 
-        // FITUR BARU: Listener Log Transaksi Realtime
         roomRef.child('logs').limitToLast(20).on('value', (snap) => {
             let logsData = snap.val();
             let logContainer = document.getElementById('logContainer');
@@ -584,8 +569,8 @@
                     localStorage.setItem('samgong_pname', playerName);
                     savedMyName = playerName;
 
-                    // FITUR BARU: Modal Awal Saldo Default Rp100.000 untuk Pemain Baru
-                    let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 100000;
+                    // ATURAN BARU: Pemain baru otomatis memiliki saldo 0 (jika bangku baru)
+                    let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
 
                     seatRef.set({
                         playerId: myPlayerId,
@@ -597,7 +582,7 @@
                     }).then(() => {
                         mySeat = seatIndex;
                         if (!seatData) {
-                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo ${formatRupiah(initialBalance)}`);
+                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0`);
                         }
                     });
                 } else {
@@ -623,7 +608,6 @@
             return parseInt(cardVal);
         }
 
-        // FITUR BARU: Mulai Permainan Menggunakan Kesepakatan Taruhan & Pemotongan Saldo Ke Pot
         function startNewGame() {
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
@@ -639,12 +623,20 @@
                     return;
                 }
 
-                // Buka modal taruhan jika taruhan belum disepakati seluruh pemain
+                // ATURAN BARU: Validasi apakah pemain yang duduk memiliki saldo > 0 sebelum bisa bergabung/main
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        if ((seats[i].balance || 0) <= 0) {
+                            alert(`Pemain "${seats[i].name}" (Bangku ${i+1}) memiliki saldo Rp0 dan belum bisa mulai bermain! Minta Admin mengisi saldo terlebih dahulu.`);
+                            return;
+                        }
+                    }
+                }
+
                 document.getElementById('modalBetting').style.display = 'flex';
             });
         }
 
-        // FITUR BARU: Logika Persetujuan Taruhan dan Eksekusi Pembagian Kartu
         function executeStartGameWithBets() {
             let deck = [];
             for (let suit of suits) {
@@ -659,20 +651,17 @@
                 const seats = data.seats || {};
                 const betAmount = data.currentBet || 10000;
                 let updates = {};
-                let activeCount = 0;
                 let totalPotCollected = 0;
 
-                // Validasi Kecukupan Saldo Pemain
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         if (seats[i].balance < betAmount) {
-                            alert(`Gagal Memulai: Saldo ${seats[i].name} (${formatRupiah(seats[i].balance)}) tidak cukup untuk taruhan ${formatRupiah(betAmount)}! Silakan minta Admin isi saldo.`);
+                            alert(`Gagal Memulai: Saldo ${seats[i].name} (${formatRupiah(seats[i].balance)}) tidak cukup untuk taruhan ${formatRupiah(betAmount)}!`);
                             return;
                         }
                     }
                 }
 
-                // Potong Saldo Pemain & Kumpulkan Pot Taruhan
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         let newBalance = seats[i].balance - betAmount;
@@ -681,7 +670,6 @@
                         updates[`seats/${i}/isReadyBet`] = false;
                         updates[`seats/${i}/balance`] = newBalance;
                         totalPotCollected += betAmount;
-                        activeCount++;
                     }
                 }
 
@@ -795,7 +783,6 @@
             });
         }
 
-        // FITUR BARU: Pembayaran Pot Otomatis ke Pemenang Saat Showdown
         function handleShowdownPayout(data) {
             const seats = data.seats || {};
             const pot = data.pot || 0;
@@ -840,7 +827,6 @@
                     addTransactionLog(`🏆 PRESTASI: ${winnerNames.join(', ')} memenangkan pot ${formatRupiah(pot)}!`);
                 });
             } else {
-                // Jika Semua Player Bust, Pot dikembalikan/tetap di meja
                 addTransactionLog(`Semua pemain Bust! Pot ${formatRupiah(pot)} tetap tersimpan di meja.`);
             }
         }
@@ -875,7 +861,6 @@
             }, 1500);
         }
 
-        // FITUR BARU: Fungsi-fungsi Kontrol Modal & Taruhan
         function openBetModal() { document.getElementById('modalBetting').style.display = 'flex'; }
         function closeBetModal() { document.getElementById('modalBetting').style.display = 'none'; }
 
@@ -887,7 +872,6 @@
             }
             if (confirm(`Apakah Anda yakin ingin menetapkan taruhan sebesar ${formatRupiah(betVal)}?`)) {
                 roomRef.child('currentBet').set(betVal).then(() => {
-                    // Reset kesepakatan siap jika nominal taruhan diubah
                     roomRef.once('value', snap => {
                         let data = snap.val() || {};
                         let seats = data.seats || {};
@@ -907,9 +891,14 @@
                 alert("Anda harus duduk terlebih dahulu!");
                 return;
             }
+            // ATURAN BARU: Cegah pemain dengan saldo 0 menekan tombol siap/main
             roomRef.child(`seats/${mySeat}`).once('value', snap => {
                 let p = snap.val();
                 if (p) {
+                    if ((p.balance || 0) <= 0) {
+                        alert("Saldo Anda masih Rp0. Minta Admin untuk mengisi saldo Anda terlebih dahulu!");
+                        return;
+                    }
                     let newStatus = !p.isReadyBet;
                     roomRef.child(`seats/${mySeat}/isReadyBet`).set(newStatus);
                 }
@@ -931,7 +920,6 @@
             }
         }
 
-        // FITUR BARU: Admin Panel Top Up
         function openAdminModal() {
             if (!isAdmin) return;
             roomRef.child('seats').once('value', snap => {
@@ -940,7 +928,7 @@
                 select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        select.innerHTML += `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - ${formatRupiah(seats[i].balance)}</option>`;
+                        select.innerHTML += `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
                     }
                 }
                 document.getElementById('modalAdmin').style.display = 'flex';
@@ -952,7 +940,7 @@
             let seatIdx = document.getElementById('adminSelectPlayer').value;
             let amount = parseInt(document.getElementById('adminTopUpAmount').value);
 
-            if (seatIdx === "" || isNaN(amount) || amount <= 0) {
+            if (seatIdx === "" || isNaN(amount)) {
                 alert("Pilih pemain dan masukkan nominal saldo yang valid!");
                 return;
             }
@@ -988,7 +976,6 @@
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
             document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
 
-            // Render Status Persetujuan Taruhan di Modal
             let readyHtml = "";
             for (let i = 0; i < 7; i++) {
                 if (seats[i]) {
@@ -998,7 +985,6 @@
             }
             document.getElementById('readyListDisplay').innerHTML = readyHtml || "Belum ada pemain.";
 
-            // Cek Otomatis Persetujuan Kesepakatan
             if (document.getElementById('modalBetting').style.display === 'flex') {
                 checkAllReadyAndStart(data);
             }
@@ -1052,7 +1038,6 @@
                 winnerElem.innerHTML = rankingHtml;
             }
 
-            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
             for (let i = 0; i < 7; i++) {
                 const seatElem = document.getElementById(`seat-${i}`);
                 const cardsElem = document.getElementById(`cards-${i}`);
