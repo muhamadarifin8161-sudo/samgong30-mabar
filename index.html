@@ -151,7 +151,6 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
-        /* DIPERBESAR DAN DIBUAT BISA DIGESER (DRAGGABLE) */
         .seat.is-me {
             width: 240px;
             border-color: #059669;
@@ -240,7 +239,6 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* UKURAN KARTU PEMAIN AKTIF LEBIH BESAR DAN JELAS */
         .seat.is-me .card-container { height: 100px; margin: 5px 0; }
         .seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
         .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
@@ -639,11 +637,26 @@
                     return;
                 }
 
+                // VALIDASI SALDO 0 DENGAN OPSI INTERAKTIF (TOP-UP ATAU SIT-OUT)
+                let hasZeroBalance = false;
                 for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        if ((seats[i].balance || 0) <= 0) {
-                            alert(`Pemain "${seats[i].name}" (Bangku ${i+1}) memiliki saldo Rp0 dan belum bisa mulai bermain! Minta Admin mengisi saldo terlebih dahulu.`);
-                            return;
+                    if (seats[i] && (seats[i].balance || 0) <= 0) {
+                        hasZeroBalance = true;
+                        let playerName = seats[i].name || `Pemain ${i+1}`;
+                        let wantTopUp = confirm(`Pemain "${playerName}" (Bangku ${i+1}) memiliki saldo Rp0.\n\nApakah ingin langsung isi saldo (top-up) sekarang? (Tekan OK untuk Top-Up, Cancel untuk Sit-Out/Lewati ronde ini).`);
+                        
+                        if (wantTopUp) {
+                            let amountStr = prompt(`Masukkan nominal top-up untuk ${playerName}:`, "50000");
+                            let topUpAmount = parseInt(amountStr);
+                            if (!isNaN(topUpAmount) && topUpAmount > 0) {
+                                let newBal = (seats[i].balance || 0) + topUpAmount;
+                                roomRef.child(`seats/${i}/balance`).set(newBal);
+                                addTransactionLog(`💸 AUTO TOP UP: Saldo ${playerName} ditambah ${formatRupiah(topUpAmount)}. Total: ${formatRupiah(newBal)}`);
+                            } else {
+                                alert("Nominal tidak valid. Pemain akan dilewati (sit-out) untuk ronde ini, posisi duduk tetap aman.");
+                            }
+                        } else {
+                            addTransactionLog(`ℹ️ ${playerName} (Bangku ${i+1}) melakukan sit-out (lewat ronde ini) karena saldo Rp0.`);
                         }
                     }
                 }
@@ -668,29 +681,33 @@
                 let updates = {};
                 let totalPotCollected = 0;
 
+                // Pastikan pemain dengan saldo Rp0 atau saldo kurang otomatis di-sit-out (tidak ikut serta pot/kartu ronde ini)
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        if (seats[i].balance < betAmount) {
-                            alert(`Gagal Memulai: Saldo ${seats[i].name} (${formatRupiah(seats[i].balance)}) tidak cukup untuk taruhan ${formatRupiah(betAmount)}!`);
-                            return;
+                        if ((seats[i].balance || 0) < betAmount) {
+                            // Pemain dengan saldo kurang dari taruhan otomatis dilewati (sit-out), bangku tetap aman
+                            updates[`seats/${i}/cards`] = [];
+                            updates[`seats/${i}/isStopped`] = true;
+                            updates[`seats/${i}/isReadyBet`] = false;
+                        } else {
+                            let newBalance = seats[i].balance - betAmount;
+                            updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
+                            updates[`seats/${i}/isStopped`] = false;
+                            updates[`seats/${i}/isReadyBet`] = false;
+                            updates[`seats/${i}/balance`] = newBalance;
+                            totalPotCollected += betAmount;
                         }
                     }
                 }
 
-                for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        let newBalance = seats[i].balance - betAmount;
-                        updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
-                        updates[`seats/${i}/isStopped`] = false;
-                        updates[`seats/${i}/isReadyBet`] = false;
-                        updates[`seats/${i}/balance`] = newBalance;
-                        totalPotCollected += betAmount;
-                    }
+                let startSeat = data.lastWinnerSeat ?? 0;
+                if (!seats[startSeat] || (seats[startSeat].balance || 0) < betAmount) {
+                    startSeat = getFirstActivePlayingSeat(seats, betAmount);
                 }
 
-                let startSeat = data.lastWinnerSeat ?? 0;
-                if (!seats[startSeat]) {
-                    startSeat = getFirstActiveSeat(seats);
+                if (startSeat === null) {
+                    alert("Tidak ada pemain dengan saldo yang cukup untuk memulai taruhan!");
+                    return;
                 }
 
                 updates['currentTurn'] = startSeat;
@@ -704,6 +721,13 @@
                     addTransactionLog(`Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot: ${formatRupiah(totalPotCollected)}`);
                 });
             });
+        }
+
+        function getFirstActivePlayingSeat(seats, betAmount) {
+            for (let i = 0; i < 7; i++) {
+                if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
+            }
+            return 0;
         }
 
         function getFirstActiveSeat(seats) {
@@ -804,7 +828,9 @@
             let activePlayers = [];
 
             for (let i = 0; i < 7; i++) {
-                if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
+                if (seats[i] && seats[i].cards && seats[i].cards.length > 0) {
+                    activePlayers.push({ index: i, ...seats[i] });
+                }
             }
 
             if (activePlayers.length === 0 || pot <= 0) return;
@@ -850,7 +876,8 @@
             let next = (currentSeat + 1) % 7;
             let checked = 0;
             while (checked < 7) {
-                if (seats[next] && !seats[next].isStopped) {
+                // Hanya pilih pemain yang aktif ikut ronde (punya kartu dan belum stop)
+                if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
                     return next;
                 }
                 next = (next + 1) % 7;
@@ -909,21 +936,30 @@
             roomRef.child(`seats/${mySeat}`).once('value', snap => {
                 let p = snap.val();
                 if (p) {
-                    if ((p.balance || 0) <= 0) {
-                        alert("Saldo Anda masih Rp0. Minta Admin untuk mengisi saldo Anda terlebih dahulu!");
-                        return;
-                    }
-                    let newStatus = !p.isReadyBet;
-                    roomRef.child(`seats/${mySeat}/isReadyBet`).set(newStatus);
+                    let currentBet = 10000; 
+                    // Ambil currentBet terbaru dari DB jika ada
+                    roomRef.child('currentBet').once('value', betSnap => {
+                        let betVal = betSnap.val() || 10000;
+                        if ((p.balance || 0) < betVal) {
+                            alert(`Saldo Anda (${formatRupiah(p.balance)}) kurang dari taruhan (${formatRupiah(betVal)}). Minta Admin mengisi saldo Anda terlebih dahulu atau tunggu ronde berikutnya!`);
+                            return;
+                        }
+                        let newStatus = !p.isReadyBet;
+                        roomRef.child(`seats/${mySeat}/isReadyBet`).set(newStatus);
+                    });
                 }
             });
         }
 
         function checkAllReadyAndStart(data) {
             const seats = data.seats || {};
+            const betAmount = data.currentBet || 10000;
             let activePlayers = [];
             for (let i = 0; i < 7; i++) {
-                if (seats[i]) activePlayers.push(seats[i]);
+                // Hitung pemain yang punya saldo cukup dan terdaftar
+                if (seats[i] && (seats[i].balance || 0) >= betAmount) {
+                    activePlayers.push(seats[i]);
+                }
             }
 
             if (activePlayers.length > 0) {
@@ -993,7 +1029,8 @@
             let readyHtml = "";
             for (let i = 0; i < 7; i++) {
                 if (seats[i]) {
-                    let statusBadge = seats[i].isReadyBet ? `<span class="ready-badge">SIAP</span>` : `<span style="color:#ef4444; font-size:8px;">Belum</span>`;
+                    let isZeroOrLow = (seats[i].balance || 0) < currentBet;
+                    let statusBadge = isZeroOrLow ? `<span style="color:#ef4444; font-size:8px;">Sit-Out (Saldo kurang)</span>` : (seats[i].isReadyBet ? `<span class="ready-badge">SIAP</span>` : `<span style="color:#ef4444; font-size:8px;">Belum</span>`);
                     readyHtml += `<div>Bangku ${i+1} (${seats[i].name}): ${statusBadge}</div>`;
                 }
             }
@@ -1012,7 +1049,7 @@
             let winnerSeatIndex = null;
 
             if (isShowdown && activePlayers.length > 0) {
-                let validPlayers = activePlayers.map(p => {
+                let validPlayers = activePlayers.filter(p => p.cards && p.cards.length > 0).map(p => {
                     let score = calculateScore(p.cards);
                     return { ...p, score, isBust: score > 30 };
                 });
@@ -1090,7 +1127,6 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    // Pertahankan posisi custom drag jika sudah digeser, atau set default bawah
                     if (!seatElem.dataset.dragged) {
                         seatElem.style.bottom = '10px';
                         seatElem.style.left = '50%';
@@ -1099,7 +1135,6 @@
                         seatElem.style.transform = 'translateX(-50%)';
                     }
                     
-                    // Tambahkan indikator petunjuk geser jika belum ada
                     if (!seatElem.querySelector('.drag-handle')) {
                         const handle = document.createElement('div');
                         handle.className = 'drag-handle';
@@ -1140,7 +1175,7 @@
                     
                     let currentCardScore = calculateScore(player.cards);
 
-                    if (player.cards) {
+                    if (player.cards && player.cards.length > 0) {
                         player.cards.forEach((card) => {
                             const cardDiv = document.createElement('div');
                             if (isMe || isShowdown) {
@@ -1158,10 +1193,12 @@
                         });
                     }
 
-                    if (isShowdown) {
+                    if (isShowdown && player.cards && player.cards.length > 0) {
                         statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
-                    } else if (player.isStopped) {
-                        if (isMe) {
+                    } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
+                        if (player.cards && player.cards.length === 0) {
+                            statusElem.innerText = `Sit-Out (Saldo 0)`;
+                        } else if (isMe) {
                             statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
                         } else {
                             statusElem.innerText = `STOP`;
@@ -1187,7 +1224,6 @@
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
 
-        // FITUR DRAG & DROP / TOUCH DRAG KOTAK PEMAIN AKTIF KE SEGALA ARAH
         document.addEventListener('DOMContentLoaded', () => {
             let isDragging = false;
             let startX, startY, initialX, initialY;
@@ -1196,7 +1232,6 @@
                 const targetMe = e.target.closest('.seat.is-me');
                 if (!targetMe) return;
                 
-                // Jangan aktifkan drag jika menekan tombol atau elemen interaktif di dalam kartu
                 if (e.target.tagName === 'BUTTON' || e.target.closest('.card')) return;
 
                 isDragging = true;
