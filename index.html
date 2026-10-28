@@ -4,68 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Samgong 30 - Mabar Online</title>
+    <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            background-color: #0b0f19; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            width: 100vw; height: 100vh; height: 100dvh; display: flex; flex-direction: column;
-            justify-content: space-between; overflow: hidden; user-select: none; position: fixed;
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            user-select: none;
+            position: fixed;
         }
-        .top-bar, .control-panel {
-            background: #111827; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 20; flex-shrink: 0;
+        .top-bar {
+            background: #111827;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+            z-index: 20;
+            flex-shrink: 0;
+            height: 48px;
         }
-        .top-bar { height: 48px; border-bottom: 1px solid #1f2937; }
-        .control-panel { height: 52px; border-top: 1px solid #1f2937; z-index: 30; }
-        .top-actions { display: flex; gap: 5px; align-items: center; }
-        .btn { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white; white-space: nowrap; }
+        .top-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .btn-top-start {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-top-start:hover { background: #1d4ed8; }
+        
+        .wa-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .btn-top-start { background: #2563eb; padding: 5px 10px; font-size: 10px; border-radius: 6px; }
-        .wa-btn { background: #059669; padding: 5px 8px; font-size: 10px; border-radius: 6px; }
-        .btn-top-admin { background: #d97706; padding: 5px 8px; font-size: 10px; border-radius: 6px; display: none; }
-        .btn-top-log { background: #4b5563; padding: 5px 8px; font-size: 10px; border-radius: 6px; }
-        .table-area { position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; padding: 5px; }
+
+        /* FITUR BARU: Tombol Tambahan Top Bar */
+        .btn-top-admin {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none; /* Muncul jika admin */
+        }
+        .btn-top-log {
+            background: #4b5563;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .table-area {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            overflow: hidden;
+            padding: 5px;
+        }
         .poker-table {
-            position: relative; width: 100%; max-width: 360px; height: 100%; max-height: 440px;
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            height: 100%;
+            max-height: 440px;
             background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
-            border: 5px solid #78350f; border-radius: 140px;
+            border: 5px solid #78350f;
+            border-radius: 140px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .center-info {
-            background: rgba(0, 0, 0, 0.85); padding: 8px 12px; border-radius: 10px;
-            border: 1px solid rgba(34, 197, 94, 0.4); text-align: center; z-index: 5; max-width: 190px;
-            display: flex; flex-direction: column; gap: 4px; align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            text-align: center;
+            z-index: 5;
+            max-width: 190px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
-        .pot-display { font-size: 11px; color: #4ade80; font-weight: bold; background: rgba(6, 78, 59, 0.7); padding: 2px 6px; border-radius: 4px; border: 1px solid #10b981; }
+
+        /* FITUR BARU: Tampilan Pot Taruhan Meja */
+        .pot-display {
+            font-size: 11px;
+            color: #4ade80;
+            font-weight: bold;
+            background: rgba(6, 78, 59, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #10b981;
+        }
+
         .seat {
-            position: absolute; background: #111827; border: 2px solid #374151; border-radius: 8px;
-            padding: 4px 6px; width: 115px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.6); z-index: 10; transition: all 0.3s ease;
+            position: absolute;
+            background: #111827;
+            border: 2px solid #374151;
+            border-radius: 8px;
+            padding: 4px 6px;
+            width: 115px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            z-index: 10;
+            transition: all 0.3s ease;
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
+        
         .seat.is-me {
-            width: 180px; border-color: #059669; padding: 8px; z-index: 25; position: absolute; bottom: 2px;
-            left: 50%; transform: translateX(-50%) !important; background: #0f172a; box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
+            width: 180px;
+            border-color: #059669;
+            padding: 8px;
+            z-index: 25;
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%) !important;
+            background: #0f172a;
+            box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
         }
+
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* FITUR BARU: Tampilan Saldo Pemain di Bangku */
         .seat-balance { font-size: 8px; color: #facc15; font-weight: bold; }
-        .seat-status { font-size: 7px; color: #38bdf8; margin-top: 2px; font-weight: bold; text-shadow: 0 0 6px rgba(56, 189, 248, 0.7); }
+        .seat-status { 
+            font-size: 7px; 
+            color: #38bdf8; 
+            margin-top: 2px; 
+            font-weight: bold; 
+            text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+        }
+
         .card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
+        
         .card {
-            width: 38px; height: 54px; background: #fff; border-radius: 4px; display: flex; flex-direction: column;
-            justify-content: space-between; padding: 2px 3px; font-weight: bold; font-size: 11px; line-height: 1;
-            margin-left: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.6); border: 1px solid #d1d5db; position: relative;
+            width: 38px; 
+            height: 54px; 
+            background: #fff; 
+            border-radius: 4px;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            padding: 2px 3px; 
+            font-weight: bold; 
+            font-size: 11px; 
+            line-height: 1; 
+            margin-left: -10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            border: 1px solid #d1d5db;
+            position: relative;
         }
         .card:first-child { margin-left: 0; }
-        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 10px; }
-        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; }
-        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 10px; transform: rotate(180deg); }
-        .card.back { background: linear-gradient(135deg, #b91c1c, #7f1d1d); border: 1px solid #fff; box-shadow: inset 0 0 3px rgba(0,0,0,0.5); }
+        
+        .card .card-top {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 10px;
+        }
+        .card .card-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+        }
+        .card .card-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 10px;
+            transform: rotate(180deg);
+        }
+
+        .card.back { 
+            background: linear-gradient(135deg, #b91c1c, #7f1d1d); 
+            border: 1px solid #ffffff; 
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+        }
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
+
+        /* Tampilan Kartu Pribadi Diperbesar 2x Lipat di Tengah Bawah */
         .seat.is-me .card-container { height: 85px; }
         .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
         .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
@@ -73,35 +235,102 @@
         .seat.is-me .seat-name { font-size: 11px; }
         .seat.is-me .seat-balance { font-size: 10px; }
         .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
-        @keyframes blink-indicator { 0% { opacity: 0; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(0.8); } }
-        .stealth-led { position: absolute; top: 3px; right: 5px; width: 10px; height: 10px; border-radius: 50%; z-index: 40; pointer-events: none; box-shadow: 0 0 5px currentColor; animation: blink-indicator 0.5s ease-in-out 3; }
+
+        @keyframes blink-indicator {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        .stealth-led {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 40;
+            pointer-events: none;
+            box-shadow: 0 0 5px currentColor;
+            animation: blink-indicator 0.5s ease-in-out 3;
+        }
         .stealth-led.on { background-color: #22c55e; color: #22c55e; }
         .stealth-led.off { background-color: #ef4444; color: #ef4444; }
+
+        .control-panel {
+            background: #111827;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #1f2937;
+            z-index: 30;
+            flex-shrink: 0;
+            height: 52px;
+        }
+        .btn {
+            padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+            white-space: nowrap;
+        }
         .btn-stop { background: #e11d48; width: 48%; }
         .btn-hit { background: #059669; width: 48%; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 50; padding: 15px; }
+
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
+            align-items: center; justify-content: center; z-index: 50; padding: 15px;
+        }
         .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 320px; width: 100%; }
-        .modal-input { width: 100%; padding: 8px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 12px; }
-        .log-container { max-height: 180px; overflow-y: auto; text-align: left; font-size: 10px; background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #1e293b; }
-        .log-item { padding: 4px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+
+        /* FITUR BARU: Style Modal Khusus Taruhan, Log & Admin */
+        .modal-input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .log-container {
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 10px;
+            background: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #1e293b;
+        }
+        .log-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #1e293b;
+            color: #cbd5e1;
+        }
         .log-item:last-child { border-bottom: none; }
-        .ready-badge { font-size: 8px; background: #059669; color: white; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
+        .ready-badge {
+            font-size: 8px;
+            background: #059669;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 3px;
+        }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <div>
-            <button id="btnTopStart" class="btn btn-top-start" onclick="startNewGame()">Mulai Game</button>
-            <button id="btnTopAdmin" class="btn btn-top-admin" onclick="openModal('modalAdmin')">Admin</button>
+            <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
+            <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin</button>
         </div>
         <div style="text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
             <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
-            <button class="btn btn-top-log" onclick="openModal('modalLog')">Riwayat</button>
-            <button class="btn wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
+            <button class="btn-top-log" onclick="openLogModal()">Riwayat</button>
+            <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
         </div>
     </div>
 
@@ -110,315 +339,736 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
+                <!-- FITUR BARU: Display Pot Taruhan Meja -->
                 <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
             </div>
-            <script>
-                // Generate 7 seats dynamically to save HTML size
-                for(let i=0; i<7; i++) {
-                    document.write(`
-                        <div id="seat-${i}" class="seat" onclick="claimSeat(${i})">
-                            <div class="seat-name" id="name-${i}">Bangku ${i+1} (Kosong)</div>
-                            <div class="seat-balance" id="balance-${i}"></div>
-                            <div class="card-container" id="cards-${i}"></div>
-                            <div class="seat-status" id="status-${i}">Ketuk duduk</div>
-                        </div>
-                    `);
-                }
-            </script>
+
+            <!-- Penomoran Bangku 1 s.d. 7 (Indeks Internal 0 s.d. 6) -->
+            <div id="seat-0" class="seat" onclick="claimSeat(0)">
+                <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
+                <div class="seat-balance" id="balance-0"></div>
+                <div class="card-container" id="cards-0"></div>
+                <div class="seat-status" id="status-0">Ketuk duduk</div>
+            </div>
+            <div id="seat-1" class="seat" onclick="claimSeat(1)">
+                <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
+                <div class="seat-balance" id="balance-1"></div>
+                <div class="card-container" id="cards-1"></div>
+                <div class="seat-status" id="status-1">Ketuk duduk</div>
+            </div>
+            <div id="seat-2" class="seat" onclick="claimSeat(2)">
+                <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
+                <div class="seat-balance" id="balance-2"></div>
+                <div class="card-container" id="cards-2"></div>
+                <div class="seat-status" id="status-2">Ketuk duduk</div>
+            </div>
+            <div id="seat-3" class="seat" onclick="claimSeat(3)">
+                <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
+                <div class="seat-balance" id="balance-3"></div>
+                <div class="card-container" id="cards-3"></div>
+                <div class="seat-status" id="status-3">Ketuk duduk</div>
+            </div>
+            <div id="seat-4" class="seat" onclick="claimSeat(4)">
+                <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
+                <div class="seat-balance" id="balance-4"></div>
+                <div class="card-container" id="cards-4"></div>
+                <div class="seat-status" id="status-4">Ketuk duduk</div>
+            </div>
+            <div id="seat-5" class="seat" onclick="claimSeat(5)">
+                <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
+                <div class="seat-balance" id="balance-5"></div>
+                <div class="card-container" id="cards-5"></div>
+                <div class="seat-status" id="status-5">Ketuk duduk</div>
+            </div>
+            <div id="seat-6" class="seat" onclick="claimSeat(6)">
+                <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
+                <div class="seat-balance" id="balance-6"></div>
+                <div class="card-container" id="cards-6"></div>
+                <div class="seat-status" id="status-6">Ketuk duduk</div>
+            </div>
         </div>
     </div>
 
     <div class="control-panel">
-        <button id="btnStop" class="btn btn-stop" onclick="playerAction('stop')" disabled>Stop</button>
-        <button id="btnHit" class="btn btn-hit" onclick="playerAction('hit')" disabled>Hit (+ Ambil Kartu)</button>
+        <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
+        <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
     </div>
 
-    <!-- Modals -->
+    <!-- Modal Showdown Original -->
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
             <div id="winnerAnnouncement" style="font-size: 10px; color: #22c55e; font-weight: bold; margin-bottom: 8px; text-align: left; max-height: 150px; overflow-y: auto;"></div>
-            <button class="btn" style="width:100%; background:#2563eb;" onclick="startNewGame()">Lanjut Ronde Baru</button>
+            <button class="btn" style="width:100%; background:#2563eb;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
         </div>
     </div>
 
+    <!-- FITUR BARU: Modal Pengaturan Taruhan Sebelum Game -->
     <div id="modalBetting" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 6px;">KESEPAKATAN TARUHAN</h3>
             <p style="font-size: 10px; color: #9ca3af; margin-bottom: 8px;">Tentukan besaran taruhan untuk ronde ini:</p>
+            
             <input type="number" id="inputBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
+            
             <div style="margin: 10px 0;">
                 <button class="btn" style="background: #2563eb; width: 100%; margin-bottom: 5px;" onclick="proposeOrSetBet()">Setujui / Ubah Taruhan</button>
                 <button id="btnReadyBet" class="btn" style="background: #059669; width: 100%;" onclick="toggleReadyBet()">Saya Siap (Setuju)</button>
             </div>
+
             <div style="font-size: 9px; color: #d1d5db; text-align: left; margin-top: 8px;">
                 <b>Status Persetujuan:</b>
                 <div id="readyListDisplay" style="margin-top: 4px; max-height: 80px; overflow-y: auto;"></div>
             </div>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeModal('modalBetting')">Tutup</button>
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeBetModal()">Tutup</button>
         </div>
     </div>
 
+    <!-- FITUR BARU: Modal Admin Top Up Saldo -->
     <div id="modalAdmin" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL ADMIN - TOP UP SALDO</h3>
-            <select id="adminSelectPlayer" class="modal-input"><option value="">-- Pilih Pemain --</option></select>
+            <select id="adminSelectPlayer" class="modal-input">
+                <option value="">-- Pilih Pemain --</option>
+            </select>
             <input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
             <button class="btn" style="background: #059669; width: 100%; margin-top: 5px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 5px;" onclick="closeModal('modalAdmin')">Tutup</button>
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 5px;" onclick="closeAdminModal()">Tutup</button>
         </div>
     </div>
 
+    <!-- FITUR BARU: Modal Riwayat Transaksi (Log) -->
     <div id="modalLog" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
-            <div class="log-container" id="logContainer"><div class="log-item">Belum ada catatan transaksi.</div></div>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeModal('modalLog')">Tutup</button>
+            <div class="log-container" id="logContainer">
+                <div class="log-item">Belum ada catatan transaksi.</div>
+            </div>
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeLogModal()">Tutup</button>
         </div>
     </div>
 
     <script>
-        let isAdmin = false, stealthModeActive = false, lastTapTime = 0, mySeat = null;
-        
+        let isAdmin = false;
+        let stealthModeActive = false;
+        let lastTapTime = 0;
+
         window.addEventListener('load', () => {
-            if (prompt("Akses Sistem (Kosongkan jika pemain biasa):") === "mstr890") {
+            const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
+            if (secretPass === "mstr890") {
                 isAdmin = true;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
             }
         });
 
-        if (!firebase.apps.length) firebase.initializeApp({ databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        const firebaseConfig = {
+            databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
-        let urlParams = new URLSearchParams(window.location.search);
+        const urlParams = new URLSearchParams(window.location.search);
         let roomId = urlParams.get('room') || window.location.hash.replace('#', '').trim();
+        
         if (!roomId || roomId.length < 3) {
             roomId = 'room-' + Math.random().toString(36).substring(2, 8);
             window.location.search = `?room=${roomId}`;
         } else if (!window.location.search.includes('room=')) {
             window.location.hash = roomId;
         }
+
         document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
 
-        let myPlayerId = localStorage.getItem('samgong_pid') || ('p-' + Math.random().toString(36).substring(2, 8));
-        localStorage.setItem('samgong_pid', myPlayerId);
+        let myPlayerId = localStorage.getItem('samgong_pid');
+        if (!myPlayerId) {
+            myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
+            localStorage.setItem('samgong_pid', myPlayerId);
+        }
+
         let savedMyName = localStorage.getItem('samgong_pname') || '';
+
+        let mySeat = null;
         let roomRef = db.ref('samgong_rooms/' + roomId);
 
-        const formatRupiah = (amt) => 'Rp' + Math.floor(amt || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        const addTransactionLog = (text) => roomRef.child('logs').push({ text: `[${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}] ${text}`, time: firebase.database.ServerValue.TIMESTAMP });
-        const openModal = (id) => document.getElementById(id).style.display = 'flex';
-        const closeModal = (id) => document.getElementById(id).style.display = 'none';
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-        roomRef.on('value', (snap) => {
-            const data = snap.val();
+        // FITUR BARU: Helper Format Rupiah
+        function formatRupiah(amount) {
+            let val = Math.floor(amount || 0);
+            return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // FITUR BARU: Catat Riwayat Transaksi / Log ke Firebase
+        function addTransactionLog(message) {
+            let logRef = roomRef.child('logs').push();
+            let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            logRef.set({
+                text: `[${timestamp}] ${message}`,
+                time: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        roomRef.on('value', (snapshot) => {
+            const data = snapshot.val();
             if (data) {
+                // Auto-Reconnect Check
                 if (data.seats) {
-                    mySeat = Object.keys(data.seats).find(i => data.seats[i].playerId === myPlayerId) ?? null;
-                    if (mySeat !== null) mySeat = parseInt(mySeat);
+                    let foundMySeat = null;
+                    for (let i = 0; i < 7; i++) {
+                        if (data.seats[i] && data.seats[i].playerId === myPlayerId) {
+                            foundMySeat = i;
+                            break;
+                        }
+                    }
+                    mySeat = foundMySeat;
                 }
                 updateUI(data);
             } else {
-                roomRef.set({ currentTurn: 0, isShowdown: false, lastWinnerSeat: 0, seats: {}, pot: 0, currentBet: 10000, gameStarted: false });
+                roomRef.set({ 
+                    currentTurn: 0, 
+                    isShowdown: false, 
+                    lastWinnerSeat: 0, 
+                    seats: {},
+                    pot: 0,
+                    currentBet: 10000,
+                    betAgreed: false,
+                    gameStarted: false
+                });
             }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
         });
 
+        // FITUR BARU: Listener Log Transaksi Realtime
         roomRef.child('logs').limitToLast(20).on('value', (snap) => {
-            let logs = snap.val(), container = document.getElementById('logContainer');
-            if (!logs) return container.innerHTML = '<div class="log-item">Belum ada catatan transaksi.</div>';
-            container.innerHTML = Object.values(logs).reverse().map(item => `<div class="log-item">${item.text}</div>`).join('');
+            let logsData = snap.val();
+            let logContainer = document.getElementById('logContainer');
+            if (!logsData) {
+                logContainer.innerHTML = '<div class="log-item">Belum ada catatan transaksi.</div>';
+                return;
+            }
+            let html = '';
+            let items = Object.values(logsData);
+            items.reverse();
+            items.forEach(item => {
+                html += `<div class="log-item">${item.text}</div>`;
+            });
+            logContainer.innerHTML = html;
         });
 
         function copyWhatsAppLink() {
-            navigator.clipboard.writeText(`Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${window.location.origin + window.location.pathname}?room=${roomId}`).then(() => alert("Link mabar disalin!"));
+            const shareUrl = window.location.origin + window.location.pathname + `?room=${roomId}`;
+            const message = `Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
+            navigator.clipboard.writeText(message).then(() => {
+                alert("Link mabar berhasil disalin! Kirim ke WhatsApp.");
+            });
         }
 
-        function claimSeat(idx) {
-            if (mySeat !== null && mySeat !== idx) return alert("Kamu sudah duduk di bangku lain!");
-            let seatRef = roomRef.child(`seats/${idx}`);
+        function claimSeat(seatIndex) {
+            if (mySeat !== null && mySeat !== seatIndex) {
+                alert("Kamu sudah duduk di bangku lain!");
+                return;
+            }
+            let seatRef = roomRef.child('seats/' + seatIndex);
             seatRef.once('value', (snap) => {
-                let sData = snap.val();
-                if (!sData || sData.playerId === myPlayerId) {
-                    let name = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${idx + 1}`);
-                    if (!name || !(name = name.trim())) return;
-                    localStorage.setItem('samgong_pname', (name = name.substring(0, 15)));
-                    savedMyName = name;
+                let seatData = snap.val();
+                if (!seatData || seatData.playerId === myPlayerId) {
+                    let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
+                    if (!inputName || inputName.trim() === "") return;
+                    let playerName = inputName.trim().substring(0, 15);
                     
+                    localStorage.setItem('samgong_pname', playerName);
+                    savedMyName = playerName;
+
+                    // FITUR BARU: Modal Awal Saldo Default Rp100.000 untuk Pemain Baru
+                    let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 100000;
+
                     seatRef.set({
-                        playerId: myPlayerId, name, isStopped: false,
-                        balance: sData?.balance ?? 100000, isReadyBet: false, cards: sData?.cards || []
+                        playerId: myPlayerId,
+                        name: playerName,
+                        isStopped: false,
+                        balance: initialBalance,
+                        isReadyBet: false,
+                        cards: seatData && seatData.cards ? seatData.cards : []
                     }).then(() => {
-                        mySeat = idx;
-                        if (!sData) addTransactionLog(`${name} bergabung di Bangku ${idx + 1}`);
+                        mySeat = seatIndex;
+                        if (!seatData) {
+                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo ${formatRupiah(initialBalance)}`);
+                        }
                     });
-                } else alert("Bangku sudah diambil orang lain!");
+                } else {
+                    alert("Bangku sudah diambil orang lain!");
+                }
             });
         }
 
-        const calcScore = (cards) => (cards || []).reduce((acc, c) => acc + (['J','Q','K','10'].includes(c.value) ? 10 : c.value === 'A' ? 1 : parseInt(c.value)), 0);
+        function calculateScore(cards) {
+            if (!cards) return 0;
+            let total = 0;
+            for (let card of cards) {
+                if (['J', 'Q', 'K', '10'].includes(card.value)) total += 10;
+                else if (card.value === 'A') total += 1;
+                else total += parseInt(card.value);
+            }
+            return total;
+        }
 
+        function getCardValue(cardVal) {
+            if (['J', 'Q', 'K', '10'].includes(cardVal)) return 10;
+            if (cardVal === 'A') return 1;
+            return parseInt(cardVal);
+        }
+
+        // FITUR BARU: Mulai Permainan Menggunakan Kesepakatan Taruhan & Pemotongan Saldo Ke Pot
         function startNewGame() {
-            roomRef.once('value', (snap) => {
-                const seats = snap.val()?.seats || {};
-                if (!Object.keys(seats).length) return alert("Belum ada pemain di meja!");
-                openModal('modalBetting');
+            roomRef.once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const seats = data.seats || {};
+
+                let activePlayers = [];
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
+                }
+
+                if (activePlayers.length === 0) {
+                    alert("Belum ada pemain di meja!");
+                    return;
+                }
+
+                // Buka modal taruhan jika taruhan belum disepakati seluruh pemain
+                document.getElementById('modalBetting').style.display = 'flex';
             });
         }
 
+        // FITUR BARU: Logika Persetujuan Taruhan dan Eksekusi Pembagian Kartu
         function executeStartGameWithBets() {
-            roomRef.once('value', (snap) => {
-                const data = snap.val() || {}, seats = data.seats || {}, bet = data.currentBet || 10000;
-                let updates = {}, pot = 0, deck = [];
-                
+            let deck = [];
+            for (let suit of suits) {
+                for (let val of values) {
+                    deck.push({ suit, value: val });
+                }
+            }
+            deck.sort(() => Math.random() - 0.5);
+
+            roomRef.once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const seats = data.seats || {};
+                const betAmount = data.currentBet || 10000;
+                let updates = {};
+                let activeCount = 0;
+                let totalPotCollected = 0;
+
+                // Validasi Kecukupan Saldo Pemain
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        if (seats[i].balance < bet) return alert(`Gagal: Saldo ${seats[i].name} kurang dari ${formatRupiah(bet)}!`);
-                        updates[`seats/${i}/balance`] = seats[i].balance - bet;
-                        updates[`seats/${i}/isStopped`] = false;
-                        updates[`seats/${i}/isReadyBet`] = false;
-                        pot += bet;
+                        if (seats[i].balance < betAmount) {
+                            alert(`Gagal Memulai: Saldo ${seats[i].name} (${formatRupiah(seats[i].balance)}) tidak cukup untuk taruhan ${formatRupiah(betAmount)}! Silakan minta Admin isi saldo.`);
+                            return;
+                        }
                     }
                 }
 
-                ['♠', '♥', '♦', '♣'].forEach(suit => ['A','2','3','4','5','6','7','8','9','10','J','Q','K'].forEach(val => deck.push({ suit, value: val })));
-                deck.sort(() => Math.random() - 0.5);
-
+                // Potong Saldo Pemain & Kumpulkan Pot Taruhan
                 for (let i = 0; i < 7; i++) {
-                    if (seats[i]) updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
+                    if (seats[i]) {
+                        let newBalance = seats[i].balance - betAmount;
+                        updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
+                        updates[`seats/${i}/isStopped`] = false;
+                        updates[`seats/${i}/isReadyBet`] = false;
+                        updates[`seats/${i}/balance`] = newBalance;
+                        totalPotCollected += betAmount;
+                        activeCount++;
+                    }
                 }
 
-                let startSeat = seats[data.lastWinnerSeat] ? data.lastWinnerSeat : Object.keys(seats)[0];
-                Object.assign(updates, { currentTurn: parseInt(startSeat), isShowdown: false, gameStarted: true, deck, pot });
+                let startSeat = data.lastWinnerSeat ?? 0;
+                if (!seats[startSeat]) {
+                    startSeat = getFirstActiveSeat(seats);
+                }
+
+                updates['currentTurn'] = startSeat;
+                updates['isShowdown'] = false;
+                updates['gameStarted'] = true;
+                updates['deck'] = deck;
+                updates['pot'] = totalPotCollected;
 
                 roomRef.update(updates).then(() => {
-                    closeModal('modalBetting');
-                    addTransactionLog(`Ronde dimulai! Taruhan: ${formatRupiah(bet)}. Total Pot: ${formatRupiah(pot)}`);
+                    document.getElementById('modalBetting').style.display = 'none';
+                    addTransactionLog(`Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot: ${formatRupiah(totalPotCollected)}`);
                 });
             });
         }
 
-        function playerAction(action) {
+        function getFirstActiveSeat(seats) {
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) return i;
+            }
+            return 0;
+        }
+
+        function playerHit() {
             if (mySeat === null) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val() || {};
                 if (data.currentTurn !== mySeat || data.isShowdown) return;
-                let seats = data.seats || {}, player = seats[mySeat], deck = data.deck || [];
+                let seats = data.seats || {};
+                let player = seats[mySeat];
+                let deck = data.deck || [];
+                
+                if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
+                    let drawnCard = null;
 
-                if (action === 'hit' && player.cards.length < 7 && deck.length > 0) {
-                    let card = deck.pop();
                     if (stealthModeActive) {
-                        let cur = calcScore(player.cards), bestIdx = -1, maxSafe = -1;
-                        deck.forEach((c, idx) => {
-                            let val = ['J','Q','K','10'].includes(c.value) ? 10 : c.value === 'A' ? 1 : parseInt(c.value);
-                            if (cur + val <= 30 && cur + val > maxSafe) { maxSafe = cur + val; bestIdx = idx; }
-                        });
-                        if (bestIdx !== -1) card = deck.splice(bestIdx, 1)[0];
-                    }
-                    player.cards.push(card);
-                } else if (action === 'stop' || player.cards.length >= 7) {
-                    player.isStopped = true;
-                }
+                        let currentScore = calculateScore(player.cards);
+                        let bestCardIndex = -1;
+                        let maxSafeScore = -1;
 
-                let nextTurn = player.isStopped ? findNextTurn(seats, mySeat) : mySeat;
-                let updates = { [`seats/${mySeat}/cards`]: player.cards, [`seats/${mySeat}/isStopped`]: player.isStopped, deck };
+                        for (let i = deck.length - 1; i >= 0; i--) {
+                            let val = getCardValue(deck[i].value);
+                            if (currentScore + val <= 30) {
+                                let potentialScore = currentScore + val;
+                                if (potentialScore > maxSafeScore) {
+                                    maxSafeScore = potentialScore;
+                                    bestCardIndex = i;
+                                }
+                            }
+                        }
+
+                        if (bestCardIndex !== -1) {
+                            drawnCard = deck.splice(bestCardIndex, 1)[0];
+                        } else {
+                            drawnCard = deck.pop();
+                        }
+                    } else {
+                        drawnCard = deck.pop();
+                    }
+
+                    player.cards.push(drawnCard);
+                    
+                    let updates = {
+                        [`seats/${mySeat}/cards`]: player.cards,
+                        deck: deck
+                    };
+
+                    if (player.cards.length >= 7) {
+                        player.isStopped = true;
+                        updates[`seats/${mySeat}/isStopped`] = true;
+                        let nextTurn = findNextTurn(seats, mySeat);
+                        if (nextTurn === null) {
+                            updates['isShowdown'] = true;
+                            handleShowdownPayout(data);
+                        } else {
+                            updates['currentTurn'] = nextTurn;
+                        }
+                    }
+
+                    roomRef.update(updates);
+                }
+            });
+        }
+
+        function playerStand() {
+            if (mySeat === null) return;
+            roomRef.once('value', (snap) => {
+                const data = snap.val() || {};
+                if (data.currentTurn !== mySeat || data.isShowdown) return;
+                let seats = data.seats || {};
+                if (seats[mySeat]) seats[mySeat].isStopped = true;
+
+                let nextTurn = findNextTurn(seats, mySeat);
+                let updates = {
+                    [`seats/${mySeat}/isStopped`]: true
+                };
 
                 if (nextTurn === null) {
                     updates['isShowdown'] = true;
-                    handleShowdown(data);
+                    handleShowdownPayout(data);
                 } else {
                     updates['currentTurn'] = nextTurn;
                 }
+
                 roomRef.update(updates);
             });
         }
 
-        function handleShowdown(data) {
-            const seats = data.seats || {}, pot = data.pot || 0;
-            let active = Object.keys(seats).map(i => ({ index: parseInt(i), ...seats[i], score: calcScore(seats[i].cards) }));
-            let valid = active.map(p => ({ ...p, isBust: p.score > 30 })).sort((a, b) => (a.isBust - b.isBust) || (b.score - a.score));
-            let nonBust = valid.filter(p => !p.isBust);
+        // FITUR BARU: Pembayaran Pot Otomatis ke Pemenang Saat Showdown
+        function handleShowdownPayout(data) {
+            const seats = data.seats || {};
+            const pot = data.pot || 0;
+            let activePlayers = [];
 
-            if (nonBust.length && pot > 0) {
-                let winners = nonBust.filter(p => p.score === nonBust[0].score), split = Math.floor(pot / winners.length), updates = {};
-                winners.forEach(w => updates[`seats/${w.index}/balance`] = (seats[w.index].balance || 0) + split);
-                Object.assign(updates, { pot: 0, gameStarted: false });
-                roomRef.update(updates).then(() => addTransactionLog(`🏆 PRESTASI: ${winners.map(w => w.name).join(', ')} memenangkan ${formatRupiah(pot)}!`));
-            } else addTransactionLog(`Semua pemain Bust! Pot ${formatRupiah(pot)} tersimpan.`);
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
+            }
+
+            if (activePlayers.length === 0 || pot <= 0) return;
+
+            let validPlayers = activePlayers.map(p => {
+                let score = calculateScore(p.cards);
+                return { ...p, score, isBust: score > 30 };
+            });
+
+            validPlayers.sort((a, b) => {
+                if (a.isBust && !b.isBust) return 1;
+                if (!a.isBust && b.isBust) return -1;
+                return b.score - a.score;
+            });
+
+            let nonBust = validPlayers.filter(p => !p.isBust);
+            
+            if (nonBust.length > 0) {
+                let highScore = nonBust[0].score;
+                let winners = nonBust.filter(p => p.score === highScore);
+                let splitPot = Math.floor(pot / winners.length);
+
+                let updates = {};
+                let winnerNames = [];
+
+                winners.forEach(w => {
+                    let currentBal = seats[w.index].balance || 0;
+                    updates[`seats/${w.index}/balance`] = currentBal + splitPot;
+                    winnerNames.push(w.name);
+                });
+
+                updates['pot'] = 0;
+                updates['gameStarted'] = false;
+                roomRef.update(updates).then(() => {
+                    addTransactionLog(`🏆 PRESTASI: ${winnerNames.join(', ')} memenangkan pot ${formatRupiah(pot)}!`);
+                });
+            } else {
+                // Jika Semua Player Bust, Pot dikembalikan/tetap di meja
+                addTransactionLog(`Semua pemain Bust! Pot ${formatRupiah(pot)} tetap tersimpan di meja.`);
+            }
         }
 
-        const findNextTurn = (seats, cur) => {
-            for (let i = 1; i <= 7; i++) {
-                let next = (cur + i) % 7;
-                if (seats[next] && !seats[next].isStopped) return next;
+        function findNextTurn(seats, currentSeat) {
+            let next = (currentSeat + 1) % 7;
+            let checked = 0;
+            while (checked < 7) {
+                if (seats[next] && !seats[next].isStopped) {
+                    return next;
+                }
+                next = (next + 1) % 7;
+                checked++;
             }
             return null;
-        };
+        }
+
+        function confirmNewRound() { 
+            startNewGame(); 
+        }
+
+        function triggerStealthLed(seatElem, state) {
+            let existingLed = seatElem.querySelector('.stealth-led');
+            if (existingLed) existingLed.remove();
+
+            const led = document.createElement('div');
+            led.className = `stealth-led ${state ? 'on' : 'off'}`;
+            seatElem.appendChild(led);
+
+            setTimeout(() => {
+                if (led) led.remove();
+            }, 1500);
+        }
+
+        // FITUR BARU: Fungsi-fungsi Kontrol Modal & Taruhan
+        function openBetModal() { document.getElementById('modalBetting').style.display = 'flex'; }
+        function closeBetModal() { document.getElementById('modalBetting').style.display = 'none'; }
 
         function proposeOrSetBet() {
-            let val = parseInt(document.getElementById('inputBetAmount').value);
-            if (isNaN(val) || val < 1000) return alert("Minimal Rp1.000");
-            if (confirm(`Tetapkan taruhan ${formatRupiah(val)}?`)) {
-                roomRef.child('currentBet').set(val).then(() => {
-                    roomRef.once('value', s => {
-                        let seats = s.val()?.seats || {}, up = {};
-                        for (let i = 0; i < 7; i++) if (seats[i]) up[`seats/${i}/isReadyBet`] = false;
-                        roomRef.update(up);
+            let betVal = parseInt(document.getElementById('inputBetAmount').value);
+            if (isNaN(betVal) || betVal < 1000) {
+                alert("Nominal taruhan minimal Rp1.000");
+                return;
+            }
+            if (confirm(`Apakah Anda yakin ingin menetapkan taruhan sebesar ${formatRupiah(betVal)}?`)) {
+                roomRef.child('currentBet').set(betVal).then(() => {
+                    // Reset kesepakatan siap jika nominal taruhan diubah
+                    roomRef.once('value', snap => {
+                        let data = snap.val() || {};
+                        let seats = data.seats || {};
+                        let updates = {};
+                        for (let i = 0; i < 7; i++) {
+                            if (seats[i]) updates[`seats/${i}/isReadyBet`] = false;
+                        }
+                        roomRef.update(updates);
                     });
-                    addTransactionLog(`Taruhan diusulkan menjadi ${formatRupiah(val)}`);
+                    addTransactionLog(`Nominal taruhan diusulkan menjadi ${formatRupiah(betVal)}`);
                 });
             }
         }
 
         function toggleReadyBet() {
-            if (mySeat === null) return alert("Duduk dulu!");
-            roomRef.child(`seats/${mySeat}/isReadyBet`).once('value', s => roomRef.child(`seats/${mySeat}/isReadyBet`).set(!s.val()));
-        }
-
-        function submitAdminTopUp() {
-            let idx = document.getElementById('adminSelectPlayer').value, amt = parseInt(document.getElementById('adminTopUpAmount').value);
-            if (idx === "" || isNaN(amt) || amt <= 0) return alert("Data tidak valid!");
-            roomRef.child(`seats/${idx}`).once('value', s => {
-                let p = s.val();
+            if (mySeat === null) {
+                alert("Anda harus duduk terlebih dahulu!");
+                return;
+            }
+            roomRef.child(`seats/${mySeat}`).once('value', snap => {
+                let p = snap.val();
                 if (p) {
-                    let newBal = (p.balance || 0) + amt;
-                    roomRef.child(`seats/${idx}/balance`).set(newBal).then(() => {
-                        addTransactionLog(`💸 ADMIN: Saldo ${p.name} ditambah ${formatRupiah(amt)}`);
-                        alert("Berhasil!");
-                        closeModal('modalAdmin');
-                    });
+                    let newStatus = !p.isReadyBet;
+                    roomRef.child(`seats/${mySeat}/isReadyBet`).set(newStatus);
                 }
             });
         }
 
-        function updateUI(data) {
-            const seats = data.seats || {}, turn = data.currentTurn ?? 0, showdown = data.isShowdown ?? false;
-            document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(data.pot || 0)}`;
-            document.getElementById('inputBetAmount').value = data.currentBet || 10000;
-            document.getElementById('modalShowdown').style.display = showdown ? 'flex' : 'none';
-            document.getElementById('btnTopStart').disabled = !showdown && data.deck?.length > 0;
-
-            let active = Object.keys(seats).map(i => ({ index: parseInt(i), ...seats[i] }));
-            document.getElementById('readyListDisplay').innerHTML = active.map(p => `<div>Bangku ${p.index+1} (${p.name}): ${p.isReadyBet ? '<span class="ready-badge">SIAP</span>' : '<span style="color:#ef4444;font-size:8px;">Belum</span>'}</div>`).join('') || "Belum ada pemain.";
-
-            if (document.getElementById('modalBetting').style.display === 'flex' && active.length && active.every(p => p.isReadyBet) && !data.gameStarted) {
-                executeStartGameWithBets();
-            }
-
-            let winnerIdx = null;
-            if (showdown && active.length) {
-                let sorted = active.map(p => ({ ...p, score: calcScore(p.cards), isBust: calcScore(p.cards) > 30 })).sort((a, b) => (a.isBust - b.isBust) || (b.score - a.score));
-                let nonBust = sorted.filter(p => !p.isBust);
-                if (nonBust.length && nonBust.filter(p => p.score === nonBust[0].score).length === 1) winnerIdx = nonBust[0].index;
-                
-                document.getElementById('winnerAnnouncement').innerHTML = "<ol style='padding-left: 15px; margin: 0;'>" + sorted.map((p, i) => `<li style="margin-bottom:3px;">${i === 0 ? "👑 " : ""}<b>${p.name}</b> (${p.isBust ? 'Bust: ' : 'Skor: '}${p.score})</li>`).join('') + "</ol>";
-                if (winnerIdx !== null && data.lastWinnerSeat !== winnerIdx) roomRef.update({ lastWinnerSeat: winnerIdx });
-            }
-
+        function checkAllReadyAndStart(data) {
+            const seats = data.seats || {};
+            let activePlayers = [];
             for (let i = 0; i < 7; i++) {
-                let seatElem = document.getElementById(`seat-${i}`), p = seats[i], isMe = mySeat === i || p?.playerId === myPlayerId;
-                let vPos = mySeat !== null ? (i - mySeat + 7) % 7 : i;
-                
-                const pos = [
+                if (seats[i]) activePlayers.push(seats[i]);
+            }
+
+            if (activePlayers.length > 0) {
+                let allReady = activePlayers.every(p => p.isReadyBet === true);
+                if (allReady && !data.gameStarted) {
+                    executeStartGameWithBets();
+                }
+            }
+        }
+
+        // FITUR BARU: Admin Panel Top Up
+        function openAdminModal() {
+            if (!isAdmin) return;
+            roomRef.child('seats').once('value', snap => {
+                let seats = snap.val() || {};
+                let select = document.getElementById('adminSelectPlayer');
+                select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        select.innerHTML += `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - ${formatRupiah(seats[i].balance)}</option>`;
+                    }
+                }
+                document.getElementById('modalAdmin').style.display = 'flex';
+            });
+        }
+        function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
+
+        function submitAdminTopUp() {
+            let seatIdx = document.getElementById('adminSelectPlayer').value;
+            let amount = parseInt(document.getElementById('adminTopUpAmount').value);
+
+            if (seatIdx === "" || isNaN(amount) || amount <= 0) {
+                alert("Pilih pemain dan masukkan nominal saldo yang valid!");
+                return;
+            }
+
+            if (confirm(`Konfirmasi Top Up Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    if (player) {
+                        let newBal = (player.balance || 0) + amount;
+                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
+                            addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
+                            alert(`Saldo ${player.name} berhasil diperbarui!`);
+                            closeAdminModal();
+                        });
+                    }
+                });
+            }
+        }
+
+        function openLogModal() { document.getElementById('modalLog').style.display = 'flex'; }
+        function closeLogModal() { document.getElementById('modalLog').style.display = 'none'; }
+
+        function updateUI(data) {
+            const seats = data.seats || {};
+            const currentTurn = data.currentTurn ?? 0;
+            const isShowdown = data.isShowdown ?? false;
+            const pot = data.pot || 0;
+            const currentBet = data.currentBet || 10000;
+
+            document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
+            document.getElementById('inputBetAmount').value = currentBet;
+
+            document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
+            document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
+
+            // Render Status Persetujuan Taruhan di Modal
+            let readyHtml = "";
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) {
+                    let statusBadge = seats[i].isReadyBet ? `<span class="ready-badge">SIAP</span>` : `<span style="color:#ef4444; font-size:8px;">Belum</span>`;
+                    readyHtml += `<div>Bangku ${i+1} (${seats[i].name}): ${statusBadge}</div>`;
+                }
+            }
+            document.getElementById('readyListDisplay').innerHTML = readyHtml || "Belum ada pemain.";
+
+            // Cek Otomatis Persetujuan Kesepakatan
+            if (document.getElementById('modalBetting').style.display === 'flex') {
+                checkAllReadyAndStart(data);
+            }
+
+            let activePlayers = [];
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
+            }
+
+            let rankingHtml = "";
+            let winnerSeatIndex = null;
+
+            if (isShowdown && activePlayers.length > 0) {
+                let validPlayers = activePlayers.map(p => {
+                    let score = calculateScore(p.cards);
+                    return { ...p, score, isBust: score > 30 };
+                });
+
+                validPlayers.sort((a, b) => {
+                    if (a.isBust && !b.isBust) return 1;
+                    if (!a.isBust && b.isBust) return -1;
+                    return b.score - a.score;
+                });
+
+                let nonBust = validPlayers.filter(p => !p.isBust);
+                if (nonBust.length > 0) {
+                    let highScore = nonBust[0].score;
+                    let topScorePlayers = nonBust.filter(p => p.score === highScore);
+                    if (topScorePlayers.length === 1) {
+                        winnerSeatIndex = topScorePlayers[0].index;
+                    }
+                }
+
+                rankingHtml += "<ol style='padding-left: 15px; margin: 0;'>";
+                validPlayers.forEach((p, idx) => {
+                    let badge = idx === 0 ? "👑 " : "";
+                    let statusText = p.isBust ? ` (Bust: ${p.score})` : ` (Skor: ${p.score})`;
+                    rankingHtml += `<li style="margin-bottom: 3px;">${badge}<b>${p.name}</b>${statusText}</li>`;
+                });
+                rankingHtml += "</ol>";
+
+                if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
+                    roomRef.update({ lastWinnerSeat: winnerSeatIndex });
+                }
+            } else {
+                rankingHtml = "Permainan sedang berlangsung...";
+            }
+            
+            let winnerElem = document.getElementById('winnerAnnouncement');
+            if (winnerElem) {
+                winnerElem.innerHTML = rankingHtml;
+            }
+
+            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
+            for (let i = 0; i < 7; i++) {
+                const seatElem = document.getElementById(`seat-${i}`);
+                const cardsElem = document.getElementById(`cards-${i}`);
+                const statusElem = document.getElementById(`status-${i}`);
+                const nameElem = document.getElementById(`name-${i}`);
+                const balanceElem = document.getElementById(`balance-${i}`);
+                const player = seats[i];
+
+                let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
+
+                let visualPosIndex = i;
+                if (mySeat !== null) {
+                    visualPosIndex = (i - mySeat + 7) % 7;
+                }
+
+                const angles = [
                     { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
                     { bottom: '70px', left: '2px', transform: 'none' },
                     { top: '70px', left: '2px', transform: 'none' },
@@ -426,51 +1076,103 @@
                     { top: '2px', right: '22%', transform: 'translateX(50%)' },
                     { top: '70px', right: '2px', transform: 'none' },
                     { bottom: '70px', right: '2px', transform: 'none' }
-                ][vPos];
+                ];
 
-                Object.keys(seatElem.style).forEach(k => { if(['bottom','top','left','right','transform'].includes(k)) seatElem.style[k] = ''; });
-                Object.assign(seatElem.style, pos);
+                seatElem.style.bottom = '';
+                seatElem.style.top = '';
+                seatElem.style.left = '';
+                seatElem.style.right = '';
+                seatElem.style.transform = '';
 
-                seatElem.className = `seat ${isMe ? 'is-me' : ''} ${turn === i && !showdown && p ? 'active-turn' : ''}`;
-                if (isMe) Object.assign(seatElem.style, { bottom: '2px', left: '50%', right: '', top: '', transform: 'translateX(-50%)' });
+                const posConfig = angles[visualPosIndex];
+                for (let key in posConfig) {
+                    seatElem.style[key] = posConfig[key];
+                }
 
-                document.getElementById(`name-${i}`).innerText = p ? p.name + (isMe ? ' (Anda)' : '') : `Bangku ${i+1} (Kosong)`;
-                document.getElementById(`balance-${i}`).innerText = p ? formatRupiah(p.balance || 0) : '';
-                
-                let cElem = document.getElementById(`cards-${i}`), sElem = document.getElementById(`status-${i}`);
-                cElem.innerHTML = '';
-                cElem.onclick = (isMe && isAdmin) ? (e) => {
-                    let now = Date.now();
-                    if (now - lastTapTime < 350) {
-                        stealthModeActive = !stealthModeActive;
-                        let led = seatElem.querySelector('.stealth-led'); if(led) led.remove();
-                        let newLed = document.createElement('div'); newLed.className = `stealth-led ${stealthModeActive ? 'on' : 'off'}`;
-                        seatElem.appendChild(newLed);
-                        setTimeout(() => newLed.remove(), 1500);
+                if (isMe) {
+                    seatElem.classList.add('is-me');
+                    seatElem.style.bottom = '2px';
+                    seatElem.style.left = '50%';
+                    seatElem.style.right = '';
+                    seatElem.style.top = '';
+                    seatElem.style.transform = 'translateX(-50%)';
+                    
+                    cardsElem.onclick = (e) => {
+                        e.stopPropagation();
+                        if (!isAdmin) return;
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTapTime;
+                        if (tapLength < 350 && tapLength > 0) {
+                            stealthModeActive = !stealthModeActive;
+                            triggerStealthLed(seatElem, stealthModeActive);
+                        }
+                        lastTapTime = currentTime;
+                    };
+                } else {
+                    seatElem.classList.remove('is-me');
+                    cardsElem.onclick = null;
+                }
+
+                if (currentTurn === i && !isShowdown && player) {
+                    seatElem.classList.add('active-turn');
+                } else {
+                    seatElem.classList.remove('active-turn');
+                }
+
+                let seatNumDisplay = i + 1;
+
+                if (player) {
+                    nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
+                    balanceElem.innerText = formatRupiah(player.balance || 0);
+                    cardsElem.innerHTML = '';
+                    
+                    let currentCardScore = calculateScore(player.cards);
+
+                    if (player.cards) {
+                        player.cards.forEach((card) => {
+                            const cardDiv = document.createElement('div');
+                            if (isMe || isShowdown) {
+                                const isRed = card.suit === '♥' || card.suit === '♦';
+                                cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
+                                cardDiv.innerHTML = `
+                                    <div class="card-top"><span>${card.value}</span><span>${card.suit}</span></div>
+                                    <div class="card-center">${card.suit}</div>
+                                    <div class="card-bottom"><span>${card.value}</span><span>${card.suit}</span></div>
+                                `;
+                            } else {
+                                cardDiv.className = 'card back';
+                            }
+                            cardsElem.appendChild(cardDiv);
+                        });
                     }
-                    lastTapTime = now;
-                } : null;
 
-                if (p) {
-                    let score = calcScore(p.cards);
-                    (p.cards || []).forEach(c => {
-                        let div = document.createElement('div');
-                        let red = c.suit === '♥' || c.suit === '♦';
-                        div.className = `card ${isMe || showdown ? (red ? 'red' : 'black') : 'back'}`;
-                        if (isMe || showdown) div.innerHTML = `<div class="card-top"><span>${c.value}</span><span>${c.suit}</span></div><div class="card-center">${c.suit}</div><div class="card-bottom"><span>${c.value}</span><span>${c.suit}</span></div>`;
-                        cElem.appendChild(div);
-                    });
-                    sElem.innerText = showdown ? `Skor: ${score} ${score > 30 ? '(Bust)' : ''}` : p.isStopped ? (isMe ? `STOP (${score})` : 'STOP') : (isMe ? `Main | Poin: ${score}` : 'Main');
-                } else sElem.innerText = 'Ketuk duduk';
+                    if (isShowdown) {
+                        statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
+                    } else if (player.isStopped) {
+                        if (isMe) {
+                            statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
+                        } else {
+                            statusElem.innerText = `STOP`;
+                        }
+                    } else {
+                        if (isMe) {
+                            statusElem.innerText = `Main | Poin: ${currentCardScore}`;
+                        } else {
+                            statusElem.innerText = `Main`;
+                        }
+                    }
+                } else {
+                    nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
+                    balanceElem.innerText = '';
+                    cardsElem.innerHTML = '';
+                    statusElem.innerText = `Ketuk duduk`;
+                }
             }
-
-            document.getElementById('turnStatusText').innerText = showdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${turn + 1}`;
-            let myTurn = mySeat !== null && turn === mySeat && !showdown;
-            document.getElementById('btnHit').disabled = document.getElementById('btnStop').disabled = !myTurn;
-
-            if (isAdmin && document.getElementById('modalAdmin').style.display === 'flex') {
-                document.getElementById('adminSelectPlayer').innerHTML = '<option value="">-- Pilih Pemain --</option>' + active.map(p => `<option value="${p.index}">${p.name} (Bangku ${p.index+1}) - ${formatRupiah(p.balance)}</option>`).join('');
-            }
+            document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`;
+            
+            let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
+            document.getElementById('btnHit').disabled = !isMyTurn;
+            document.getElementById('btnStop').disabled = !isMyTurn;
         }
     </script>
 </body>
