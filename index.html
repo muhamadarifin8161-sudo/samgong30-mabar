@@ -151,17 +151,33 @@
         }
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
+        /* DIPERBESAR DAN DIBUAT BISA DIGESER (DRAGGABLE) */
         .seat.is-me {
-            width: 180px;
+            width: 240px;
             border-color: #059669;
-            padding: 8px;
+            padding: 10px;
             z-index: 25;
             position: absolute;
-            bottom: 2px;
+            bottom: 10px;
             left: 50%;
-            transform: translateX(-50%) !important;
+            transform: translateX(-50%);
             background: #0f172a;
-            box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.8);
+            touch-action: none;
+            cursor: grab;
+        }
+        .seat.is-me:active {
+            cursor: grabbing;
+        }
+        .drag-handle {
+            font-size: 8px;
+            color: #38bdf8;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+            display: inline-block;
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -224,13 +240,14 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        .seat.is-me .card-container { height: 85px; }
-        .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
-        .seat.is-me .card .card-center { font-size: 26px; }
-        .seat.is-me .seat-name { font-size: 11px; }
-        .seat.is-me .seat-balance { font-size: 10px; }
-        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        /* UKURAN KARTU PEMAIN AKTIF LEBIH BESAR DAN JELAS */
+        .seat.is-me .card-container { height: 100px; margin: 5px 0; }
+        .seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
+        .seat.is-me .card .card-center { font-size: 32px; }
+        .seat.is-me .seat-name { font-size: 12px; }
+        .seat.is-me .seat-balance { font-size: 11px; }
+        .seat.is-me .seat-status { font-size: 11px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -569,7 +586,6 @@
                     localStorage.setItem('samgong_pname', playerName);
                     savedMyName = playerName;
 
-                    // ATURAN BARU: Pemain baru otomatis memiliki saldo 0 (jika bangku baru)
                     let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
 
                     seatRef.set({
@@ -623,7 +639,6 @@
                     return;
                 }
 
-                // ATURAN BARU: Validasi apakah pemain yang duduk memiliki saldo > 0 sebelum bisa bergabung/main
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         if ((seats[i].balance || 0) <= 0) {
@@ -891,7 +906,6 @@
                 alert("Anda harus duduk terlebih dahulu!");
                 return;
             }
-            // ATURAN BARU: Cegah pemain dengan saldo 0 menekan tombol siap/main
             roomRef.child(`seats/${mySeat}`).once('value', snap => {
                 let p = snap.val();
                 if (p) {
@@ -1076,11 +1090,22 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    seatElem.style.bottom = '2px';
-                    seatElem.style.left = '50%';
-                    seatElem.style.right = '';
-                    seatElem.style.top = '';
-                    seatElem.style.transform = 'translateX(-50%)';
+                    // Pertahankan posisi custom drag jika sudah digeser, atau set default bawah
+                    if (!seatElem.dataset.dragged) {
+                        seatElem.style.bottom = '10px';
+                        seatElem.style.left = '50%';
+                        seatElem.style.right = '';
+                        seatElem.style.top = '';
+                        seatElem.style.transform = 'translateX(-50%)';
+                    }
+                    
+                    // Tambahkan indikator petunjuk geser jika belum ada
+                    if (!seatElem.querySelector('.drag-handle')) {
+                        const handle = document.createElement('div');
+                        handle.className = 'drag-handle';
+                        handle.innerText = '↕ Geser Kotak Sini ↕';
+                        seatElem.insertBefore(handle, seatElem.firstChild);
+                    }
                     
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
@@ -1095,6 +1120,8 @@
                     };
                 } else {
                     seatElem.classList.remove('is-me');
+                    const existingHandle = seatElem.querySelector('.drag-handle');
+                    if (existingHandle) existingHandle.remove();
                     cardsElem.onclick = null;
                 }
 
@@ -1159,6 +1186,61 @@
             document.getElementById('btnHit').disabled = !isMyTurn;
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
+
+        // FITUR DRAG & DROP / TOUCH DRAG KOTAK PEMAIN AKTIF KE SEGALA ARAH
+        document.addEventListener('DOMContentLoaded', () => {
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+
+            document.addEventListener('pointerdown', (e) => {
+                const targetMe = e.target.closest('.seat.is-me');
+                if (!targetMe) return;
+                
+                // Jangan aktifkan drag jika menekan tombol atau elemen interaktif di dalam kartu
+                if (e.target.tagName === 'BUTTON' || e.target.closest('.card')) return;
+
+                isDragging = true;
+                targetMe.dataset.dragged = "true";
+                
+                const rect = targetMe.getBoundingClientRect();
+                initialX = rect.left;
+                initialY = rect.top;
+
+                startX = e.clientX;
+                startY = e.clientY;
+
+                targetMe.style.position = 'fixed';
+                targetMe.style.left = `${initialX}px`;
+                targetMe.style.top = `${initialY}px`;
+                targetMe.style.bottom = 'auto';
+                targetMe.style.transform = 'none';
+
+                targetMe.setPointerCapture(e.pointerId);
+            });
+
+            document.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const mySeatElem = document.querySelector('.seat.is-me');
+                if (!mySeatElem) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                mySeatElem.style.left = `${initialX + dx}px`;
+                mySeatElem.style.top = `${initialY + dy}px`;
+            });
+
+            document.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const mySeatElem = document.querySelector('.seat.is-me');
+                if (mySeatElem) {
+                    try {
+                        mySeatElem.releasePointerCapture(e.pointerId);
+                    } catch (err) {}
+                }
+            });
+        });
     </script>
 </body>
 </html>
