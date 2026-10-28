@@ -63,6 +63,24 @@
         }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        .game-meta {
+            background: #0f172a;
+            border-bottom: 1px solid #1f2937;
+            padding: 5px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+            font-size: 10px;
+        }
+        .meta-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+        .meta-pill { color: #e5e7eb; background: #1f2937; border-radius: 5px; padding: 3px 6px; }
+        .meta-pill strong { color: #facc15; }
+        .meta-select { background: #111827; color: white; border: 1px solid #4b5563; border-radius: 4px; font-size: 10px; padding: 3px; }
+        .admin-tools { display: none; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .admin-tools.visible { display: flex; }
+        .admin-tools button { background: #7c3aed; color: white; border: 0; border-radius: 4px; padding: 4px 6px; font-size: 9px; font-weight: bold; }
+        .history-strip { color: #cbd5e1; white-space: nowrap; overflow-x: auto; max-width: 100%; font-size: 9px; }
         .table-area {
             position: relative;
             flex-grow: 1;
@@ -259,6 +277,33 @@
         </div>
     </div>
 
+    <div class="game-meta">
+        <div class="meta-row">
+            <span class="meta-pill">Saldo: <strong id="myBalanceLabel">Rp 0</strong></span>
+            <span class="meta-pill">Pot: <strong id="potLabel">Rp 0</strong></span>
+            <span class="meta-pill">Ronde: <strong id="roundLabel">0</strong></span>
+            <label class="meta-pill">Ante
+                <select id="anteSelect" class="meta-select" onchange="setAnte(this.value)" aria-label="Pilih nominal ante">
+                    <option value="3000">Rp 3.000</option>
+                    <option value="5000">Rp 5.000</option>
+                    <option value="10000">Rp 10.000</option>
+                </select>
+                <input id="customAnteInput" class="meta-select" type="number" min="1" step="1"
+                    inputmode="numeric" placeholder="Nominal Rp" aria-label="Nominal ante kustom"
+                    style="width: 90px; max-width: 26vw; margin-left: 4px;" />
+                <button type="button" class="meta-select" onclick="applyCustomAnte()"
+                    style="margin-left: 3px; cursor: pointer;">Terapkan</button>
+            </label>
+        </div>
+        <div class="meta-row">
+            <div id="adminTools" class="admin-tools">
+                <select id="topupSeatSelect" class="meta-select" aria-label="Pilih pemain untuk top-up"></select>
+                <button onclick="topUpSelectedPlayer()">Top-Up Rp 100.000</button>
+            </div>
+            <div id="historyStrip" class="history-strip">Riwayat ronde akan muncul di sini.</div>
+        </div>
+    </div>
+
     <div class="table-area">
         <div class="poker-table">
             <div class="center-info">
@@ -322,6 +367,14 @@
         let isAdmin = false;
         let stealthModeActive = false;
         let lastTapTime = 0;
+        let connectedToFirebase = false;
+        let presenceSeatBound = null;
+        const disconnectTimers = {};
+        const turnSkipTimers = {};
+        let selectedAnte = 3000;
+        const GRACE_PERIOD_MS = 10 * 60 * 1000;
+        const TURN_SKIP_DELAY_MS = 15000;
+        const STARTING_BALANCE = 100000;
 
         window.addEventListener('load', () => {
             const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
@@ -337,6 +390,12 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+
+        db.ref('.info/connected').on('value', (snapshot) => {
+            connectedToFirebase = snapshot.val() === true;
+            if (!connectedToFirebase) presenceSeatBound = null;
+            if (connectedToFirebase && mySeat !== null) setupPresenceForSeat(mySeat);
+        });
 
         const urlParams = new URLSearchParams(window.location.search);
         let roomId = urlParams.get('room') || window.location.hash.replace('#', '').trim();
@@ -414,14 +473,175 @@
                     seatRef.set({
                         playerId: myPlayerId,
                         name: playerName,
-                        isStopped: false,
-                        cards: seatData && seatData.cards ? seatData.cards : []
+                        balance: seatData && Number.isFinite(seatData.balance) ? seatData.balance : STARTING_BALANCE,
+                        isStopped: seatData ? !!seatData.isStopped : false,
+                        forfeit: seatData ? !!seatData.forfeit : false,
+                        cards: seatData && seatData.cards ? seatData.cards : [],
+                        connection: { state: 'online', since: null }
                     }).then(() => {
                         mySeat = seatIndex;
+                        if (connectedToFirebase) setupPresenceForSeat(seatIndex);
                     });
                 } else {
                     alert("Bangku sudah diambil orang lain!");
                 }
+            });
+        }
+
+        function setupPresenceForSeat(seatIndex) {
+            if (!connectedToFirebase || seatIndex === null || seatIndex === undefined) return;
+            const bindingKey = `${roomId}:${seatIndex}:${myPlayerId}`;
+            if (presenceSeatBound === bindingKey) return;
+            presenceSeatBound = bindingKey;
+            const connectionRef = roomRef.child(`seats/${seatIndex}/connection`);
+            connectionRef.onDisconnect().set({
+                state: 'offline',
+                since: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => connectionRef.set({ state: 'online', since: null }))
+              .catch((err) => console.warn('Presence setup failed:', err));
+        }
+
+        function setAnte(value) {
+            const amount = Number(value);
+            if (!Number.isSafeInteger(amount) || amount < 1) {
+                alert('Masukkan nominal ante berupa bilangan bulat lebih dari Rp 0.');
+                return;
+            }
+            selectedAnte = amount;
+            const customInput = document.getElementById('customAnteInput');
+            if (customInput) customInput.value = String(amount);
+            roomRef.once('value', (snap) => {
+                const data = snap.val() || {};
+                if (data.deck && data.deck.length > 0 && !data.isShowdown) {
+                    alert('Ante hanya dapat diubah sebelum ronde dimulai.');
+                    const previousAnte = Number(data.pendingAnte || data.currentAnte || 3000);
+                    document.getElementById('anteSelect').value = [3000, 5000, 10000].includes(previousAnte) ? String(previousAnte) : '3000';
+                    if (customInput) customInput.value = String(previousAnte);
+                    selectedAnte = previousAnte;
+                    return;
+                }
+                roomRef.update({ pendingAnte: amount }).catch((err) => {
+                    console.error('Gagal mengubah ante:', err);
+                    alert('Nominal ante gagal disimpan. Periksa koneksi internet.');
+                });
+            });
+        }
+
+        function applyCustomAnte() {
+            const input = document.getElementById('customAnteInput');
+            const rawValue = input.value.trim();
+            const amount = Number(rawValue);
+            if (!rawValue || !Number.isSafeInteger(amount) || amount < 1) {
+                alert('Masukkan nominal taruhan yang valid, misalnya 3000, 5000, atau 10000.');
+                input.focus();
+                return;
+            }
+            setAnte(amount);
+        }
+
+        function getHandInfo(player) {
+            const cards = player && Array.isArray(player.cards) ? player.cards : [];
+            const score = calculateScore(cards);
+            if (player && player.forfeit) return { score, tier: -1, label: 'Bust (putus koneksi > 10 menit)', bust: true };
+
+            // Straight Flush: minimal 3 kartu berurutan dengan suit yang sama.
+            const rankOf = (v) => v === 'A' ? 1 : v === 'J' ? 11 : v === 'Q' ? 12 : v === 'K' ? 13 : Number(v);
+            let straightFlush = false;
+            for (const suit of suits) {
+                const ranks = cards.filter(c => c.suit === suit).map(c => rankOf(c.value));
+                if (ranks.includes(1)) ranks.push(14); // dukung Q-K-A
+                const unique = [...new Set(ranks)].sort((a, b) => a - b);
+                for (let i = 0; i <= unique.length - 3; i++) {
+                    if (unique[i + 1] === unique[i] + 1 && unique[i + 2] === unique[i] + 2) straightFlush = true;
+                }
+            }
+            if (straightFlush && score <= 30) return { score, tier: 4, label: 'Straight Flush', bust: false };
+
+            if (cards.length >= 3 && cards[0].value === cards[1].value && cards[1].value === cards[2].value && score <= 30) {
+                return { score, tier: 3, label: 'Tiga Kartu Kembar (Trips)', bust: false };
+            }
+            if (cards.length === 7 && score <= 30) return { score, tier: 2, label: 'Murni Besar (7 kartu, tidak bust)', bust: false };
+            if (cards.length >= 3 && calculateScore(cards.slice(0, 3)) < 5 && score <= 30) {
+                return { score, tier: 1, label: 'Murni Kecil (3 kartu awal < 5)', bust: false };
+            }
+            if (score > 30) return { score, tier: -1, label: 'Bust', bust: true };
+            return { score, tier: 0, label: `Normal (${score} poin)`, bust: false };
+        }
+
+        function monitorDisconnectedPlayers(data) {
+            const seats = data.seats || {};
+            const round = Number(data.roundNumber || 0);
+            for (let i = 0; i < 7; i++) {
+                const player = seats[i];
+                if (!player || !player.playerId) continue;
+                const connection = player.connection || {};
+                const isOffline = connection.state === 'offline' && Number.isFinite(connection.since);
+                const timerKey = `${round}:${i}`;
+
+                if (!isOffline) {
+                    if (disconnectTimers[timerKey]) { clearTimeout(disconnectTimers[timerKey]); delete disconnectTimers[timerKey]; }
+                    if (turnSkipTimers[timerKey]) { clearTimeout(turnSkipTimers[timerKey]); delete turnSkipTimers[timerKey]; }
+                    continue;
+                }
+
+                if (data.currentTurn === i && !data.isShowdown && !player.isStopped && !turnSkipTimers[timerKey]) {
+                    turnSkipTimers[timerKey] = setTimeout(() => {
+                        roomRef.once('value', snap => {
+                            const latest = snap.val() || {};
+                            const currentPlayer = latest.seats && latest.seats[i];
+                            if (Number(latest.roundNumber || 0) !== round || latest.isShowdown ||
+                                latest.currentTurn !== i || !currentPlayer ||
+                                !currentPlayer.connection || currentPlayer.connection.state !== 'offline' ||
+                                currentPlayer.isStopped) return;
+                            const next = findNextTurn(latest.seats || {}, i);
+                            const updates = {};
+                            updates[`seats/${i}/isStopped`] = true;
+                            updates[`seats/${i}/autoSkipped`] = true;
+                            if (next === null) updates.isShowdown = true;
+                            else updates.currentTurn = next;
+                            roomRef.update(updates);
+                        });
+                        delete turnSkipTimers[timerKey];
+                    }, TURN_SKIP_DELAY_MS);
+                }
+
+                if (!disconnectTimers[timerKey]) {
+                    const remaining = Math.max(0, GRACE_PERIOD_MS - (Date.now() - connection.since));
+                    disconnectTimers[timerKey] = setTimeout(() => {
+                        roomRef.once('value', snap => {
+                            const latest = snap.val() || {};
+                            const currentPlayer = latest.seats && latest.seats[i];
+                            if (Number(latest.roundNumber || 0) !== round || !currentPlayer ||
+                                !currentPlayer.connection || currentPlayer.connection.state !== 'offline') return;
+                            const updates = {};
+                            updates[`seats/${i}/forfeit`] = true;
+                            updates[`seats/${i}/isStopped`] = true;
+                            if (!latest.isShowdown && latest.currentTurn === i) {
+                                const next = findNextTurn(latest.seats || {}, i);
+                                if (next === null) updates.isShowdown = true;
+                                else updates.currentTurn = next;
+                            }
+                            roomRef.update(updates);
+                        });
+                        delete disconnectTimers[timerKey];
+                    }, remaining);
+                }
+            }
+        }
+
+        function topUpSelectedPlayer() {
+            if (!isAdmin) {
+                alert('Fitur top-up hanya untuk Admin.');
+                return;
+            }
+            const seatIndex = Number(document.getElementById('topupSeatSelect').value);
+            if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex > 6) return;
+            roomRef.once('value', snap => {
+                const data = snap.val() || {};
+                const player = data.seats && data.seats[seatIndex];
+                if (!player) { alert('Bangku tersebut kosong.'); return; }
+                roomRef.child(`seats/${seatIndex}/balance`).set(STARTING_BALANCE)
+                    .then(() => alert(`Saldo ${player.name} dipulihkan menjadi Rp 100.000.`));
             });
         }
 
@@ -445,22 +665,29 @@
         function startNewGame() {
             let deck = [];
             for (let suit of suits) {
-                for (let val of values) {
-                    deck.push({ suit, value: val });
-                }
+                for (let val of values) deck.push({ suit, value: val });
             }
             deck.sort(() => Math.random() - 0.5);
 
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const seats = data.seats || {};
+                const ante = Number(data.pendingAnte || selectedAnte || 3000);
                 let updates = {};
                 let activeCount = 0;
 
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
+                        const balance = Number.isFinite(seats[i].balance) ? seats[i].balance : STARTING_BALANCE;
+                        if (balance < ante) {
+                            alert(`${seats[i].name} tidak memiliki saldo cukup untuk ante Rp ${ante.toLocaleString('id-ID')}. Admin dapat melakukan top-up.`);
+                            return;
+                        }
                         updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
                         updates[`seats/${i}/isStopped`] = false;
+                        updates[`seats/${i}/forfeit`] = false;
+                        updates[`seats/${i}/autoSkipped`] = false;
+                        updates[`seats/${i}/balance`] = balance - ante;
                         activeCount++;
                     }
                 }
@@ -470,13 +697,15 @@
                 }
 
                 let startSeat = data.lastWinnerSeat ?? 0;
-                if (!seats[startSeat]) {
-                    startSeat = getFirstActiveSeat(seats);
-                }
+                if (!seats[startSeat]) startSeat = getFirstActiveSeat(seats);
 
                 updates['currentTurn'] = startSeat;
                 updates['isShowdown'] = false;
                 updates['deck'] = deck;
+                updates['currentAnte'] = ante;
+                updates['pot'] = activeCount * ante;
+                updates['roundNumber'] = Number(data.roundNumber || 0) + 1;
+                updates['payoutDoneRound'] = Number(data.payoutDoneRound || 0);
                 roomRef.update(updates);
             });
         }
@@ -601,8 +830,105 @@
             }, 1500);
         }
 
+        function settleRoundIfNeeded(data) {
+            const round = Number(data.roundNumber || 0);
+            if (!data.isShowdown || round <= 0 || Number(data.payoutDoneRound || 0) === round) return;
+            roomRef.transaction(current => {
+                if (!current || !current.isShowdown || Number(current.roundNumber || 0) !== round ||
+                    Number(current.payoutDoneRound || 0) === round) return;
+                const seats = current.seats || {};
+                const players = [];
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        const hand = getHandInfo(seats[i]);
+                        if (!hand.bust) players.push({ index: i, player: seats[i], ...hand });
+                    }
+                }
+
+                let winners = [];
+                if (players.length) {
+                    players.sort((a, b) => b.tier - a.tier || b.score - a.score);
+                    const best = players[0];
+                    winners = players.filter(p => p.tier === best.tier && p.score === best.score);
+                } else {
+                    // Jika semua bust/forfeit, ante dikembalikan merata ke pemain yang ikut ronde.
+                    for (let i = 0; i < 7; i++) {
+                        if (seats[i] && Array.isArray(seats[i].cards) && seats[i].cards.length) {
+                            winners.push({ index: i, player: seats[i], score: calculateScore(seats[i].cards), tier: -2, label: 'Pengembalian ante (semua Bust)' });
+                        }
+                    }
+                }
+
+                const pot = Number(current.pot || 0);
+                const each = winners.length ? Math.floor(pot / winners.length) : 0;
+                let remainder = winners.length ? pot - each * winners.length : 0;
+                winners.forEach((w, idx) => {
+                    const prize = each + (idx === 0 ? remainder : 0);
+                    const balance = Number.isFinite(seats[w.index].balance) ? seats[w.index].balance : 0;
+                    seats[w.index].balance = balance + prize;
+                });
+
+                const winnerNames = winners.length ? winners.map(w => w.player.name).join(', ') : 'Tidak ada pemenang';
+                const winningHand = winners.length ? winners[0].label || getHandInfo(winners[0].player).label : 'Semua Bust';
+                const historyItem = {
+                    round,
+                    winner: winnerNames,
+                    hand: winningHand,
+                    score: winners.length ? winners[0].score : 0,
+                    pot,
+                    timestamp: Date.now()
+                };
+                const history = Array.isArray(current.history) ? current.history : [];
+                history.unshift(historyItem);
+                current.history = history.slice(0, 5);
+                current.seats = seats;
+                current.pot = 0;
+                current.payoutDoneRound = round;
+                if (winners.length === 1 && winners[0].index >= 0) current.lastWinnerSeat = winners[0].index;
+                return current;
+            }, (error, committed) => {
+                if (error) console.warn('Penyelesaian ronde gagal:', error);
+            }, false);
+        }
+
         function updateUI(data) {
             const seats = data.seats || {};
+            monitorDisconnectedPlayers(data);
+            if (mySeat !== null && connectedToFirebase) setupPresenceForSeat(mySeat);
+            settleRoundIfNeeded(data);
+
+            const ownPlayer = mySeat !== null ? seats[mySeat] : null;
+            document.getElementById('myBalanceLabel').innerText = ownPlayer && Number.isFinite(ownPlayer.balance)
+                ? `Rp ${ownPlayer.balance.toLocaleString('id-ID')}` : 'Rp 0';
+            document.getElementById('potLabel').innerText = `Rp ${Number(data.pot || 0).toLocaleString('id-ID')}`;
+            document.getElementById('roundLabel').innerText = String(data.roundNumber || 0);
+            const anteSelect = document.getElementById('anteSelect');
+            const customAnteInput = document.getElementById('customAnteInput');
+            const shownAnte = Number(data.pendingAnte || data.currentAnte || 3000);
+            if (Number.isSafeInteger(shownAnte) && shownAnte > 0) {
+                selectedAnte = shownAnte;
+                anteSelect.value = [3000, 5000, 10000].includes(shownAnte) ? String(shownAnte) : '3000';
+                if (customAnteInput) customAnteInput.value = String(shownAnte);
+            }
+            document.getElementById('adminTools').classList.toggle('visible', isAdmin);
+            const topupSelect = document.getElementById('topupSeatSelect');
+            const oldTopup = topupSelect.value;
+            topupSelect.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                if (seats[i]) {
+                    const option = document.createElement('option');
+                    option.value = String(i);
+                    option.textContent = `${seats[i].name} — Rp ${Number(seats[i].balance || 0).toLocaleString('id-ID')}`;
+                    topupSelect.appendChild(option);
+                }
+            }
+            if ([...topupSelect.options].some(o => o.value === oldTopup)) topupSelect.value = oldTopup;
+
+            const historyStrip = document.getElementById('historyStrip');
+            const history = Array.isArray(data.history) ? data.history : [];
+            historyStrip.textContent = history.length
+                ? history.map(h => `R${h.round}: ${h.winner} — ${h.hand}, pot Rp ${Number(h.pot || 0).toLocaleString('id-ID')}`).join(' | ')
+                : 'Riwayat ronde akan muncul di sini.';
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
 
@@ -619,20 +945,21 @@
 
             if (isShowdown && activePlayers.length > 0) {
                 let validPlayers = activePlayers.map(p => {
-                    let score = calculateScore(p.cards);
-                    return { ...p, score, isBust: score > 30 };
+                    const hand = getHandInfo(p);
+                    return { ...p, ...hand, isBust: hand.bust };
                 });
 
                 validPlayers.sort((a, b) => {
                     if (a.isBust && !b.isBust) return 1;
                     if (!a.isBust && b.isBust) return -1;
-                    return b.score - a.score;
+                    return b.tier - a.tier || b.score - a.score;
                 });
 
                 let nonBust = validPlayers.filter(p => !p.isBust);
                 if (nonBust.length > 0) {
+                    let bestTier = nonBust[0].tier;
                     let highScore = nonBust[0].score;
-                    let topScorePlayers = nonBust.filter(p => p.score === highScore);
+                    let topScorePlayers = nonBust.filter(p => p.tier === bestTier && p.score === highScore);
                     if (topScorePlayers.length === 1) {
                         winnerSeatIndex = topScorePlayers[0].index;
                     }
@@ -646,9 +973,7 @@
                 });
                 rankingHtml += "</ol>";
 
-                if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
-                    roomRef.update({ lastWinnerSeat: winnerSeatIndex });
-                }
+                // lastWinnerSeat ditetapkan oleh settlement transaksi agar mengikuti ranking kartu spesial.
             } else {
                 rankingHtml = "Permainan sedang berlangsung...";
             }
@@ -761,9 +1086,12 @@
                     }
 
                     if (isShowdown) {
-                        statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
+                        const handInfo = getHandInfo(player);
+                        statusElem.innerText = player.forfeit ? 'Bust (Forfeit)' : `${handInfo.label} | Skor: ${currentCardScore}${currentCardScore > 30 ? ' (Bust)' : ''}`;
                     } else if (player.isStopped) {
-                        if (isMe) {
+                        if (player.autoSkipped) {
+                            statusElem.innerText = 'Stand otomatis (offline)';
+                        } else if (isMe) {
                             statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
                         } else {
                             statusElem.innerText = `STOP`;
