@@ -317,14 +317,6 @@
             color: #cbd5e1;
         }
         .log-item:last-child { border-bottom: none; }
-        .ready-badge {
-            font-size: 8px;
-            background: #059669;
-            color: white;
-            padding: 1px 4px;
-            border-radius: 3px;
-            margin-left: 3px;
-        }
     </style>
 </head>
 <body>
@@ -410,35 +402,29 @@
         </div>
     </div>
 
-    <div id="modalBetting" class="modal">
-        <div class="modal-box">
-            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 6px;">KESEPAKATAN TARUHAN</h3>
-            <p style="font-size: 10px; color: #9ca3af; margin-bottom: 8px;">Tentukan besaran taruhan untuk ronde ini:</p>
-            
-            <input type="number" id="inputBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
-            
-            <div style="margin: 10px 0;">
-                <button class="btn" style="background: #2563eb; width: 100%; margin-bottom: 5px;" onclick="proposeOrSetBet()">Setujui / Ubah Taruhan</button>
-                <button id="btnReadyBet" class="btn" style="background: #059669; width: 100%;" onclick="toggleReadyBet()">Saya Siap (Setuju)</button>
-            </div>
-
-            <div style="font-size: 9px; color: #d1d5db; text-align: left; margin-top: 8px;">
-                <b>Status Persetujuan:</b>
-                <div id="readyListDisplay" style="margin-top: 4px; max-height: 80px; overflow-y: auto;"></div>
-            </div>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeBetModal()">Tutup</button>
-        </div>
-    </div>
-
+    <!-- PANEL ADMIN TERPUSAT -->
     <div id="modalAdmin" class="modal">
         <div class="modal-box">
-            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL ADMIN - TOP UP SALDO</h3>
-            <select id="adminSelectPlayer" class="modal-input">
-                <option value="">-- Pilih Pemain --</option>
-            </select>
-            <input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
-            <button class="btn" style="background: #059669; width: 100%; margin-top: 5px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 5px;" onclick="closeAdminModal()">Tutup</button>
+            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
+            
+            <!-- SEKSI SETTING TARUHAN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
+                <input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
+                <button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
+            </div>
+
+            <!-- SEKSI TOP UP SALDO -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; text-align: left;">
+                <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
+                <select id="adminSelectPlayer" class="modal-input">
+                    <option value="">-- Pilih Pemain --</option>
+                </select>
+                <input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
+                <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
+            </div>
+
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 10px;" onclick="closeAdminModal()">Tutup</button>
         </div>
     </div>
 
@@ -535,7 +521,6 @@
                     seats: {},
                     pot: 0,
                     currentBet: 10000,
-                    betAgreed: false,
                     gameStarted: false
                 });
             }
@@ -591,7 +576,6 @@
                         name: playerName,
                         isStopped: false,
                         balance: initialBalance,
-                        isReadyBet: false,
                         cards: seatData && seatData.cards ? seatData.cards : []
                     }).then(() => {
                         mySeat = seatIndex;
@@ -622,46 +606,37 @@
             return parseInt(cardVal);
         }
 
+        // ALUR KONTROL ADMIN TERPUSAT KETIKA MULAI GAME
         function startNewGame() {
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const seats = data.seats || {};
+                const betAmount = data.currentBet || 10000;
 
-                let activePlayers = [];
+                let activeSeatsCount = 0;
+                let eligiblePlayersCount = 0;
+
                 for (let i = 0; i < 7; i++) {
-                    if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
-                }
-
-                if (activePlayers.length === 0) {
-                    alert("Belum ada pemain di meja!");
-                    return;
-                }
-
-                // VALIDASI SALDO 0 DENGAN OPSI INTERAKTIF (TOP-UP ATAU SIT-OUT)
-                let hasZeroBalance = false;
-                for (let i = 0; i < 7; i++) {
-                    if (seats[i] && (seats[i].balance || 0) <= 0) {
-                        hasZeroBalance = true;
-                        let playerName = seats[i].name || `Pemain ${i+1}`;
-                        let wantTopUp = confirm(`Pemain "${playerName}" (Bangku ${i+1}) memiliki saldo Rp0.\n\nApakah ingin langsung isi saldo (top-up) sekarang? (Tekan OK untuk Top-Up, Cancel untuk Sit-Out/Lewati ronde ini).`);
-                        
-                        if (wantTopUp) {
-                            let amountStr = prompt(`Masukkan nominal top-up untuk ${playerName}:`, "50000");
-                            let topUpAmount = parseInt(amountStr);
-                            if (!isNaN(topUpAmount) && topUpAmount > 0) {
-                                let newBal = (seats[i].balance || 0) + topUpAmount;
-                                roomRef.child(`seats/${i}/balance`).set(newBal);
-                                addTransactionLog(`💸 AUTO TOP UP: Saldo ${playerName} ditambah ${formatRupiah(topUpAmount)}. Total: ${formatRupiah(newBal)}`);
-                            } else {
-                                alert("Nominal tidak valid. Pemain akan dilewati (sit-out) untuk ronde ini, posisi duduk tetap aman.");
-                            }
-                        } else {
-                            addTransactionLog(`ℹ️ ${playerName} (Bangku ${i+1}) melakukan sit-out (lewat ronde ini) karena saldo Rp0.`);
+                    if (seats[i]) {
+                        activeSeatsCount++;
+                        if ((seats[i].balance || 0) >= betAmount) {
+                            eligiblePlayersCount++;
                         }
                     }
                 }
 
-                document.getElementById('modalBetting').style.display = 'flex';
+                if (activeSeatsCount === 0) {
+                    alert("Belum ada pemain di meja!");
+                    return;
+                }
+
+                if (eligiblePlayersCount === 0) {
+                    alert(`Tidak ada pemain dengan saldo yang cukup untuk taruhan (${formatRupiah(betAmount)}). Minta Admin mengisi saldo!`);
+                    return;
+                }
+
+                // Eksekusi Pembagian Kartu & Pemotongan Saldo Otomatis
+                executeStartGameWithBets();
             });
         }
 
@@ -681,19 +656,18 @@
                 let updates = {};
                 let totalPotCollected = 0;
 
-                // Pastikan pemain dengan saldo Rp0 atau saldo kurang otomatis di-sit-out (tidak ikut serta pot/kartu ronde ini)
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         if ((seats[i].balance || 0) < betAmount) {
-                            // Pemain dengan saldo kurang dari taruhan otomatis dilewati (sit-out), bangku tetap aman
+                            // Saldo kurang dari taruhan: Sit-Out otomatis, posisi duduk tetap aman
                             updates[`seats/${i}/cards`] = [];
                             updates[`seats/${i}/isStopped`] = true;
-                            updates[`seats/${i}/isReadyBet`] = false;
+                            addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)}`);
                         } else {
+                            // Saldo mencukupi: Potong saldo & bagikan 3 kartu awal
                             let newBalance = seats[i].balance - betAmount;
                             updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
                             updates[`seats/${i}/isStopped`] = false;
-                            updates[`seats/${i}/isReadyBet`] = false;
                             updates[`seats/${i}/balance`] = newBalance;
                             totalPotCollected += betAmount;
                         }
@@ -705,20 +679,14 @@
                     startSeat = getFirstActivePlayingSeat(seats, betAmount);
                 }
 
-                if (startSeat === null) {
-                    alert("Tidak ada pemain dengan saldo yang cukup untuk memulai taruhan!");
-                    return;
-                }
-
                 updates['currentTurn'] = startSeat;
                 updates['isShowdown'] = false;
                 updates['gameStarted'] = true;
                 updates['deck'] = deck;
-                updates['pot'] = totalPotCollected;
+                updates['pot'] = (data.pot || 0) + totalPotCollected;
 
                 roomRef.update(updates).then(() => {
-                    document.getElementById('modalBetting').style.display = 'none';
-                    addTransactionLog(`Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot: ${formatRupiah(totalPotCollected)}`);
+                    addTransactionLog(`🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot Saat Ini: ${formatRupiah((data.pot || 0) + totalPotCollected)}`);
                 });
             });
         }
@@ -726,13 +694,6 @@
         function getFirstActivePlayingSeat(seats, betAmount) {
             for (let i = 0; i < 7; i++) {
                 if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
-            }
-            return 0;
-        }
-
-        function getFirstActiveSeat(seats) {
-            for (let i = 0; i < 7; i++) {
-                if (seats[i]) return i;
             }
             return 0;
         }
@@ -876,7 +837,6 @@
             let next = (currentSeat + 1) % 7;
             let checked = 0;
             while (checked < 7) {
-                // Hanya pilih pemain yang aktif ikut ronde (punya kartu dan belum stop)
                 if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
                     return next;
                 }
@@ -887,6 +847,7 @@
         }
 
         function confirmNewRound() { 
+            document.getElementById('modalShowdown').style.display = 'none';
             startNewGame(); 
         }
 
@@ -903,77 +864,16 @@
             }, 1500);
         }
 
-        function openBetModal() { document.getElementById('modalBetting').style.display = 'flex'; }
-        function closeBetModal() { document.getElementById('modalBetting').style.display = 'none'; }
-
-        function proposeOrSetBet() {
-            let betVal = parseInt(document.getElementById('inputBetAmount').value);
-            if (isNaN(betVal) || betVal < 1000) {
-                alert("Nominal taruhan minimal Rp1.000");
-                return;
-            }
-            if (confirm(`Apakah Anda yakin ingin menetapkan taruhan sebesar ${formatRupiah(betVal)}?`)) {
-                roomRef.child('currentBet').set(betVal).then(() => {
-                    roomRef.once('value', snap => {
-                        let data = snap.val() || {};
-                        let seats = data.seats || {};
-                        let updates = {};
-                        for (let i = 0; i < 7; i++) {
-                            if (seats[i]) updates[`seats/${i}/isReadyBet`] = false;
-                        }
-                        roomRef.update(updates);
-                    });
-                    addTransactionLog(`Nominal taruhan diusulkan menjadi ${formatRupiah(betVal)}`);
-                });
-            }
-        }
-
-        function toggleReadyBet() {
-            if (mySeat === null) {
-                alert("Anda harus duduk terlebih dahulu!");
-                return;
-            }
-            roomRef.child(`seats/${mySeat}`).once('value', snap => {
-                let p = snap.val();
-                if (p) {
-                    let currentBet = 10000; 
-                    // Ambil currentBet terbaru dari DB jika ada
-                    roomRef.child('currentBet').once('value', betSnap => {
-                        let betVal = betSnap.val() || 10000;
-                        if ((p.balance || 0) < betVal) {
-                            alert(`Saldo Anda (${formatRupiah(p.balance)}) kurang dari taruhan (${formatRupiah(betVal)}). Minta Admin mengisi saldo Anda terlebih dahulu atau tunggu ronde berikutnya!`);
-                            return;
-                        }
-                        let newStatus = !p.isReadyBet;
-                        roomRef.child(`seats/${mySeat}/isReadyBet`).set(newStatus);
-                    });
-                }
-            });
-        }
-
-        function checkAllReadyAndStart(data) {
-            const seats = data.seats || {};
-            const betAmount = data.currentBet || 10000;
-            let activePlayers = [];
-            for (let i = 0; i < 7; i++) {
-                // Hitung pemain yang punya saldo cukup dan terdaftar
-                if (seats[i] && (seats[i].balance || 0) >= betAmount) {
-                    activePlayers.push(seats[i]);
-                }
-            }
-
-            if (activePlayers.length > 0) {
-                let allReady = activePlayers.every(p => p.isReadyBet === true);
-                if (allReady && !data.gameStarted) {
-                    executeStartGameWithBets();
-                }
-            }
-        }
-
+        // FUNGSI ADMIN TERPUSAT
         function openAdminModal() {
             if (!isAdmin) return;
-            roomRef.child('seats').once('value', snap => {
-                let seats = snap.val() || {};
+            roomRef.once('value', snap => {
+                let data = snap.val() || {};
+                let seats = data.seats || {};
+                let currentBet = data.currentBet || 10000;
+                
+                document.getElementById('adminBetAmount').value = currentBet;
+                
                 let select = document.getElementById('adminSelectPlayer');
                 select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
                 for (let i = 0; i < 7; i++) {
@@ -985,6 +885,18 @@
             });
         }
         function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
+
+        function submitAdminSetBet() {
+            let betVal = parseInt(document.getElementById('adminBetAmount').value);
+            if (isNaN(betVal) || betVal < 1000) {
+                alert("Nominal taruhan minimal Rp1.000");
+                return;
+            }
+            roomRef.child('currentBet').set(betVal).then(() => {
+                addTransactionLog(`⚙️ ADMIN: Nominal taruhan diatur menjadi ${formatRupiah(betVal)}`);
+                alert(`Taruhan berhasil diatur menjadi ${formatRupiah(betVal)}`);
+            });
+        }
 
         function submitAdminTopUp() {
             let seatIdx = document.getElementById('adminSelectPlayer').value;
@@ -1003,7 +915,7 @@
                         roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
                             addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
                             alert(`Saldo ${player.name} berhasil diperbarui!`);
-                            closeAdminModal();
+                            openAdminModal(); // Refresh dropdown
                         });
                     }
                 });
@@ -1021,24 +933,9 @@
             const currentBet = data.currentBet || 10000;
 
             document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
-            document.getElementById('inputBetAmount').value = currentBet;
 
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
             document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
-
-            let readyHtml = "";
-            for (let i = 0; i < 7; i++) {
-                if (seats[i]) {
-                    let isZeroOrLow = (seats[i].balance || 0) < currentBet;
-                    let statusBadge = isZeroOrLow ? `<span style="color:#ef4444; font-size:8px;">Sit-Out (Saldo kurang)</span>` : (seats[i].isReadyBet ? `<span class="ready-badge">SIAP</span>` : `<span style="color:#ef4444; font-size:8px;">Belum</span>`);
-                    readyHtml += `<div>Bangku ${i+1} (${seats[i].name}): ${statusBadge}</div>`;
-                }
-            }
-            document.getElementById('readyListDisplay').innerHTML = readyHtml || "Belum ada pemain.";
-
-            if (document.getElementById('modalBetting').style.display === 'flex') {
-                checkAllReadyAndStart(data);
-            }
 
             let activePlayers = [];
             for (let i = 0; i < 7; i++) {
@@ -1197,7 +1094,7 @@
                         statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
                     } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
                         if (player.cards && player.cards.length === 0) {
-                            statusElem.innerText = `Sit-Out (Saldo 0)`;
+                            statusElem.innerText = `Sit-Out (Saldo kurang)`;
                         } else if (isMe) {
                             statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
                         } else {
