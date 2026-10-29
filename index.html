@@ -168,15 +168,34 @@
         .seat.is-me:active {
             cursor: grabbing;
         }
+        .drag-handle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
         .drag-handle {
             font-size: 8px;
             color: #38bdf8;
             background: rgba(30, 41, 59, 0.8);
             padding: 2px 4px;
             border-radius: 4px;
-            margin-bottom: 3px;
             letter-spacing: 0.5px;
             display: inline-block;
+        }
+        .btn-lock-seat {
+            font-size: 8px;
+            background: #374151;
+            color: #f3f4f6;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-lock-seat.locked {
+            background: #b91c1c;
+            color: white;
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -344,43 +363,43 @@
                 <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
             </div>
 
-            <div id="seat-0" class="seat" onclick="claimSeat(0)">
+            <div id="seat-0" class="seat" onclick="handleSeatClick(0)">
                 <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
                 <div class="seat-balance" id="balance-0"></div>
                 <div class="card-container" id="cards-0"></div>
                 <div class="seat-status" id="status-0">Ketuk duduk</div>
             </div>
-            <div id="seat-1" class="seat" onclick="claimSeat(1)">
+            <div id="seat-1" class="seat" onclick="handleSeatClick(1)">
                 <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
                 <div class="seat-balance" id="balance-1"></div>
                 <div class="card-container" id="cards-1"></div>
                 <div class="seat-status" id="status-1">Ketuk duduk</div>
             </div>
-            <div id="seat-2" class="seat" onclick="claimSeat(2)">
+            <div id="seat-2" class="seat" onclick="handleSeatClick(2)">
                 <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
                 <div class="seat-balance" id="balance-2"></div>
                 <div class="card-container" id="cards-2"></div>
                 <div class="seat-status" id="status-2">Ketuk duduk</div>
             </div>
-            <div id="seat-3" class="seat" onclick="claimSeat(3)">
+            <div id="seat-3" class="seat" onclick="handleSeatClick(3)">
                 <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
                 <div class="seat-balance" id="balance-3"></div>
                 <div class="card-container" id="cards-3"></div>
                 <div class="seat-status" id="status-3">Ketuk duduk</div>
             </div>
-            <div id="seat-4" class="seat" onclick="claimSeat(4)">
+            <div id="seat-4" class="seat" onclick="handleSeatClick(4)">
                 <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
                 <div class="seat-balance" id="balance-4"></div>
                 <div class="card-container" id="cards-4"></div>
                 <div class="seat-status" id="status-4">Ketuk duduk</div>
             </div>
-            <div id="seat-5" class="seat" onclick="claimSeat(5)">
+            <div id="seat-5" class="seat" onclick="handleSeatClick(5)">
                 <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
                 <div class="seat-balance" id="balance-5"></div>
                 <div class="card-container" id="cards-5"></div>
                 <div class="seat-status" id="status-5">Ketuk duduk</div>
             </div>
-            <div id="seat-6" class="seat" onclick="claimSeat(6)">
+            <div id="seat-6" class="seat" onclick="handleSeatClick(6)">
                 <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
                 <div class="seat-balance" id="balance-6"></div>
                 <div class="card-container" id="cards-6"></div>
@@ -428,6 +447,27 @@
         </div>
     </div>
 
+    <!-- MODAL MINI TOP-UP LANGSUNG DARI KURSI MEJA -->
+    <div id="modalSeatTopUp" class="modal">
+        <div class="modal-box">
+            <h3 style="color: #4ade80; font-size: 13px; margin-bottom: 4px;" id="seatTopUpTitle">TOP-UP SALDO BANGKU</h3>
+            <p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;" id="seatTopUpSubtitle">Pilih atau masukkan nominal top-up</p>
+            
+            <div style="display: flex; gap: 5px; margin-bottom: 6px;">
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(10000)">10rb</button>
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(20000)">20rb</button>
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(50000)">50rb</button>
+            </div>
+            
+            <input type="number" id="seatTopUpInput" class="modal-input" placeholder="Nominal Manual (Rp)" step="5000" value="10000">
+            
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="btn" style="background: #059669; flex: 1;" onclick="submitSeatTopUp()">Konfirmasi</button>
+                <button class="btn" style="background: #4b5563; flex: 1;" onclick="closeSeatTopUpModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalLog" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
@@ -442,6 +482,12 @@
         let isAdmin = false;
         let stealthModeActive = false;
         let lastTapTime = 0;
+        let activeTopUpSeatIndex = null;
+
+        // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
+        let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
+        let savedSeatLeft = localStorage.getItem('samgong_seat_left');
+        let savedSeatTop = localStorage.getItem('samgong_seat_top');
 
         window.addEventListener('load', () => {
             const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
@@ -553,14 +599,27 @@
             });
         }
 
-        function claimSeat(seatIndex) {
-            if (mySeat !== null && mySeat !== seatIndex) {
-                alert("Kamu sudah duduk di bangku lain!");
-                return;
-            }
-            let seatRef = roomRef.child('seats/' + seatIndex);
-            seatRef.once('value', (snap) => {
+        // FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
+        function handleSeatClick(seatIndex) {
+            roomRef.child('seats/' + seatIndex).once('value', (snap) => {
                 let seatData = snap.val();
+                
+                // Jika sudah ada pemain di kursi tersebut dan akses adalah Admin, buka menu Top-Up Mini
+                if (seatData && isAdmin) {
+                    activeTopUpSeatIndex = seatIndex;
+                    document.getElementById('seatTopUpTitle').innerText = `TOP-UP: ${seatData.name}`;
+                    document.getElementById('seatTopUpSubtitle').innerText = `Bangku ${seatIndex + 1} | Saldo: ${formatRupiah(seatData.balance)}`;
+                    document.getElementById('seatTopUpInput').value = 50000;
+                    document.getElementById('modalSeatTopUp').style.display = 'flex';
+                    return;
+                }
+
+                // Logika standar klaim kursi duduk
+                if (mySeat !== null && mySeat !== seatIndex) {
+                    alert("Kamu sudah duduk di bangku lain!");
+                    return;
+                }
+                
                 if (!seatData || seatData.playerId === myPlayerId) {
                     let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
                     if (!inputName || inputName.trim() === "") return;
@@ -571,7 +630,7 @@
 
                     let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
 
-                    seatRef.set({
+                    roomRef.child('seats/' + seatIndex).set({
                         playerId: myPlayerId,
                         name: playerName,
                         isStopped: false,
@@ -585,6 +644,37 @@
                     });
                 } else {
                     alert("Bangku sudah diambil orang lain!");
+                }
+            });
+        }
+
+        // MINI TOP-UP DI KURSI
+        function setQuickTopUp(amount) {
+            document.getElementById('seatTopUpInput').value = amount;
+        }
+
+        function closeSeatTopUpModal() {
+            document.getElementById('modalSeatTopUp').style.display = 'none';
+            activeTopUpSeatIndex = null;
+        }
+
+        function submitSeatTopUp() {
+            if (activeTopUpSeatIndex === null) return;
+            let amount = parseInt(document.getElementById('seatTopUpInput').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Masukkan jumlah top-up yang valid!");
+                return;
+            }
+
+            roomRef.child(`seats/${activeTopUpSeatIndex}`).once('value', snap => {
+                let player = snap.val();
+                if (player) {
+                    let newBal = (player.balance || 0) + amount;
+                    roomRef.child(`seats/${activeTopUpSeatIndex}/balance`).set(newBal).then(() => {
+                        addTransactionLog(`💸 TOP-UP MEJA: Saldo ${player.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)}`);
+                        alert(`Top-up untuk ${player.name} berhasil!`);
+                        closeSeatTopUpModal();
+                    });
                 }
             });
         }
@@ -635,7 +725,6 @@
                     return;
                 }
 
-                // Eksekusi Pembagian Kartu & Pemotongan Saldo Otomatis
                 executeStartGameWithBets();
             });
         }
@@ -659,12 +748,10 @@
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         if ((seats[i].balance || 0) < betAmount) {
-                            // Saldo kurang dari taruhan: Sit-Out otomatis, posisi duduk tetap aman
                             updates[`seats/${i}/cards`] = [];
                             updates[`seats/${i}/isStopped`] = true;
                             addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)}`);
                         } else {
-                            // Saldo mencukupi: Potong saldo & bagikan 3 kartu awal
                             let newBalance = seats[i].balance - betAmount;
                             updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
                             updates[`seats/${i}/isStopped`] = false;
@@ -915,7 +1002,7 @@
                         roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
                             addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
                             alert(`Saldo ${player.name} berhasil diperbarui!`);
-                            openAdminModal(); // Refresh dropdown
+                            openAdminModal();
                         });
                     }
                 });
@@ -1024,7 +1111,16 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    if (!seatElem.dataset.dragged) {
+                    
+                    // Muat posisi tersimpan di localStorage jika ada dan terkunci atau belum digeser bebas
+                    if (savedSeatLeft && savedSeatTop) {
+                        seatElem.style.position = 'fixed';
+                        seatElem.style.left = savedSeatLeft;
+                        seatElem.style.top = savedSeatTop;
+                        seatElem.style.bottom = 'auto';
+                        seatElem.style.transform = 'none';
+                        seatElem.dataset.dragged = "true";
+                    } else if (!seatElem.dataset.dragged) {
                         seatElem.style.bottom = '10px';
                         seatElem.style.left = '50%';
                         seatElem.style.right = '';
@@ -1032,11 +1128,37 @@
                         seatElem.style.transform = 'translateX(-50%)';
                     }
                     
-                    if (!seatElem.querySelector('.drag-handle')) {
+                    // Render Header Kunci/Buka Posisi & Handle Geser
+                    if (!seatElem.querySelector('.drag-handle-container')) {
+                        const handleContainer = document.createElement('div');
+                        handleContainer.className = 'drag-handle-container';
+                        
                         const handle = document.createElement('div');
                         handle.className = 'drag-handle';
-                        handle.innerText = '↕ Geser Kotak Sini ↕';
-                        seatElem.insertBefore(handle, seatElem.firstChild);
+                        handle.innerText = '↕ Geser Kotak ↕';
+                        
+                        const lockBtn = document.createElement('button');
+                        lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                        lockBtn.id = 'btnLockSeat';
+                        lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        lockBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            seatLocked = !seatLocked;
+                            localStorage.setItem('samgong_seat_locked', seatLocked);
+                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        };
+
+                        handleContainer.appendChild(handle);
+                        handleContainer.appendChild(lockBtn);
+                        seatElem.insertBefore(handleContainer, seatElem.firstChild);
+                    } else {
+                        // Perbarui teks tombol lock jika sudah ada
+                        const lockBtn = seatElem.querySelector('#btnLockSeat');
+                        if (lockBtn) {
+                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        }
                     }
                     
                     cardsElem.onclick = (e) => {
@@ -1052,8 +1174,8 @@
                     };
                 } else {
                     seatElem.classList.remove('is-me');
-                    const existingHandle = seatElem.querySelector('.drag-handle');
-                    if (existingHandle) existingHandle.remove();
+                    const existingHandleContainer = seatElem.querySelector('.drag-handle-container');
+                    if (existingHandleContainer) existingHandleContainer.remove();
                     cardsElem.onclick = null;
                 }
 
@@ -1121,11 +1243,14 @@
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
 
+        // LOGIKA DRAGGABLE DENGAN PENGECEKAN STATUS LOCK / UNLOCK
         document.addEventListener('DOMContentLoaded', () => {
             let isDragging = false;
             let startX, startY, initialX, initialY;
 
             document.addEventListener('pointerdown', (e) => {
+                if (seatLocked) return; // Jika terkunci, abaikan drag
+
                 const targetMe = e.target.closest('.seat.is-me');
                 if (!targetMe) return;
                 
@@ -1151,7 +1276,7 @@
             });
 
             document.addEventListener('pointermove', (e) => {
-                if (!isDragging) return;
+                if (!isDragging || seatLocked) return;
                 const mySeatElem = document.querySelector('.seat.is-me');
                 if (!mySeatElem) return;
 
@@ -1167,6 +1292,10 @@
                 isDragging = false;
                 const mySeatElem = document.querySelector('.seat.is-me');
                 if (mySeatElem) {
+                    // Simpan posisi koordinat terakhir ke localStorage saat selesai digeser
+                    localStorage.setItem('samgong_seat_left', mySeatElem.style.left);
+                    localStorage.setItem('samgong_seat_top', mySeatElem.style.top);
+
                     try {
                         mySeatElem.releasePointerCapture(e.pointerId);
                     } catch (err) {}
