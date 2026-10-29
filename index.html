@@ -465,6 +465,22 @@
                 <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
             </div>
 
+            <!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
+                <select id="adminSelectResetSeat" class="modal-input">
+                    <option value="">-- Pilih Bangku --</option>
+                    <option value="0">Bangku 1</option>
+                    <option value="1">Bangku 2</option>
+                    <option value="2">Bangku 3</option>
+                    <option value="3">Bangku 4</option>
+                    <option value="4">Bangku 5</option>
+                    <option value="5">Bangku 6</option>
+                    <option value="6">Bangku 7</option>
+                </select>
+                <button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
+            </div>
+
             <button class="btn" style="background: #4b5563; width: 100%; margin-top: 4px;" onclick="closeAdminModal()">Tutup</button>
         </div>
     </div>
@@ -588,6 +604,8 @@
                         }
                     }
                     mySeat = foundMySeat;
+                } else {
+                    mySeat = null;
                 }
                 updateUI(data);
             } else {
@@ -998,11 +1016,17 @@
                 let selectDeduct = document.getElementById('adminSelectPlayerDeduct');
                 selectDeduct.innerHTML = '<option value="">-- Pilih Pemain --</option>';
 
+                let selectReset = document.getElementById('adminSelectResetSeat');
+                selectReset.innerHTML = '<option value="">-- Pilih Bangku --</option>';
+
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
                         let optHtml = `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
                         select.innerHTML += optHtml;
                         selectDeduct.innerHTML += optHtml;
+                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (${seats[i].name})</option>`;
+                    } else {
+                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (Kosong)</option>`;
                     }
                 }
                 document.getElementById('modalAdmin').style.display = 'flex';
@@ -1062,7 +1086,7 @@
                     if (player) {
                         let currentBal = player.balance || 0;
                         let newBal = currentBal - amount;
-                        if (newBal < 0) newBal = 0; // Batasi minimal saldo 0 atau biarkan negatif sesuai fleksibilitas
+                        if (newBal < 0) newBal = 0;
 
                         roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
                             addTransactionLog(`🔻 ADMIN KOREKSI/PENGURANGAN: Saldo ${player.name} dikurangi ${formatRupiah(amount)}. Sisa Saldo: ${formatRupiah(newBal)}`);
@@ -1070,6 +1094,30 @@
                             openAdminModal();
                         });
                     }
+                });
+            }
+        }
+
+        // FUNGSI RESET / KELUAR BANGKU (BERDIRI) KHUSUS ADMIN
+        function submitAdminResetSeat() {
+            let seatIdx = document.getElementById('adminSelectResetSeat').value;
+            if (seatIdx === "") {
+                alert("Pilih bangku yang ingin direset!");
+                return;
+            }
+
+            let seatNum = parseInt(seatIdx) + 1;
+            if (confirm(`Konfirmasi: Kosongkan / berdirikan pemain di Bangku ${seatNum}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    let playerName = player ? player.name : `Bangku ${seatNum}`;
+                    
+                    // Menghapus data bangku dari Firebase untuk mengosongkan status & memori ID perangkat
+                    roomRef.child(`seats/${seatIdx}`).remove().then(() => {
+                        addTransactionLog(`🚪 ADMIN RESET: ${playerName} dikeluarkan dari Bangku ${seatNum} (Bangku dikosongkan)`);
+                        alert(`Bangku ${seatNum} berhasil dikosongkan!`);
+                        closeAdminModal();
+                    });
                 });
             }
         }
@@ -1177,7 +1225,6 @@
                 if (isMe) {
                     seatElem.classList.add('is-me');
                     
-                    // Muat posisi tersimpan di localStorage jika ada dan terkunci atau belum digeser bebas
                     if (savedSeatLeft && savedSeatTop) {
                         seatElem.style.position = 'fixed';
                         seatElem.style.left = savedSeatLeft;
@@ -1193,7 +1240,6 @@
                         seatElem.style.transform = 'translateX(-50%)';
                     }
                     
-                    // Render Header Kunci/Buka Posisi & Handle Geser
                     if (!seatElem.querySelector('.drag-handle-container')) {
                         const handleContainer = document.createElement('div');
                         handleContainer.className = 'drag-handle-container';
@@ -1218,7 +1264,6 @@
                         handleContainer.appendChild(lockBtn);
                         seatElem.insertBefore(handleContainer, seatElem.firstChild);
                     } else {
-                        // Perbarui teks tombol lock jika sudah ada
                         const lockBtn = seatElem.querySelector('#btnLockSeat');
                         if (lockBtn) {
                             lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
@@ -1314,7 +1359,7 @@
             let startX, startY, initialX, initialY;
 
             document.addEventListener('pointerdown', (e) => {
-                if (seatLocked) return; // Jika terkunci, abaikan drag
+                if (seatLocked) return;
 
                 const targetMe = e.target.closest('.seat.is-me');
                 if (!targetMe) return;
@@ -1357,7 +1402,6 @@
                 isDragging = false;
                 const mySeatElem = document.querySelector('.seat.is-me');
                 if (mySeatElem) {
-                    // Simpan posisi koordinat terakhir ke localStorage saat selesai digeser
                     localStorage.setItem('samgong_seat_left', mySeatElem.style.left);
                     localStorage.setItem('samgong_seat_top', mySeatElem.style.top);
 
