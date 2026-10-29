@@ -435,7 +435,7 @@
 
     <!-- PANEL ADMIN TERPUSAT -->
     <div id="modalAdmin" class="modal">
-        <div class="modal-box">
+        <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
             
             <!-- SEKSI SETTING TARUHAN -->
@@ -446,7 +446,7 @@
             </div>
 
             <!-- SEKSI TOP UP SALDO -->
-            <div style="background: #1f2937; padding: 8px; border-radius: 6px; text-align: left;">
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
                 <select id="adminSelectPlayer" class="modal-input">
                     <option value="">-- Pilih Pemain --</option>
@@ -455,7 +455,17 @@
                 <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
             </div>
 
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 10px;" onclick="closeAdminModal()">Tutup</button>
+            <!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
+                <select id="adminSelectPlayerDeduct" class="modal-input">
+                    <option value="">-- Pilih Pemain --</option>
+                </select>
+                <input type="number" id="adminDeductAmount" class="modal-input" placeholder="Jumlah Pengurangan Saldo (Rp)" value="10000" step="1000">
+                <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
+            </div>
+
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 4px;" onclick="closeAdminModal()">Tutup</button>
         </div>
     </div>
 
@@ -984,9 +994,15 @@
                 
                 let select = document.getElementById('adminSelectPlayer');
                 select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+
+                let selectDeduct = document.getElementById('adminSelectPlayerDeduct');
+                selectDeduct.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        select.innerHTML += `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
+                        let optHtml = `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
+                        select.innerHTML += optHtml;
+                        selectDeduct.innerHTML += optHtml;
                     }
                 }
                 document.getElementById('modalAdmin').style.display = 'flex';
@@ -1023,6 +1039,34 @@
                         roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
                             addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
                             alert(`Saldo ${player.name} berhasil diperbarui!`);
+                            openAdminModal();
+                        });
+                    }
+                });
+            }
+        }
+
+        // FUNGSI PENGURANGAN SALDO FLEKSIBEL / MANUAL OLEH ADMIN
+        function submitAdminDeduct() {
+            let seatIdx = document.getElementById('adminSelectPlayerDeduct').value;
+            let amount = parseInt(document.getElementById('adminDeductAmount').value);
+
+            if (seatIdx === "" || isNaN(amount) || amount <= 0) {
+                alert("Pilih pemain dan masukkan jumlah pengurangan saldo yang valid!");
+                return;
+            }
+
+            if (confirm(`Konfirmasi Pengurangan Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    if (player) {
+                        let currentBal = player.balance || 0;
+                        let newBal = currentBal - amount;
+                        if (newBal < 0) newBal = 0; // Batasi minimal saldo 0 atau biarkan negatif sesuai fleksibilitas
+
+                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
+                            addTransactionLog(`🔻 ADMIN KOREKSI/PENGURANGAN: Saldo ${player.name} dikurangi ${formatRupiah(amount)}. Sisa Saldo: ${formatRupiah(newBal)}`);
+                            alert(`Saldo ${player.name} berhasil dikurangi! Sisa saldo: ${formatRupiah(newBal)}`);
                             openAdminModal();
                         });
                     }
