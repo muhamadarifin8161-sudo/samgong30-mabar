@@ -340,6 +340,18 @@
 </head>
 <body>
 
+    <!-- POPUP GATEKEEPER LOGIN (BESAR, SERAM & TEGAS) -->
+    <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
+        <div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
+            <div style="font-size: 45px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">💀</div>
+            <h2 style="color: #ef4444; font-size: 14px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">ANAK ANAK DILARANG COBA COBA</h2>
+            <p style="font-size: 10px; color: #9ca3af; margin-bottom: 10px;">Masukkan sandi akses untuk melanjutkan ke meja permainan:</p>
+            <input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
+            <div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
+            <button class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 8px;" onclick="validateGatekeeperLogin()">MASUK KE MEJA</button>
+        </div>
+    </div>
+
     <div class="top-bar">
         <div>
             <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
@@ -489,11 +501,28 @@
         let savedSeatLeft = localStorage.getItem('samgong_seat_left');
         let savedSeatTop = localStorage.getItem('samgong_seat_top');
 
-        window.addEventListener('load', () => {
-            const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
-            if (secretPass === "mstr890") {
+        // Validasi Gatekeeper Login Sandi Masuk
+        function validateGatekeeperLogin() {
+            const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
+            const errorText = document.getElementById('gatekeeperErrorText');
+
+            if (passInput === "12346") {
                 isAdmin = true;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            } else if (passInput === "12345") {
+                isAdmin = false;
+                document.getElementById('btnTopAdmin').style.display = 'none';
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            } else {
+                errorText.innerText = "Sandi Salah!";
+            }
+        }
+
+        // Support Enter key di input password gatekeeper
+        document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                validateGatekeeperLogin();
             }
         });
 
@@ -505,17 +534,9 @@
         }
         const db = firebase.database();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let roomId = urlParams.get('room') || window.location.hash.replace('#', '').trim();
-        
-        if (!roomId || roomId.length < 3) {
-            roomId = 'room-' + Math.random().toString(36).substring(2, 8);
-            window.location.search = `?room=${roomId}`;
-        } else if (!window.location.search.includes('room=')) {
-            window.location.hash = roomId;
-        }
-
-        document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
+        // Sistem Tunggal Link/Room Permanen Terpusat
+        let roomId = 'samgong-juara-pusat';
+        document.getElementById('roomDisplayLabel').innerText = `Room: Utama`;
 
         let myPlayerId = localStorage.getItem('samgong_pid');
         if (!myPlayerId) {
@@ -592,7 +613,7 @@
         });
 
         function copyWhatsAppLink() {
-            const shareUrl = window.location.origin + window.location.pathname + `?room=${roomId}`;
+            const shareUrl = window.location.origin + window.location.pathname;
             const message = `Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
             navigator.clipboard.writeText(message).then(() => {
                 alert("Link mabar berhasil disalin! Kirim ke WhatsApp.");
