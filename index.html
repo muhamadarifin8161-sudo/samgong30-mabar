@@ -560,7 +560,7 @@
         let currentRoomKey = 'room1';
         let roomRef = null;
 
-        // Auto-detect room dari parameter URL secara otomatis (?room=1, ?room=2, ?room=3, atau ?room=4). Default ke room1 jika tidak ada/tidak valid.
+        // Auto-detect room dari parameter URL secara otomatis (?room=1, ?room=2, ?room=3, atau ?room=4)
         const urlParams = new URLSearchParams(window.location.search);
         const urlRoom = urlParams.get('room');
         if (urlRoom && ['1','2','3','4'].includes(urlRoom)) {
@@ -568,18 +568,22 @@
         } else {
             currentRoomKey = 'room1';
         }
-        // Set nilai dropdown tersembunyi agar tetap sinkron jika dibutuhkan sistem
         document.getElementById('gatekeeperRoomSelect').value = currentRoomKey;
 
         function validateGatekeeperLogin() {
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
-            const selectedRoom = currentRoomKey; // Menggunakan room otomatis dari URL
             const errorText = document.getElementById('gatekeeperErrorText');
+
+            // Memastikan room dari URL tetap terkunci secara mutlak saat tombol login ditekan
+            const checkUrlParams = new URLSearchParams(window.location.search);
+            const checkUrlRoom = checkUrlParams.get('room');
+            if (checkUrlRoom && ['1','2','3','4'].includes(checkUrlRoom)) {
+                currentRoomKey = 'room' + checkUrlRoom;
+            }
 
             if (passInput === "123098") { // Super Admin
                 isSuperAdmin = true;
                 isRoomAdmin = true;
-                currentRoomKey = selectedRoom;
                 document.getElementById('btnTopSuper').style.display = 'inline-block';
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
@@ -587,7 +591,6 @@
             } else if (passInput === "asd1234") { // Admin Room
                 isSuperAdmin = false;
                 isRoomAdmin = true;
-                currentRoomKey = selectedRoom;
                 document.getElementById('btnTopSuper').style.display = 'none';
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
@@ -595,7 +598,6 @@
             } else if (passInput === "12345") { // Pemain
                 isSuperAdmin = false;
                 isRoomAdmin = false;
-                currentRoomKey = selectedRoom;
                 document.getElementById('btnTopSuper').style.display = 'none';
                 document.getElementById('btnTopAdmin').style.display = 'none';
                 document.getElementById('modalGatekeeper').style.display = 'none';
