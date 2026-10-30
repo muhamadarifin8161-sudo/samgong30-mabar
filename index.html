@@ -354,8 +354,8 @@
             <div style="font-size: 45px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">💀</div>
             <h2 style="color: #ef4444; font-size: 14px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px;">GATEKEEPER ACCESS</h2>
             
-            <p style="font-size: 10px; color: #9ca3af; margin-bottom: 6px;">Pilih Room Permainan:</p>
-            <select id="gatekeeperRoomSelect" class="modal-input" style="text-align: center; font-weight: bold; margin-top: 0;">
+            <!-- Dropdown pemilihan room disembunyikan/dihapus agar otomatis membaca URL -->
+            <select id="gatekeeperRoomSelect" class="modal-input" style="display: none;">
                 <option value="room1">Meja 1 (Room Utama)</option>
                 <option value="room2">Meja 2</option>
                 <option value="room3">Meja 3</option>
@@ -373,7 +373,7 @@
         <div class="top-actions">
             <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
             <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin Room</button>
-            <button id="btnTopSuper" class="btn-top-super" onclick="openSuperAdminModal()">Cek Room</button>
+            <button id="btnTopSuper" class="btn-top-super" onclick="openSuperAdminModal()">Penyewa</button>
         </div>
         <div style="text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
@@ -560,17 +560,20 @@
         let currentRoomKey = 'room1';
         let roomRef = null;
 
-        // Auto-detect room dari parameter URL jika ada (?room=2)
+        // Auto-detect room dari parameter URL secara otomatis (?room=1, ?room=2, ?room=3, atau ?room=4). Default ke room1 jika tidak ada/tidak valid.
         const urlParams = new URLSearchParams(window.location.search);
         const urlRoom = urlParams.get('room');
         if (urlRoom && ['1','2','3','4'].includes(urlRoom)) {
             currentRoomKey = 'room' + urlRoom;
-            document.getElementById('gatekeeperRoomSelect').value = currentRoomKey;
+        } else {
+            currentRoomKey = 'room1';
         }
+        // Set nilai dropdown tersembunyi agar tetap sinkron jika dibutuhkan sistem
+        document.getElementById('gatekeeperRoomSelect').value = currentRoomKey;
 
         function validateGatekeeperLogin() {
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
-            const selectedRoom = document.getElementById('gatekeeperRoomSelect').value;
+            const selectedRoom = currentRoomKey; // Menggunakan room otomatis dari URL
             const errorText = document.getElementById('gatekeeperErrorText');
 
             if (passInput === "123098") { // Super Admin
