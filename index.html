@@ -63,6 +63,28 @@
         }
         .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        .btn-top-admin {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+        }
+        .btn-top-log {
+            background: #4b5563;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .table-area {
             position: relative;
             flex-grow: 1;
@@ -95,14 +117,24 @@
             border: 1px solid rgba(34, 197, 94, 0.4);
             text-align: center;
             z-index: 5;
-            max-width: 180px;
+            max-width: 190px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             align-items: center;
         }
         .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
+
+        .pot-display {
+            font-size: 11px;
+            color: #4ade80;
+            font-weight: bold;
+            background: rgba(6, 78, 59, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #10b981;
+        }
 
         .seat {
             position: absolute;
@@ -120,19 +152,54 @@
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
         .seat.is-me {
-            width: 180px;
+            width: 240px;
             border-color: #059669;
-            padding: 8px;
+            padding: 10px;
             z-index: 25;
             position: absolute;
-            bottom: 2px;
+            bottom: 10px;
             left: 50%;
-            transform: translateX(-50%) !important;
+            transform: translateX(-50%);
             background: #0f172a;
-            box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.8);
+            touch-action: none;
+            cursor: grab;
+        }
+        .seat.is-me:active {
+            cursor: grabbing;
+        }
+        .drag-handle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+        .drag-handle {
+            font-size: 8px;
+            color: #38bdf8;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 2px 4px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        .btn-lock-seat {
+            font-size: 8px;
+            background: #374151;
+            color: #f3f4f6;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-lock-seat.locked {
+            background: #b91c1c;
+            color: white;
         }
 
         .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seat-balance { font-size: 8px; color: #facc15; font-weight: bold; }
         .seat-status { 
             font-size: 7px; 
             color: #38bdf8; 
@@ -191,13 +258,13 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        /* Tampilan Kartu Pribadi Diperbesar 2x Lipat di Tengah Bawah */
-        .seat.is-me .card-container { height: 85px; }
-        .seat.is-me .card { width: 54px; height: 78px; font-size: 15px; margin-left: -16px; padding: 4px 5px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
-        .seat.is-me .card .card-center { font-size: 26px; }
-        .seat.is-me .seat-name { font-size: 11px; }
-        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        .seat.is-me .card-container { height: 100px; margin: 5px 0; }
+        .seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
+        .seat.is-me .card .card-center { font-size: 32px; }
+        .seat.is-me .seat-name { font-size: 12px; }
+        .seat.is-me .seat-balance { font-size: 11px; }
+        .seat.is-me .seat-status { font-size: 11px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -241,20 +308,61 @@
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
             align-items: center; justify-content: center; z-index: 50; padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 290px; width: 100%; }
+        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 320px; width: 100%; }
+
+        .modal-input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .log-container {
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 10px;
+            background: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #1e293b;
+        }
+        .log-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #1e293b;
+            color: #cbd5e1;
+        }
+        .log-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
+    <!-- POPUP GATEKEEPER LOGIN (BESAR, SERAM & TEGAS) -->
+    <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
+        <div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
+            <div style="font-size: 45px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">💀</div>
+            <h2 style="color: #ef4444; font-size: 14px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">ANAK ANAK DILARANG COBA COBA</h2>
+            <p style="font-size: 10px; color: #9ca3af; margin-bottom: 10px;">Masukkan sandi akses untuk melanjutkan ke meja permainan:</p>
+            <input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
+            <div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
+            <button class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 8px;" onclick="validateGatekeeperLogin()">MASUK KE MEJA</button>
+        </div>
+    </div>
+
     <div class="top-bar">
         <div>
             <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
+            <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin</button>
         </div>
         <div style="text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
             <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
+            <button class="btn-top-log" onclick="openLogModal()">Riwayat</button>
             <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
         </div>
     </div>
@@ -264,41 +372,48 @@
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
                 <div id="turnStatusText">Silakan Pilih Bangku</div>
+                <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
             </div>
 
-            <!-- Penomoran Bangku 1 s.d. 7 (Indeks Internal 0 s.d. 6) -->
-            <div id="seat-0" class="seat" onclick="claimSeat(0)">
+            <div id="seat-0" class="seat" onclick="handleSeatClick(0)">
                 <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
+                <div class="seat-balance" id="balance-0"></div>
                 <div class="card-container" id="cards-0"></div>
                 <div class="seat-status" id="status-0">Ketuk duduk</div>
             </div>
-            <div id="seat-1" class="seat" onclick="claimSeat(1)">
+            <div id="seat-1" class="seat" onclick="handleSeatClick(1)">
                 <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
+                <div class="seat-balance" id="balance-1"></div>
                 <div class="card-container" id="cards-1"></div>
                 <div class="seat-status" id="status-1">Ketuk duduk</div>
             </div>
-            <div id="seat-2" class="seat" onclick="claimSeat(2)">
+            <div id="seat-2" class="seat" onclick="handleSeatClick(2)">
                 <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
+                <div class="seat-balance" id="balance-2"></div>
                 <div class="card-container" id="cards-2"></div>
                 <div class="seat-status" id="status-2">Ketuk duduk</div>
             </div>
-            <div id="seat-3" class="seat" onclick="claimSeat(3)">
+            <div id="seat-3" class="seat" onclick="handleSeatClick(3)">
                 <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
+                <div class="seat-balance" id="balance-3"></div>
                 <div class="card-container" id="cards-3"></div>
                 <div class="seat-status" id="status-3">Ketuk duduk</div>
             </div>
-            <div id="seat-4" class="seat" onclick="claimSeat(4)">
+            <div id="seat-4" class="seat" onclick="handleSeatClick(4)">
                 <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
+                <div class="seat-balance" id="balance-4"></div>
                 <div class="card-container" id="cards-4"></div>
                 <div class="seat-status" id="status-4">Ketuk duduk</div>
             </div>
-            <div id="seat-5" class="seat" onclick="claimSeat(5)">
+            <div id="seat-5" class="seat" onclick="handleSeatClick(5)">
                 <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
+                <div class="seat-balance" id="balance-5"></div>
                 <div class="card-container" id="cards-5"></div>
                 <div class="seat-status" id="status-5">Ketuk duduk</div>
             </div>
-            <div id="seat-6" class="seat" onclick="claimSeat(6)">
+            <div id="seat-6" class="seat" onclick="handleSeatClick(6)">
                 <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
+                <div class="seat-balance" id="balance-6"></div>
                 <div class="card-container" id="cards-6"></div>
                 <div class="seat-status" id="status-6">Ketuk duduk</div>
             </div>
@@ -318,15 +433,128 @@
         </div>
     </div>
 
+    <!-- PANEL ADMIN TERPUSAT -->
+    <div id="modalAdmin" class="modal">
+        <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
+            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
+            
+            <!-- SEKSI SETTING TARUHAN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
+                <input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
+                <button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
+            </div>
+
+            <!-- SEKSI TOP UP SALDO -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
+                <select id="adminSelectPlayer" class="modal-input">
+                    <option value="">-- Pilih Pemain --</option>
+                </select>
+                <input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
+                <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
+            </div>
+
+            <!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
+                <select id="adminSelectPlayerDeduct" class="modal-input">
+                    <option value="">-- Pilih Pemain --</option>
+                </select>
+                <input type="number" id="adminDeductAmount" class="modal-input" placeholder="Jumlah Pengurangan Saldo (Rp)" value="10000" step="1000">
+                <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
+            </div>
+
+            <!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
+            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
+                <select id="adminSelectResetSeat" class="modal-input">
+                    <option value="">-- Pilih Bangku --</option>
+                    <option value="0">Bangku 1</option>
+                    <option value="1">Bangku 2</option>
+                    <option value="2">Bangku 3</option>
+                    <option value="3">Bangku 4</option>
+                    <option value="4">Bangku 5</option>
+                    <option value="5">Bangku 6</option>
+                    <option value="6">Bangku 7</option>
+                </select>
+                <button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
+            </div>
+
+            <!-- SEKSI TOMBOL RESET TOTAL ROOM BARU KHUSUS ADMIN -->
+            <div style="background: #2d1215; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #7f1d1d; text-align: left;">
+                <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Zona Bahaya Admin:</label>
+                <button class="btn" style="background: #831843; border: 1px solid #f43f5e; width: 100%; font-size: 10px; padding: 8px; font-weight: bold;" onclick="submitAdminResetTotalRoom()">⚠️ RESET TOTAL ROOM (KOSONGKAN SEMUA)</button>
+            </div>
+
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 4px;" onclick="closeAdminModal()">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL MINI TOP-UP LANGSUNG DARI KURSI MEJA -->
+    <div id="modalSeatTopUp" class="modal">
+        <div class="modal-box">
+            <h3 style="color: #4ade80; font-size: 13px; margin-bottom: 4px;" id="seatTopUpTitle">TOP-UP SALDO BANGKU</h3>
+            <p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;" id="seatTopUpSubtitle">Pilih atau masukkan nominal top-up</p>
+            
+            <div style="display: flex; gap: 5px; margin-bottom: 6px;">
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(10000)">10rb</button>
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(20000)">20rb</button>
+                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(50000)">50rb</button>
+            </div>
+            
+            <input type="number" id="seatTopUpInput" class="modal-input" placeholder="Nominal Manual (Rp)" step="5000" value="10000">
+            
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="btn" style="background: #059669; flex: 1;" onclick="submitSeatTopUp()">Konfirmasi</button>
+                <button class="btn" style="background: #4b5563; flex: 1;" onclick="closeSeatTopUpModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalLog" class="modal">
+        <div class="modal-box">
+            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
+            <div class="log-container" id="logContainer">
+                <div class="log-item">Belum ada catatan transaksi.</div>
+            </div>
+            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeLogModal()">Tutup</button>
+        </div>
+    </div>
+
     <script>
         let isAdmin = false;
         let stealthModeActive = false;
         let lastTapTime = 0;
+        let activeTopUpSeatIndex = null;
 
-        window.addEventListener('load', () => {
-            const secretPass = prompt("Akses Sistem (Kosongkan jika pemain biasa):");
-            if (secretPass === "mstr890") {
+        // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
+        let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
+        let savedSeatLeft = localStorage.getItem('samgong_seat_left');
+        let savedSeatTop = localStorage.getItem('samgong_seat_top');
+
+        // Validasi Gatekeeper Login Sandi Masuk
+        function validateGatekeeperLogin() {
+            const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
+            const errorText = document.getElementById('gatekeeperErrorText');
+
+            if (passInput === "12346") {
                 isAdmin = true;
+                document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            } else if (passInput === "12345") {
+                isAdmin = false;
+                document.getElementById('btnTopAdmin').style.display = 'none';
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            } else {
+                errorText.innerText = "Sandi Salah!";
+            }
+        }
+
+        // Support Enter key di input password gatekeeper
+        document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                validateGatekeeperLogin();
             }
         });
 
@@ -338,17 +566,9 @@
         }
         const db = firebase.database();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let roomId = urlParams.get('room') || window.location.hash.replace('#', '').trim();
-        
-        if (!roomId || roomId.length < 3) {
-            roomId = 'room-' + Math.random().toString(36).substring(2, 8);
-            window.location.search = `?room=${roomId}`;
-        } else if (!window.location.search.includes('room=')) {
-            window.location.hash = roomId;
-        }
-
-        document.getElementById('roomDisplayLabel').innerText = `Room: ${roomId}`;
+        // Sistem Tunggal Link/Room Permanen Terpusat
+        let roomId = 'samgong-juara-pusat';
+        document.getElementById('roomDisplayLabel').innerText = `Room: Utama`;
 
         let myPlayerId = localStorage.getItem('samgong_pid');
         if (!myPlayerId) {
@@ -364,10 +584,23 @@
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
+        function formatRupiah(amount) {
+            let val = Math.floor(amount || 0);
+            return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function addTransactionLog(message) {
+            let logRef = roomRef.child('logs').push();
+            let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            logRef.set({
+                text: `[${timestamp}] ${message}`,
+                time: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Auto-Reconnect Check
                 if (data.seats) {
                     let foundMySeat = null;
                     for (let i = 0; i < 7; i++) {
@@ -377,32 +610,71 @@
                         }
                     }
                     mySeat = foundMySeat;
+                } else {
+                    mySeat = null;
                 }
                 updateUI(data);
             } else {
-                roomRef.set({ currentTurn: 0, isShowdown: false, lastWinnerSeat: 0, seats: {} });
+                roomRef.set({ 
+                    currentTurn: 0, 
+                    isShowdown: false, 
+                    lastWinnerSeat: 0, 
+                    seats: {},
+                    pot: 0,
+                    currentBet: 10000,
+                    gameStarted: false
+                });
             }
         }, (error) => {
             console.error("Firebase Error:", error);
             document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
         });
 
+        roomRef.child('logs').limitToLast(20).on('value', (snap) => {
+            let logsData = snap.val();
+            let logContainer = document.getElementById('logContainer');
+            if (!logsData) {
+                logContainer.innerHTML = '<div class="log-item">Belum ada catatan transaksi.</div>';
+                return;
+            }
+            let html = '';
+            let items = Object.values(logsData);
+            items.reverse();
+            items.forEach(item => {
+                html += `<div class="log-item">${item.text}</div>`;
+            });
+            logContainer.innerHTML = html;
+        });
+
         function copyWhatsAppLink() {
-            const shareUrl = window.location.origin + window.location.pathname + `?room=${roomId}`;
+            const shareUrl = window.location.origin + window.location.pathname;
             const message = `Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
             navigator.clipboard.writeText(message).then(() => {
                 alert("Link mabar berhasil disalin! Kirim ke WhatsApp.");
             });
         }
 
-        function claimSeat(seatIndex) {
-            if (mySeat !== null && mySeat !== seatIndex) {
-                alert("Kamu sudah duduk di bangku lain!");
-                return;
-            }
-            let seatRef = roomRef.child('seats/' + seatIndex);
-            seatRef.once('value', (snap) => {
+        // FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
+        function handleSeatClick(seatIndex) {
+            roomRef.child('seats/' + seatIndex).once('value', (snap) => {
                 let seatData = snap.val();
+                
+                // Jika sudah ada pemain di kursi tersebut dan akses adalah Admin, buka menu Top-Up Mini
+                if (seatData && isAdmin) {
+                    activeTopUpSeatIndex = seatIndex;
+                    document.getElementById('seatTopUpTitle').innerText = `TOP-UP: ${seatData.name}`;
+                    document.getElementById('seatTopUpSubtitle').innerText = `Bangku ${seatIndex + 1} | Saldo: ${formatRupiah(seatData.balance)}`;
+                    document.getElementById('seatTopUpInput').value = 50000;
+                    document.getElementById('modalSeatTopUp').style.display = 'flex';
+                    return;
+                }
+
+                // Logika standar klaim kursi duduk
+                if (mySeat !== null && mySeat !== seatIndex) {
+                    alert("Kamu sudah duduk di bangku lain!");
+                    return;
+                }
+                
                 if (!seatData || seatData.playerId === myPlayerId) {
                     let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
                     if (!inputName || inputName.trim() === "") return;
@@ -411,16 +683,53 @@
                     localStorage.setItem('samgong_pname', playerName);
                     savedMyName = playerName;
 
-                    seatRef.set({
+                    let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
+
+                    roomRef.child('seats/' + seatIndex).set({
                         playerId: myPlayerId,
                         name: playerName,
                         isStopped: false,
+                        balance: initialBalance,
                         cards: seatData && seatData.cards ? seatData.cards : []
                     }).then(() => {
                         mySeat = seatIndex;
+                        if (!seatData) {
+                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0`);
+                        }
                     });
                 } else {
                     alert("Bangku sudah diambil orang lain!");
+                }
+            });
+        }
+
+        // MINI TOP-UP DI KURSI
+        function setQuickTopUp(amount) {
+            document.getElementById('seatTopUpInput').value = amount;
+        }
+
+        function closeSeatTopUpModal() {
+            document.getElementById('modalSeatTopUp').style.display = 'none';
+            activeTopUpSeatIndex = null;
+        }
+
+        function submitSeatTopUp() {
+            if (activeTopUpSeatIndex === null) return;
+            let amount = parseInt(document.getElementById('seatTopUpInput').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Masukkan jumlah top-up yang valid!");
+                return;
+            }
+
+            roomRef.child(`seats/${activeTopUpSeatIndex}`).once('value', snap => {
+                let player = snap.val();
+                if (player) {
+                    let newBal = (player.balance || 0) + amount;
+                    roomRef.child(`seats/${activeTopUpSeatIndex}/balance`).set(newBal).then(() => {
+                        addTransactionLog(`💸 TOP-UP MEJA: Saldo ${player.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)}`);
+                        alert(`Top-up untuk ${player.name} berhasil!`);
+                        closeSeatTopUpModal();
+                    });
                 }
             });
         }
@@ -442,7 +751,40 @@
             return parseInt(cardVal);
         }
 
+        // ALUR KONTROL ADMIN TERPUSAT KETIKA MULAI GAME
         function startNewGame() {
+            roomRef.once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const seats = data.seats || {};
+                const betAmount = data.currentBet || 10000;
+
+                let activeSeatsCount = 0;
+                let eligiblePlayersCount = 0;
+
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        activeSeatsCount++;
+                        if ((seats[i].balance || 0) >= betAmount) {
+                            eligiblePlayersCount++;
+                        }
+                    }
+                }
+
+                if (activeSeatsCount === 0) {
+                    alert("Belum ada pemain di meja!");
+                    return;
+                }
+
+                if (eligiblePlayersCount === 0) {
+                    alert(`Tidak ada pemain dengan saldo yang cukup untuk taruhan (${formatRupiah(betAmount)}). Minta Admin mengisi saldo!`);
+                    return;
+                }
+
+                executeStartGameWithBets();
+            });
+        }
+
+        function executeStartGameWithBets() {
             let deck = [];
             for (let suit of suits) {
                 for (let val of values) {
@@ -454,36 +796,46 @@
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const seats = data.seats || {};
+                const betAmount = data.currentBet || 10000;
                 let updates = {};
-                let activeCount = 0;
+                let totalPotCollected = 0;
 
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
-                        updates[`seats/${i}/isStopped`] = false;
-                        activeCount++;
+                        if ((seats[i].balance || 0) < betAmount) {
+                            updates[`seats/${i}/cards`] = [];
+                            updates[`seats/${i}/isStopped`] = true;
+                            addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)}`);
+                        } else {
+                            let newBalance = seats[i].balance - betAmount;
+                            updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
+                            updates[`seats/${i}/isStopped`] = false;
+                            updates[`seats/${i}/balance`] = newBalance;
+                            totalPotCollected += betAmount;
+                        }
                     }
-                }
-                if (activeCount === 0) {
-                    alert("Belum ada pemain di meja!");
-                    return;
                 }
 
                 let startSeat = data.lastWinnerSeat ?? 0;
-                if (!seats[startSeat]) {
-                    startSeat = getFirstActiveSeat(seats);
+                if (!seats[startSeat] || (seats[startSeat].balance || 0) < betAmount) {
+                    startSeat = getFirstActivePlayingSeat(seats, betAmount);
                 }
 
                 updates['currentTurn'] = startSeat;
                 updates['isShowdown'] = false;
+                updates['gameStarted'] = true;
                 updates['deck'] = deck;
-                roomRef.update(updates);
+                updates['pot'] = (data.pot || 0) + totalPotCollected;
+
+                roomRef.update(updates).then(() => {
+                    addTransactionLog(`🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot Saat Ini: ${formatRupiah((data.pot || 0) + totalPotCollected)}`);
+                });
             });
         }
 
-        function getFirstActiveSeat(seats) {
+        function getFirstActivePlayingSeat(seats, betAmount) {
             for (let i = 0; i < 7; i++) {
-                if (seats[i]) return i;
+                if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
             }
             return 0;
         }
@@ -538,6 +890,7 @@
                         let nextTurn = findNextTurn(seats, mySeat);
                         if (nextTurn === null) {
                             updates['isShowdown'] = true;
+                            handleShowdownPayout(data);
                         } else {
                             updates['currentTurn'] = nextTurn;
                         }
@@ -563,6 +916,7 @@
 
                 if (nextTurn === null) {
                     updates['isShowdown'] = true;
+                    handleShowdownPayout(data);
                 } else {
                     updates['currentTurn'] = nextTurn;
                 }
@@ -571,11 +925,61 @@
             });
         }
 
+        function handleShowdownPayout(data) {
+            const seats = data.seats || {};
+            const pot = data.pot || 0;
+            let activePlayers = [];
+
+            for (let i = 0; i < 7; i++) {
+                if (seats[i] && seats[i].cards && seats[i].cards.length > 0) {
+                    activePlayers.push({ index: i, ...seats[i] });
+                }
+            }
+
+            if (activePlayers.length === 0 || pot <= 0) return;
+
+            let validPlayers = activePlayers.map(p => {
+                let score = calculateScore(p.cards);
+                return { ...p, score, isBust: score > 30 };
+            });
+
+            validPlayers.sort((a, b) => {
+                if (a.isBust && !b.isBust) return 1;
+                if (!a.isBust && b.isBust) return -1;
+                return b.score - a.score;
+            });
+
+            let nonBust = validPlayers.filter(p => !p.isBust);
+            
+            if (nonBust.length > 0) {
+                let highScore = nonBust[0].score;
+                let winners = nonBust.filter(p => p.score === highScore);
+                let splitPot = Math.floor(pot / winners.length);
+
+                let updates = {};
+                let winnerNames = [];
+
+                winners.forEach(w => {
+                    let currentBal = seats[w.index].balance || 0;
+                    updates[`seats/${w.index}/balance`] = currentBal + splitPot;
+                    winnerNames.push(w.name);
+                });
+
+                updates['pot'] = 0;
+                updates['gameStarted'] = false;
+                roomRef.update(updates).then(() => {
+                    addTransactionLog(`🏆 PRESTASI: ${winnerNames.join(', ')} memenangkan pot ${formatRupiah(pot)}!`);
+                });
+            } else {
+                addTransactionLog(`Semua pemain Bust! Pot ${formatRupiah(pot)} tetap tersimpan di meja.`);
+            }
+        }
+
         function findNextTurn(seats, currentSeat) {
             let next = (currentSeat + 1) % 7;
             let checked = 0;
             while (checked < 7) {
-                if (seats[next] && !seats[next].isStopped) {
+                if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
                     return next;
                 }
                 next = (next + 1) % 7;
@@ -585,6 +989,7 @@
         }
 
         function confirmNewRound() { 
+            document.getElementById('modalShowdown').style.display = 'none';
             startNewGame(); 
         }
 
@@ -601,10 +1006,165 @@
             }, 1500);
         }
 
+        // FUNGSI ADMIN TERPUSAT
+        function openAdminModal() {
+            if (!isAdmin) return;
+            roomRef.once('value', snap => {
+                let data = snap.val() || {};
+                let seats = data.seats || {};
+                let currentBet = data.currentBet || 10000;
+                
+                document.getElementById('adminBetAmount').value = currentBet;
+                
+                let select = document.getElementById('adminSelectPlayer');
+                select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+
+                let selectDeduct = document.getElementById('adminSelectPlayerDeduct');
+                selectDeduct.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+
+                let selectReset = document.getElementById('adminSelectResetSeat');
+                selectReset.innerHTML = '<option value="">-- Pilih Bangku --</option>';
+
+                for (let i = 0; i < 7; i++) {
+                    if (seats[i]) {
+                        let optHtml = `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
+                        select.innerHTML += optHtml;
+                        selectDeduct.innerHTML += optHtml;
+                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (${seats[i].name})</option>`;
+                    } else {
+                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (Kosong)</option>`;
+                    }
+                }
+                document.getElementById('modalAdmin').style.display = 'flex';
+            });
+        }
+        function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
+
+        function submitAdminSetBet() {
+            let betVal = parseInt(document.getElementById('adminBetAmount').value);
+            if (isNaN(betVal) || betVal < 1000) {
+                alert("Nominal taruhan minimal Rp1.000");
+                return;
+            }
+            roomRef.child('currentBet').set(betVal).then(() => {
+                addTransactionLog(`⚙️ ADMIN: Nominal taruhan diatur menjadi ${formatRupiah(betVal)}`);
+                alert(`Taruhan berhasil diatur menjadi ${formatRupiah(betVal)}`);
+            });
+        }
+
+        function submitAdminTopUp() {
+            let seatIdx = document.getElementById('adminSelectPlayer').value;
+            let amount = parseInt(document.getElementById('adminTopUpAmount').value);
+
+            if (seatIdx === "" || isNaN(amount)) {
+                alert("Pilih pemain dan masukkan nominal saldo yang valid!");
+                return;
+            }
+
+            if (confirm(`Konfirmasi Top Up Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    if (player) {
+                        let newBal = (player.balance || 0) + amount;
+                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
+                            addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
+                            alert(`Saldo ${player.name} berhasil diperbarui!`);
+                            openAdminModal();
+                        });
+                    }
+                });
+            }
+        }
+
+        // FUNGSI PENGURANGAN SALDO FLEKSIBEL / MANUAL OLEH ADMIN
+        function submitAdminDeduct() {
+            let seatIdx = document.getElementById('adminSelectPlayerDeduct').value;
+            let amount = parseInt(document.getElementById('adminDeductAmount').value);
+
+            if (seatIdx === "" || isNaN(amount) || amount <= 0) {
+                alert("Pilih pemain dan masukkan jumlah pengurangan saldo yang valid!");
+                return;
+            }
+
+            if (confirm(`Konfirmasi Pengurangan Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    if (player) {
+                        let currentBal = player.balance || 0;
+                        let newBal = currentBal - amount;
+                        if (newBal < 0) newBal = 0;
+
+                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
+                            addTransactionLog(`🔻 ADMIN KOREKSI/PENGURANGAN: Saldo ${player.name} dikurangi ${formatRupiah(amount)}. Sisa Saldo: ${formatRupiah(newBal)}`);
+                            alert(`Saldo ${player.name} berhasil dikurangi! Sisa saldo: ${formatRupiah(newBal)}`);
+                            openAdminModal();
+                        });
+                    }
+                });
+            }
+        }
+
+        // FUNGSI RESET / KELUAR BANGKU (BERDIRI) KHUSUS ADMIN
+        function submitAdminResetSeat() {
+            let seatIdx = document.getElementById('adminSelectResetSeat').value;
+            if (seatIdx === "") {
+                alert("Pilih bangku yang ingin direset!");
+                return;
+            }
+
+            let seatNum = parseInt(seatIdx) + 1;
+            if (confirm(`Konfirmasi: Kosongkan / berdirikan pemain di Bangku ${seatNum}?`)) {
+                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
+                    let player = snap.val();
+                    let playerName = player ? player.name : `Bangku ${seatNum}`;
+                    
+                    roomRef.child(`seats/${seatIdx}`).remove().then(() => {
+                        addTransactionLog(`🚪 ADMIN RESET: ${playerName} dikeluarkan dari Bangku ${seatNum} (Bangku dikosongkan)`);
+                        alert(`Bangku ${seatNum} berhasil dikosongkan!`);
+                        closeAdminModal();
+                    });
+                });
+            }
+        }
+
+        // FUNGSI FITUR RESET TOTAL ROOM BARU KHUSUS ADMIN
+        function submitAdminResetTotalRoom() {
+            if (!isAdmin) {
+                alert("Akses ditolak! Fitur ini khusus Admin.");
+                return;
+            }
+
+            if (confirm("⚠️ PERINGATAN KERAS:\nApakah Anda yakin ingin melakukan RESET TOTAL ROOM?\nSemua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu dibersihkan secara global!")) {
+                roomRef.update({
+                    currentTurn: 0,
+                    isShowdown: false,
+                    gameStarted: false,
+                    lastWinnerSeat: 0,
+                    pot: 0,
+                    deck: null,
+                    seats: null
+                }).then(() => {
+                    addTransactionLog(`⚠️🚨 ADMIN RESET TOTAL ROOM: Seluruh room berhasil direset total secara global!`);
+                    alert("Room berhasil direset total secara global!");
+                    closeAdminModal();
+                }).catch((error) => {
+                    console.error("Gagal melakukan reset total room:", error);
+                    alert("Terjadi kesalahan saat mereset room.");
+                });
+            }
+        }
+
+        function openLogModal() { document.getElementById('modalLog').style.display = 'flex'; }
+        function closeLogModal() { document.getElementById('modalLog').style.display = 'none'; }
+
         function updateUI(data) {
             const seats = data.seats || {};
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
+            const pot = data.pot || 0;
+            const currentBet = data.currentBet || 10000;
+
+            document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
 
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
             document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
@@ -618,7 +1178,7 @@
             let winnerSeatIndex = null;
 
             if (isShowdown && activePlayers.length > 0) {
-                let validPlayers = activePlayers.map(p => {
+                let validPlayers = activePlayers.filter(p => p.cards && p.cards.length > 0).map(p => {
                     let score = calculateScore(p.cards);
                     return { ...p, score, isBust: score > 30 };
                 });
@@ -658,40 +1218,31 @@
                 winnerElem.innerHTML = rankingHtml;
             }
 
-            // Penataan Posisi Melingkar Dinamis (Player-Centric View)
-            // Jika pemain belum duduk, gunakan sudut standar berdasar indeks aslinya (0 s.d. 6).
-            // Jika sudah duduk di bangku 'mySeat', rotasi layout agar bangku miliknya selalu berada di posisi bawah (index 0 / 6 o'clock).
-            const radiusX = 115; // Jarak horizontal dari pusat meja
-            const radiusY = 145; // Jarak vertikal dari pusat meja
-
             for (let i = 0; i < 7; i++) {
                 const seatElem = document.getElementById(`seat-${i}`);
                 const cardsElem = document.getElementById(`cards-${i}`);
                 const statusElem = document.getElementById(`status-${i}`);
                 const nameElem = document.getElementById(`name-${i}`);
+                const balanceElem = document.getElementById(`balance-${i}`);
                 const player = seats[i];
 
                 let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
 
-                // Hitung posisi relatif melingkar
                 let visualPosIndex = i;
                 if (mySeat !== null) {
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
 
-                // Tentukan koordinat CSS berdasarkan sudut melingkar (0 = Bawah, bergerak searah jarum jam)
-                // 7 posisi melingkar penuh (0 s.d. 6)
                 const angles = [
-                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },                     // Posisi 0: Bawah (Tengah)
-                    { bottom: '70px', left: '2px', transform: 'none' },                                  // Posisi 1: Kiri Bawah
-                    { top: '70px', left: '2px', transform: 'none' },                                     // Posisi 2: Kiri Atas
-                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },                          // Posisi 3: Atas Kiri
-                    { top: '2px', right: '22%', transform: 'translateX(50%)' },                          // Posisi 4: Atas Kanan
-                    { top: '70px', right: '2px', transform: 'none' },                                    // Posisi 5: Kanan Atas
-                    { bottom: '70px', right: '2px', transform: 'none' }                                  // Posisi 6: Kanan Bawah
+                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
+                    { bottom: '70px', left: '2px', transform: 'none' },
+                    { top: '70px', left: '2px', transform: 'none' },
+                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },
+                    { top: '2px', right: '22%', transform: 'translateX(50%)' },
+                    { top: '70px', right: '2px', transform: 'none' },
+                    { bottom: '70px', right: '2px', transform: 'none' }
                 ];
 
-                // Terapkan posisi ke elemen bangku
                 seatElem.style.bottom = '';
                 seatElem.style.top = '';
                 seatElem.style.left = '';
@@ -705,12 +1256,52 @@
 
                 if (isMe) {
                     seatElem.classList.add('is-me');
-                    // Paksa posisi persis di tengah bawah untuk diri sendiri
-                    seatElem.style.bottom = '2px';
-                    seatElem.style.left = '50%';
-                    seatElem.style.right = '';
-                    seatElem.style.top = '';
-                    seatElem.style.transform = 'translateX(-50%)';
+                    
+                    if (savedSeatLeft && savedSeatTop) {
+                        seatElem.style.position = 'fixed';
+                        seatElem.style.left = savedSeatLeft;
+                        seatElem.style.top = savedSeatTop;
+                        seatElem.style.bottom = 'auto';
+                        seatElem.style.transform = 'none';
+                        seatElem.dataset.dragged = "true";
+                    } else if (!seatElem.dataset.dragged) {
+                        seatElem.style.bottom = '10px';
+                        seatElem.style.left = '50%';
+                        seatElem.style.right = '';
+                        seatElem.style.top = '';
+                        seatElem.style.transform = 'translateX(-50%)';
+                    }
+                    
+                    if (!seatElem.querySelector('.drag-handle-container')) {
+                        const handleContainer = document.createElement('div');
+                        handleContainer.className = 'drag-handle-container';
+                        
+                        const handle = document.createElement('div');
+                        handle.className = 'drag-handle';
+                        handle.innerText = '↕ Geser Kotak ↕';
+                        
+                        const lockBtn = document.createElement('button');
+                        lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                        lockBtn.id = 'btnLockSeat';
+                        lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        lockBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            seatLocked = !seatLocked;
+                            localStorage.setItem('samgong_seat_locked', seatLocked);
+                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        };
+
+                        handleContainer.appendChild(handle);
+                        handleContainer.appendChild(lockBtn);
+                        seatElem.insertBefore(handleContainer, seatElem.firstChild);
+                    } else {
+                        const lockBtn = seatElem.querySelector('#btnLockSeat');
+                        if (lockBtn) {
+                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
+                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+                        }
+                    }
                     
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
@@ -725,6 +1316,8 @@
                     };
                 } else {
                     seatElem.classList.remove('is-me');
+                    const existingHandleContainer = seatElem.querySelector('.drag-handle-container');
+                    if (existingHandleContainer) existingHandleContainer.remove();
                     cardsElem.onclick = null;
                 }
 
@@ -738,11 +1331,12 @@
 
                 if (player) {
                     nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
+                    balanceElem.innerText = formatRupiah(player.balance || 0);
                     cardsElem.innerHTML = '';
                     
                     let currentCardScore = calculateScore(player.cards);
 
-                    if (player.cards) {
+                    if (player.cards && player.cards.length > 0) {
                         player.cards.forEach((card) => {
                             const cardDiv = document.createElement('div');
                             if (isMe || isShowdown) {
@@ -760,10 +1354,12 @@
                         });
                     }
 
-                    if (isShowdown) {
+                    if (isShowdown && player.cards && player.cards.length > 0) {
                         statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
-                    } else if (player.isStopped) {
-                        if (isMe) {
+                    } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
+                        if (player.cards && player.cards.length === 0) {
+                            statusElem.innerText = `Sit-Out (Saldo kurang)`;
+                        } else if (isMe) {
                             statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
                         } else {
                             statusElem.innerText = `STOP`;
@@ -777,6 +1373,7 @@
                     }
                 } else {
                     nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
+                    balanceElem.innerText = '';
                     cardsElem.innerHTML = '';
                     statusElem.innerText = `Ketuk duduk`;
                 }
@@ -787,6 +1384,65 @@
             document.getElementById('btnHit').disabled = !isMyTurn;
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
+
+        // LOGIKA DRAGGABLE DENGAN PENGECEKAN STATUS LOCK / UNLOCK
+        document.addEventListener('DOMContentLoaded', () => {
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+
+            document.addEventListener('pointerdown', (e) => {
+                if (seatLocked) return;
+
+                const targetMe = e.target.closest('.seat.is-me');
+                if (!targetMe) return;
+                
+                if (e.target.tagName === 'BUTTON' || e.target.closest('.card')) return;
+
+                isDragging = true;
+                targetMe.dataset.dragged = "true";
+                
+                const rect = targetMe.getBoundingClientRect();
+                initialX = rect.left;
+                initialY = rect.top;
+
+                startX = e.clientX;
+                startY = e.clientY;
+
+                targetMe.style.position = 'fixed';
+                targetMe.style.left = `${initialX}px`;
+                targetMe.style.top = `${initialY}px`;
+                targetMe.style.bottom = 'auto';
+                targetMe.style.transform = 'none';
+
+                targetMe.setPointerCapture(e.pointerId);
+            });
+
+            document.addEventListener('pointermove', (e) => {
+                if (!isDragging || seatLocked) return;
+                const mySeatElem = document.querySelector('.seat.is-me');
+                if (!mySeatElem) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                mySeatElem.style.left = `${initialX + dx}px`;
+                mySeatElem.style.top = `${initialY + dy}px`;
+            });
+
+            document.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const mySeatElem = document.querySelector('.seat.is-me');
+                if (mySeatElem) {
+                    localStorage.setItem('samgong_seat_left', mySeatElem.style.left);
+                    localStorage.setItem('samgong_seat_top', mySeatElem.style.top);
+
+                    try {
+                        mySeatElem.releasePointerCapture(e.pointerId);
+                    } catch (err) {}
+                }
+            });
+        });
     </script>
 </body>
 </html>
