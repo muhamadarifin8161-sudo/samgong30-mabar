@@ -142,7 +142,7 @@
             border: 2px solid #374151;
             border-radius: 8px;
             padding: 4px 6px;
-            width: 115px;
+            width: 100px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
@@ -152,9 +152,9 @@
         .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
         
         .seat.is-me {
-            width: 240px;
+            width: 220px;
             border-color: #059669;
-            padding: 10px;
+            padding: 8px;
             z-index: 25;
             position: absolute;
             bottom: 10px;
@@ -208,11 +208,11 @@
             text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
         }
 
-        .card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 48px; margin: 3px 0; position: relative; }
         
         .card {
-            width: 38px; 
-            height: 54px; 
+            width: 32px; 
+            height: 46px; 
             background: #fff; 
             border-radius: 4px;
             display: flex; 
@@ -220,9 +220,9 @@
             justify-content: space-between;
             padding: 2px 3px; 
             font-weight: bold; 
-            font-size: 11px; 
+            font-size: 10px; 
             line-height: 1; 
-            margin-left: -10px;
+            margin-left: -8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             border: 1px solid #d1d5db;
             position: relative;
@@ -233,20 +233,20 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            font-size: 10px;
+            font-size: 9px;
         }
         .card .card-center {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 16px;
+            font-size: 14px;
         }
         .card .card-bottom {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            font-size: 10px;
+            font-size: 9px;
             transform: rotate(180deg);
         }
 
@@ -258,13 +258,13 @@
         .card.red { color: #dc2626; }
         .card.black { color: #111827; }
 
-        .seat.is-me .card-container { height: 100px; margin: 5px 0; }
-        .seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
-        .seat.is-me .card .card-center { font-size: 32px; }
-        .seat.is-me .seat-name { font-size: 12px; }
-        .seat.is-me .seat-balance { font-size: 11px; }
-        .seat.is-me .seat-status { font-size: 11px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        .seat.is-me .card-container { height: 80px; margin: 4px 0; }
+        .seat.is-me .card { width: 54px; height: 76px; font-size: 16px; margin-left: -16px; padding: 4px 5px; }
+        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 13px; }
+        .seat.is-me .card .card-center { font-size: 26px; }
+        .seat.is-me .seat-name { font-size: 11px; }
+        .seat.is-me .seat-balance { font-size: 10px; }
+        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
 
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
@@ -275,8 +275,8 @@
             position: absolute;
             top: 3px;
             right: 5px;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             z-index: 40;
             pointer-events: none;
@@ -304,11 +304,27 @@
         .btn-stop { background: #e11d48; width: 48%; }
         .btn-hit { background: #059669; width: 48%; }
 
+        /* PERBAIKAN STYLES MODAL agar tidak meledak/menumpuk di layar */
         .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
-            align-items: center; justify-content: center; z-index: 50; padding: 15px;
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); 
+            display: none;
+            align-items: center; 
+            justify-content: center; 
+            z-index: 999; 
+            padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 360px; width: 100%; }
+        .modal-box { 
+            background: #111827; 
+            border: 2px solid #eab308; 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center; 
+            max-width: 360px; 
+            width: 100%; 
+            position: relative;
+        }
 
         .modal-input {
             width: 100%;
@@ -337,7 +353,6 @@
         }
         .log-item:last-child { border-bottom: none; }
 
-        /* Tabel Super Admin Dashboard */
         .sa-table {
             width: 100%;
             border-collapse: collapse;
@@ -372,7 +387,7 @@
 <body>
 
     <!-- POPUP GATEKEEPER LOGIN MULTI-RUANGAN & SANDI AKSES -->
-    <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
+    <div id="modalGatekeeper" class="modal" style="display: flex; background: rgba(0,0,0,0.95); z-index: 9999;">
         <div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
             <div style="font-size: 40px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">🔐</div>
             <h2 style="color: #ef4444; font-size: 13px; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">GATEKEEPER AKSES RUANGAN</h2>
@@ -407,43 +422,43 @@
             </div>
 
             <div id="seat-0" class="seat" onclick="handleSeatClick(0)">
-                <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
+                <div class="seat-name" id="name-0">Bangku 1</div>
                 <div class="seat-balance" id="balance-0"></div>
                 <div class="card-container" id="cards-0"></div>
                 <div class="seat-status" id="status-0">Ketuk duduk</div>
             </div>
             <div id="seat-1" class="seat" onclick="handleSeatClick(1)">
-                <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
+                <div class="seat-name" id="name-1">Bangku 2</div>
                 <div class="seat-balance" id="balance-1"></div>
                 <div class="card-container" id="cards-1"></div>
                 <div class="seat-status" id="status-1">Ketuk duduk</div>
             </div>
             <div id="seat-2" class="seat" onclick="handleSeatClick(2)">
-                <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
+                <div class="seat-name" id="name-2">Bangku 3</div>
                 <div class="seat-balance" id="balance-2"></div>
                 <div class="card-container" id="cards-2"></div>
                 <div class="seat-status" id="status-2">Ketuk duduk</div>
             </div>
             <div id="seat-3" class="seat" onclick="handleSeatClick(3)">
-                <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
+                <div class="seat-name" id="name-3">Bangku 4</div>
                 <div class="seat-balance" id="balance-3"></div>
                 <div class="card-container" id="cards-3"></div>
                 <div class="seat-status" id="status-3">Ketuk duduk</div>
             </div>
             <div id="seat-4" class="seat" onclick="handleSeatClick(4)">
-                <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
+                <div class="seat-name" id="name-4">Bangku 5</div>
                 <div class="seat-balance" id="balance-4"></div>
                 <div class="card-container" id="cards-4"></div>
                 <div class="seat-status" id="status-4">Ketuk duduk</div>
             </div>
             <div id="seat-5" class="seat" onclick="handleSeatClick(5)">
-                <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
+                <div class="seat-name" id="name-5">Bangku 6</div>
                 <div class="seat-balance" id="balance-5"></div>
                 <div class="card-container" id="cards-5"></div>
                 <div class="seat-status" id="status-5">Ketuk duduk</div>
             </div>
             <div id="seat-6" class="seat" onclick="handleSeatClick(6)">
-                <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
+                <div class="seat-name" id="name-6">Bangku 7</div>
                 <div class="seat-balance" id="balance-6"></div>
                 <div class="card-container" id="cards-6"></div>
                 <div class="seat-status" id="status-6">Ketuk duduk</div>
@@ -456,6 +471,7 @@
         <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
     </div>
 
+    <!-- MODAL HASIL / SHOWDOWN -->
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
@@ -469,7 +485,6 @@
         <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
             <h3 id="adminModalTitle" style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
             
-            <!-- SEKSI PUSAT KONTROL KHUSUS SUPER ADMIN (DASHBOARD ROOM 1 - 5) -->
             <div id="superAdminControlSection" style="background: #2b113a; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #9333ea; text-align: left; display: none;">
                 <label style="font-size: 10px; color: #e879f9; font-weight: bold; display: block; margin-bottom: 4px;">👑 Pusat Kontrol Super Admin (5 Ruangan):</label>
                 <table class="sa-table">
@@ -481,19 +496,16 @@
                         </tr>
                     </thead>
                     <tbody id="superAdminRoomsTable">
-                        <!-- Data room 1-5 dirender dinamis via JavaScript -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- SEKSI SETTING TARUHAN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
                 <input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
                 <button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
             </div>
 
-            <!-- SEKSI TOP UP SALDO -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
                 <select id="adminSelectPlayer" class="modal-input">
@@ -503,7 +515,6 @@
                 <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
             </div>
 
-            <!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
                 <select id="adminSelectPlayerDeduct" class="modal-input">
@@ -513,7 +524,6 @@
                 <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
             </div>
 
-            <!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
                 <select id="adminSelectResetSeat" class="modal-input">
@@ -529,7 +539,6 @@
                 <button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
             </div>
 
-            <!-- SEKSI TOMBOL RESET TOTAL ROOM BARU KHUSUS ADMIN -->
             <div style="background: #2d1215; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #7f1d1d; text-align: left;">
                 <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Zona Bahaya Admin:</label>
                 <button class="btn" style="background: #831843; border: 1px solid #f43f5e; width: 100%; font-size: 10px; padding: 8px; font-weight: bold;" onclick="submitAdminResetTotalRoom()">⚠️ RESET TOTAL ROOM (KOSONGKAN SEMUA)</button>
@@ -539,7 +548,7 @@
         </div>
     </div>
 
-    <!-- MODAL MINI TOP-UP LANGSUNG DARI KURSI MEJA -->
+    <!-- MODAL MINI TOP-UP -->
     <div id="modalSeatTopUp" class="modal">
         <div class="modal-box">
             <h3 style="color: #4ade80; font-size: 13px; margin-bottom: 4px;" id="seatTopUpTitle">TOP-UP SALDO BANGKU</h3>
@@ -560,6 +569,7 @@
         </div>
     </div>
 
+    <!-- MODAL LOG RIWAYAT -->
     <div id="modalLog" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
@@ -577,18 +587,15 @@
         let lastTapTime = 0;
         let activeTopUpSeatIndex = null;
 
-        // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
         let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
         let savedSeatLeft = localStorage.getItem('samgong_seat_left');
         let savedSeatTop = localStorage.getItem('samgong_seat_top');
 
-        // Parameter Room Dinamis berdasarkan URL Query Parameter (?room=1 s.d. 5)
         const urlParams = new URLSearchParams(window.location.search);
         let roomQuery = urlParams.get('room') || '1';
         let roomId = 'samgong-room-' + roomQuery;
         let roomDisplayName = roomQuery === 'superadmin' ? 'Room Super Admin' : 'Room ' + roomQuery;
 
-        // Validasi Gatekeeper Login Multi-Ruangan & Sandi Akses
         function validateGatekeeperLogin() {
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
             const errorText = document.getElementById('gatekeeperErrorText');
@@ -601,14 +608,12 @@
             else if (roomQuery === '5') allowedPass = 'asd555b';
 
             if (passInput === "123098") {
-                // Super Admin Master Login
                 isAdmin = true;
                 isSuperAdmin = true;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
                 listenSuperAdminRooms();
             } else if (passInput === allowedPass || passInput === "12345") {
-                // Admin Ruangan atau Pemain Biasa
                 isAdmin = (passInput === allowedPass);
                 isSuperAdmin = false;
                 if (isAdmin) {
@@ -622,7 +627,6 @@
             }
         }
 
-        // Support Enter key di input password gatekeeper
         document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 validateGatekeeperLogin();
@@ -667,7 +671,6 @@
             });
         }
 
-        // Monitoring Realtime Ruangan Saat Ini
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -701,7 +704,6 @@
             document.getElementById('roomDisplayLabel').innerText = `Error Koneksi`;
         });
 
-        // Monitoring Log Riwayat Ruangan
         roomRef.child('logs').limitToLast(20).on('value', (snap) => {
             let logsData = snap.val();
             let logContainer = document.getElementById('logContainer');
@@ -718,7 +720,6 @@
             logContainer.innerHTML = html;
         });
 
-        // KONTROL DASBOARD SUPER ADMIN (REALTIME LISTEN 5 ROOMS)
         let superAdminRoomsData = {};
         function listenSuperAdminRooms() {
             if (!isSuperAdmin) return;
@@ -776,7 +777,6 @@
             });
         }
 
-        // FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
         function handleSeatClick(seatIndex) {
             roomRef.child('seats/' + seatIndex).once('value', (snap) => {
                 let seatData = snap.val();
@@ -1372,6 +1372,7 @@
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
 
+                // Tata Letak Posisi Meja Oval (7 Bangku)
                 const angles = [
                     { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
                     { bottom: '70px', left: '2px', transform: 'none' },
@@ -1511,7 +1512,7 @@
                         }
                     }
                 } else {
-                    nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
+                    nameElem.innerText = `Bangku ${seatNumDisplay}`;
                     balanceElem.innerText = '';
                     cardsElem.innerHTML = '';
                     statusElem.innerText = `Ketuk duduk`;
@@ -1529,7 +1530,6 @@
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
 
-        // LOGIKA DRAGGABLE MEJA
         document.addEventListener('DOMContentLoaded', () => {
             let isDragging = false;
             let startX, startY, initialX, initialY;
