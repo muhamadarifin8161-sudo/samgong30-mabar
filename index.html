@@ -599,27 +599,32 @@
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
             const errorText = document.getElementById('gatekeeperErrorText');
 
-            let allowedPass = '12345';
-            if (roomQuery === '1') allowedPass = 'asd111z';
-            else if (roomQuery === '2') allowedPass = 'asd222x';
+            // Menentukan sandi admin yang valid berdasarkan room aktif di URL
+            let allowedAdminPass = 'asd111z';
+            if (roomQuery === '1') allowedAdminPass = 'asd111z';
+            else if (roomQuery === '2') allowedAdminPass = 'asd222x';
             else if (roomQuery === '3') allowedPass = 'asd333c';
             else if (roomQuery === '4') allowedPass = 'asd444v';
             else if (roomQuery === '5') allowedPass = 'asd555b';
 
             if (passInput === "123098") {
+                // Login Master Super Admin
                 isAdmin = true;
                 isSuperAdmin = true;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
                 listenSuperAdminRooms();
-            } else if (passInput === allowedPass || passInput === "12345") {
-                isAdmin = (passInput === allowedPass);
+            } else if (passInput === allowedAdminPass) {
+                // Login Admin Ruangan Terkait
+                isAdmin = true;
                 isSuperAdmin = false;
-                if (isAdmin) {
-                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
-                } else {
-                    document.getElementById('btnTopAdmin').style.display = 'none';
-                }
+                document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            } else if (passInput === "12345") {
+                // Login Pemain Biasa
+                isAdmin = false;
+                isSuperAdmin = false;
+                document.getElementById('btnTopAdmin').style.display = 'none';
                 document.getElementById('modalGatekeeper').style.display = 'none';
             } else {
                 errorText.innerText = "Sandi Akses Ruangan Salah!";
@@ -767,7 +772,6 @@
             });
         }
 
-        // FUNGSI SHARE LINK KHUSUS MEMAKAI PATH DOMAIN ANDA
         function copyWhatsAppLink() {
             const baseUrl = 'https://muhamadarifin8161-sudo.github.io/samgong30-mabar/';
             const shareUrl = `${baseUrl}?room=${roomQuery}`;
