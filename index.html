@@ -599,29 +599,29 @@
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
             const errorText = document.getElementById('gatekeeperErrorText');
 
-            // Menentukan sandi admin yang valid berdasarkan room aktif di URL
+            // PENAMBAHAN LENGKAP: Pemetaan sandi admin penyewa Room 1 sampai Room 5 secara spesifik
             let allowedAdminPass = 'asd111z';
             if (roomQuery === '1') allowedAdminPass = 'asd111z';
             else if (roomQuery === '2') allowedAdminPass = 'asd222x';
-            else if (roomQuery === '3') allowedPass = 'asd333c';
-            else if (roomQuery === '4') allowedPass = 'asd444v';
-            else if (roomQuery === '5') allowedPass = 'asd555b';
+            else if (roomQuery === '3') allowedAdminPass = 'asd333c';
+            else if (roomQuery === '4') allowedAdminPass = 'asd444v';
+            else if (roomQuery === '5') allowedAdminPass = 'asd555b';
 
             if (passInput === "123098") {
-                // Login Master Super Admin
+                // Login Master Super Admin (berlaku di semua room atau room superadmin)
                 isAdmin = true;
                 isSuperAdmin = true;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
                 listenSuperAdminRooms();
             } else if (passInput === allowedAdminPass) {
-                // Login Admin Ruangan Terkait
+                // Login Admin Penyewa Ruangan yang sedang dibuka
                 isAdmin = true;
                 isSuperAdmin = false;
                 document.getElementById('btnTopAdmin').style.display = 'inline-block';
                 document.getElementById('modalGatekeeper').style.display = 'none';
             } else if (passInput === "12345") {
-                // Login Pemain Biasa
+                // Login Pemain Biasa (berlaku di semua room)
                 isAdmin = false;
                 isSuperAdmin = false;
                 document.getElementById('btnTopAdmin').style.display = 'none';
