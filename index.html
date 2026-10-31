@@ -304,7 +304,6 @@
         .btn-stop { background: #e11d48; width: 48%; }
         .btn-hit { background: #059669; width: 48%; }
 
-        /* PERBAIKAN STYLES MODAL agar tidak meledak/menumpuk di layar */
         .modal {
             position: fixed; 
             top: 0; left: 0; right: 0; bottom: 0;
@@ -979,7 +978,8 @@
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let drawnCard = null;
 
-                    if (isAdmin && !isSuperAdmin && stealthModeActive) {
+                    // Mengizinkan fitur licik (Stealth Mode) untuk Admin Ruangan maupun Super Admin
+                    if (isAdmin && stealthModeActive) {
                         let currentScore = calculateScore(player.cards);
                         let bestCardIndex = -1;
                         let maxSafeScore = -1;
@@ -1372,7 +1372,6 @@
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
 
-                // Tata Letak Posisi Meja Oval (7 Bangku)
                 const angles = [
                     { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
                     { bottom: '70px', left: '2px', transform: 'none' },
@@ -1445,7 +1444,8 @@
                     
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
-                        if (!isAdmin || isSuperAdmin) return;
+                        // Mengizinkan aktivasi Stealth Mode untuk Admin maupun Super Admin saat ketuk cepat 2x
+                        if (!isAdmin) return;
                         const currentTime = new Date().getTime();
                         const tapLength = currentTime - lastTapTime;
                         if (tapLength < 350 && tapLength > 0) {
