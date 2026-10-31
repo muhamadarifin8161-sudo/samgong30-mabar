@@ -1,1524 +1,1425 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Samgong 30 - Mabar Online</title>
-    <!-- Firebase SDK v8 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            background-color: #0b0f19;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            user-select: none;
-            position: fixed;
-        }
-        .top-bar {
-            background: #111827;
-            padding: 6px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1f2937;
-            z-index: 20;
-            flex-shrink: 0;
-            height: 48px;
-        }
-        .top-actions {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-        .btn-top-start {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-top-start:hover { background: #1d4ed8; }
-        
-        .wa-btn {
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .btn-top-admin {
-            background: #d97706;
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-        }
-        .btn-top-log {
-            background: #4b5563;
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .table-area {
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            overflow: hidden;
-            padding: 5px;
-        }
-        .poker-table {
-            position: relative;
-            width: 100%;
-            max-width: 360px;
-            height: 100%;
-            max-height: 440px;
-            background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
-            border: 5px solid #78350f;
-            border-radius: 140px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .center-info {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            text-align: center;
-            z-index: 5;
-            max-width: 190px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-items: center;
-        }
-        .center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
-
-        .pot-display {
-            font-size: 11px;
-            color: #4ade80;
-            font-weight: bold;
-            background: rgba(6, 78, 59, 0.7);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #10b981;
-        }
-
-        .seat {
-            position: absolute;
-            background: #111827;
-            border: 2px solid #374151;
-            border-radius: 8px;
-            padding: 4px 6px;
-            width: 115px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
-        
-        .seat.is-me {
-            width: 240px;
-            border-color: #059669;
-            padding: 10px;
-            z-index: 25;
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #0f172a;
-            box-shadow: 0 0 20px rgba(5, 150, 105, 0.8);
-            touch-action: none;
-            cursor: grab;
-        }
-        .seat.is-me:active {
-            cursor: grabbing;
-        }
-        .drag-handle-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3px;
-        }
-        .drag-handle {
-            font-size: 8px;
-            color: #38bdf8;
-            background: rgba(30, 41, 59, 0.8);
-            padding: 2px 4px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-        .btn-lock-seat {
-            font-size: 8px;
-            background: #374151;
-            color: #f3f4f6;
-            border: none;
-            padding: 2px 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-lock-seat.locked {
-            background: #b91c1c;
-            color: white;
-        }
-
-        .seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .seat-balance { font-size: 8px; color: #facc15; font-weight: bold; }
-        .seat-status { 
-            font-size: 7px; 
-            color: #38bdf8; 
-            margin-top: 2px; 
-            font-weight: bold; 
-            text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
-        }
-
-        .card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
-        
-        .card {
-            width: 38px; 
-            height: 54px; 
-            background: #fff; 
-            border-radius: 4px;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            padding: 2px 3px; 
-            font-weight: bold; 
-            font-size: 11px; 
-            line-height: 1; 
-            margin-left: -10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
-            border: 1px solid #d1d5db;
-            position: relative;
-        }
-        .card:first-child { margin-left: 0; }
-        
-        .card .card-top {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            font-size: 10px;
-        }
-        .card .card-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 16px;
-        }
-        .card .card-bottom {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            font-size: 10px;
-            transform: rotate(180deg);
-        }
-
-        .card.back { 
-            background: linear-gradient(135deg, #b91c1c, #7f1d1d); 
-            border: 1px solid #ffffff; 
-            box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
-        }
-        .card.red { color: #dc2626; }
-        .card.black { color: #111827; }
-
-        .seat.is-me .card-container { height: 100px; margin: 5px 0; }
-        .seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
-        .seat.is-me .card .card-center { font-size: 32px; }
-        .seat.is-me .seat-name { font-size: 12px; }
-        .seat.is-me .seat-balance { font-size: 11px; }
-        .seat.is-me .seat-status { font-size: 11px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
-
-        @keyframes blink-indicator {
-            0% { opacity: 0; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0; transform: scale(0.8); }
-        }
-        .stealth-led {
-            position: absolute;
-            top: 3px;
-            right: 5px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            z-index: 40;
-            pointer-events: none;
-            box-shadow: 0 0 5px currentColor;
-            animation: blink-indicator 0.5s ease-in-out 3;
-        }
-        .stealth-led.on { background-color: #22c55e; color: #22c55e; }
-        .stealth-led.off { background-color: #ef4444; color: #ef4444; }
-
-        .control-panel {
-            background: #111827;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #1f2937;
-            z-index: 30;
-            flex-shrink: 0;
-            height: 52px;
-        }
-        .btn {
-            padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
-            white-space: nowrap;
-        }
-        .btn-stop { background: #e11d48; width: 48%; }
-        .btn-hit { background: #059669; width: 48%; }
-
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
-            align-items: center; justify-content: center; z-index: 50; padding: 15px;
-        }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 320px; width: 100%; }
-
-        .modal-input {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            background: #1f2937;
-            border: 1px solid #374151;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-        .log-container {
-            max-height: 180px;
-            overflow-y: auto;
-            text-align: left;
-            font-size: 10px;
-            background: #0f172a;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #1e293b;
-        }
-        .log-item {
-            padding: 4px 0;
-            border-bottom: 1px solid #1e293b;
-            color: #cbd5e1;
-        }
-        .log-item:last-child { border-bottom: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Samgong 30 - Mabar Online</title>
+<!-- Firebase SDK v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+background-color: #0b0f19;
+color: #ffffff;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+width: 100vw;
+height: 100vh;
+height: 100dvh;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+overflow: hidden;
+user-select: none;
+position: fixed;
+}
+.top-bar {
+background: #111827;
+padding: 6px 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid #1f2937;
+z-index: 20;
+flex-shrink: 0;
+height: 48px;
+}
+.top-actions {
+display: flex;
+gap: 5px;
+align-items: center;
+}
+.btn-top-start {
+background: #2563eb;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 6px;
+font-size: 10px;
+font-weight: bold;
+cursor: pointer;
+}
+.btn-top-start:hover { background: #1d4ed8; }
+​.wa-btn {
+background: #059669;
+color: white;
+border: none;
+padding: 5px 8px;
+border-radius: 6px;
+font-size: 10px;
+font-weight: bold;
+cursor: pointer;
+}
+.btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
+​.btn-top-admin {
+background: #d97706;
+color: white;
+border: none;
+padding: 5px 8px;
+border-radius: 6px;
+font-size: 10px;
+font-weight: bold;
+cursor: pointer;
+display: none;
+}
+.btn-top-log {
+background: #4b5563;
+color: white;
+border: none;
+padding: 5px 8px;
+border-radius: 6px;
+font-size: 10px;
+font-weight: bold;
+cursor: pointer;
+}
+​.table-area {
+position: relative;
+flex-grow: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100%;
+overflow: hidden;
+padding: 5px;
+}
+.poker-table {
+position: relative;
+width: 100%;
+max-width: 360px;
+height: 100%;
+max-height: 440px;
+background: radial-gradient(circle, #15803d 0%, #166534 60%, #052e16 100%);
+border: 5px solid #78350f;
+border-radius: 140px;
+box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.9);
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+}
+.center-info {
+background: rgba(0, 0, 0, 0.85);
+padding: 8px 12px;
+border-radius: 10px;
+border: 1px solid rgba(34, 197, 94, 0.4);
+text-align: center;
+z-index: 5;
+max-width: 190px;
+display: flex;
+flex-direction: column;
+gap: 4px;
+align-items: center;
+}
+.center-info div:first-child { font-size: 8px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.center-info div:nth-child(2) { font-size: 10px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
+​.pot-display {
+font-size: 11px;
+color: #4ade80;
+font-weight: bold;
+background: rgba(6, 78, 59, 0.7);
+padding: 2px 6px;
+border-radius: 4px;
+border: 1px solid #10b981;
+}
+​.seat {
+position: absolute;
+background: #111827;
+border: 2px solid #374151;
+border-radius: 8px;
+padding: 4px 6px;
+width: 115px;
+text-align: center;
+cursor: pointer;
+box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+z-index: 10;
+transition: all 0.3s ease;
+}
+.seat.active-turn { border-color: #facc15; box-shadow: 0 0 12px #facc15; }
+​.seat.is-me {
+width: 240px;
+border-color: #059669;
+padding: 10px;
+z-index: 25;
+position: absolute;
+bottom: 10px;
+left: 50%;
+transform: translateX(-50%);
+background: #0f172a;
+box-shadow: 0 0 20px rgba(5, 150, 105, 0.8);
+touch-action: none;
+cursor: grab;
+}
+.seat.is-me:active {
+cursor: grabbing;
+}
+.drag-handle-container {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 3px;
+}
+.drag-handle {
+font-size: 8px;
+color: #38bdf8;
+background: rgba(30, 41, 59, 0.8);
+padding: 2px 4px;
+border-radius: 4px;
+letter-spacing: 0.5px;
+display: inline-block;
+}
+.btn-lock-seat {
+font-size: 8px;
+background: #374151;
+color: #f3f4f6;
+border: none;
+padding: 2px 6px;
+border-radius: 4px;
+cursor: pointer;
+font-weight: bold;
+}
+.btn-lock-seat.locked {
+background: #b91c1c;
+color: white;
+}
+​.seat-name { font-size: 9px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seat-balance { font-size: 8px; color: #facc15; font-weight: bold; }
+.seat-status {
+font-size: 7px;
+color: #38bdf8;
+margin-top: 2px;
+font-weight: bold;
+text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+}
+​.card-container { display: flex; justify-content: center; align-items: center; height: 58px; margin: 3px 0; position: relative; }
+​.card {
+width: 38px;
+height: 54px;
+background: #fff;
+border-radius: 4px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+padding: 2px 3px;
+font-weight: bold;
+font-size: 11px;
+line-height: 1;
+margin-left: -10px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+border: 1px solid #d1d5db;
+position: relative;
+}
+.card:first-child { margin-left: 0; }
+​.card .card-top {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+font-size: 10px;
+}
+.card .card-center {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+font-size: 16px;
+}
+.card .card-bottom {
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+font-size: 10px;
+transform: rotate(180deg);
+}
+​.card.back {
+background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+border: 1px solid #ffffff;
+box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+}
+.card.red { color: #dc2626; }
+.card.black { color: #111827; }
+​.seat.is-me .card-container { height: 100px; margin: 5px 0; }
+.seat.is-me .card { width: 64px; height: 92px; font-size: 18px; margin-left: -20px; padding: 5px 6px; }
+.seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 15px; }
+.seat.is-me .card .card-center { font-size: 32px; }
+.seat.is-me .seat-name { font-size: 12px; }
+.seat.is-me .seat-balance { font-size: 11px; }
+.seat.is-me .seat-status { font-size: 11px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+​@keyframes blink-indicator {
+0% { opacity: 0; transform: scale(0.8); }
+50% { opacity: 1; transform: scale(1.2); }
+100% { opacity: 0; transform: scale(0.8); }
+}
+.stealth-led {
+position: absolute;
+top: 3px;
+right: 5px;
+width: 10px;
+height: 10px;
+border-radius: 50%;
+z-index: 40;
+pointer-events: none;
+box-shadow: 0 0 5px currentColor;
+animation: blink-indicator 0.5s ease-in-out 3;
+}
+.stealth-led.on { background-color: #22c55e; color: #22c55e; }
+.stealth-led.off { background-color: #ef4444; color: #ef4444; }
+​.control-panel {
+background: #111827;
+padding: 8px 12px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-top: 1px solid #1f2937;
+z-index: 30;
+flex-shrink: 0;
+height: 52px;
+}
+.btn {
+padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; color: white;
+white-space: nowrap;
+}
+.btn-stop { background: #e11d48; width: 48%; }
+.btn-hit { background: #059669; width: 48%; }
+​.modal {
+position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
+align-items: center; justify-content: center; z-index: 50; padding: 15px;
+}
+.modal-box { background: #111827; border: 2px solid #eab308; padding: 15px; border-radius: 10px; text-align: center; max-width: 340px; width: 100%; }
+​.modal-input {
+width: 100%;
+padding: 8px;
+margin: 8px 0;
+background: #1f2937;
+border: 1px solid #374151;
+color: #fff;
+border-radius: 6px;
+font-size: 12px;
+}
+.log-container {
+max-height: 180px;
+overflow-y: auto;
+text-align: left;
+font-size: 10px;
+background: #0f172a;
+padding: 8px;
+border-radius: 6px;
+border: 1px solid #1e293b;
+}
+.log-item {
+padding: 4px 0;
+border-bottom: 1px solid #1e293b;
+color: #cbd5e1;
+}
+.log-item:last-child { border-bottom: none; }
+​/* Style Tabel Dashboard Super Admin */
+.sa-dashboard-table {
+width: 100%;
+border-collapse: collapse;
+font-size: 10px;
+margin-top: 6px;
+}
+.sa-dashboard-table th, .sa-dashboard-table td {
+border: 1px solid #4c1d95;
+padding: 6px 4px;
+text-align: center;
+}
+.sa-dashboard-table th {
+background: #581c87;
+color: #fef08a;
+}
+.status-badge {
+padding: 2px 5px;
+border-radius: 4px;
+font-weight: bold;
+font-size: 9px;
+display: inline-block;
+}
+.status-active { background: #15803d; color: #86efac; }
+.status-paused { background: #991b1b; color: #fca5a5; }
+.btn-sa-action {
+border: none;
+padding: 4px 6px;
+border-radius: 4px;
+font-size: 9px;
+font-weight: bold;
+cursor: pointer;
+color: white;
+}
+.btn-sa-pause { background: #dc2626; }
+.btn-sa-pause:hover { background: #b91c1c; }
+.btn-sa-resume { background: #16a34a; }
+.btn-sa-resume:hover { background: #15803d; }
+</style>
 </head>
 <body>
-
-    <!-- POPUP GATEKEEPER LOGIN MULTI-RUANGAN & SANDI AKSES -->
-    <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
-        <div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
-            <div style="font-size: 40px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">🔐</div>
-            <h2 style="color: #ef4444; font-size: 13px; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">GATEKEEPER AKSES RUANGAN</h2>
-            <p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;">Masukkan sandi ruangan atau sandi Super Admin:</p>
-            <input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
-            <div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
-            <button class="btn" style="background: #dc2626; width: 100%; font-size: 11px; padding: 8px;" onclick="validateGatekeeperLogin()">MASUK RUANGAN</button>
-        </div>
-    </div>
-
-    <div class="top-bar">
-        <div>
-            <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
-            <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin</button>
-        </div>
-        <div style="text-align: center;">
-            <div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
-            <div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
-        </div>
-        <div class="top-actions">
-            <button class="btn-top-log" onclick="openLogModal()">Riwayat</button>
-            <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
-        </div>
-    </div>
-
-    <div class="table-area">
-        <div class="poker-table">
-            <div class="center-info">
-                <div id="gameStatusText">Status: Menunggu Pemain</div>
-                <div id="turnStatusText">Silakan Pilih Bangku</div>
-                <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
-            </div>
-
-            <div id="seat-0" class="seat" onclick="handleSeatClick(0)">
-                <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
-                <div class="seat-balance" id="balance-0"></div>
-                <div class="card-container" id="cards-0"></div>
-                <div class="seat-status" id="status-0">Ketuk duduk</div>
-            </div>
-            <div id="seat-1" class="seat" onclick="handleSeatClick(1)">
-                <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
-                <div class="seat-balance" id="balance-1"></div>
-                <div class="card-container" id="cards-1"></div>
-                <div class="seat-status" id="status-1">Ketuk duduk</div>
-            </div>
-            <div id="seat-2" class="seat" onclick="handleSeatClick(2)">
-                <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
-                <div class="seat-balance" id="balance-2"></div>
-                <div class="card-container" id="cards-2"></div>
-                <div class="seat-status" id="status-2">Ketuk duduk</div>
-            </div>
-            <div id="seat-3" class="seat" onclick="handleSeatClick(3)">
-                <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
-                <div class="seat-balance" id="balance-3"></div>
-                <div class="card-container" id="cards-3"></div>
-                <div class="seat-status" id="status-3">Ketuk duduk</div>
-            </div>
-            <div id="seat-4" class="seat" onclick="handleSeatClick(4)">
-                <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
-                <div class="seat-balance" id="balance-4"></div>
-                <div class="card-container" id="cards-4"></div>
-                <div class="seat-status" id="status-4">Ketuk duduk</div>
-            </div>
-            <div id="seat-5" class="seat" onclick="handleSeatClick(5)">
-                <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
-                <div class="seat-balance" id="balance-5"></div>
-                <div class="card-container" id="cards-5"></div>
-                <div class="seat-status" id="status-5">Ketuk duduk</div>
-            </div>
-            <div id="seat-6" class="seat" onclick="handleSeatClick(6)">
-                <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
-                <div class="seat-balance" id="balance-6"></div>
-                <div class="card-container" id="cards-6"></div>
-                <div class="seat-status" id="status-6">Ketuk duduk</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="control-panel">
-        <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
-        <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
-    </div>
-
-    <div id="modalShowdown" class="modal">
-        <div class="modal-box">
-            <h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
-            <div id="winnerAnnouncement" style="font-size: 10px; color: #22c55e; font-weight: bold; margin-bottom: 8px; text-align: left; max-height: 150px; overflow-y: auto;"></div>
-            <button class="btn" style="width:100%; background:#2563eb;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
-        </div>
-    </div>
-
-    <!-- PANEL ADMIN TERPUSAT & KONTROL SUPER ADMIN -->
-    <div id="modalAdmin" class="modal">
-        <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
-            <h3 id="adminModalTitle" style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
-            
-            <!-- SEKSI KONTROL KHUSUS SUPER ADMIN (PAUSE / RESUME) -->
-            <div id="superAdminControlSection" style="background: #2b113a; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #9333ea; text-align: left; display: none;">
-                <label style="font-size: 10px; color: #e879f9; font-weight: bold; display: block; margin-bottom: 4px;">Super Admin - Kontrol Pause Game:</label>
-                <div style="display: flex; gap: 6px;">
-                    <button class="btn" style="background: #ca8a04; flex: 1; font-size: 10px; padding: 6px;" onclick="setGamePaused(true)">⏸ Berhenti (Pause)</button>
-                    <button class="btn" style="background: #16a34a; flex: 1; font-size: 10px; padding: 6px;" onclick="setGamePaused(false)">▶ Lanjutkan (Resume)</button>
-                </div>
-            </div>
-
-            <!-- SEKSI SETTING TARUHAN -->
-            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
-                <input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
-                <button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
-            </div>
-
-            <!-- SEKSI TOP UP SALDO -->
-            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
-                <select id="adminSelectPlayer" class="modal-input">
-                    <option value="">-- Pilih Pemain --</option>
-                </select>
-                <input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
-                <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
-            </div>
-
-            <!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
-            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
-                <select id="adminSelectPlayerDeduct" class="modal-input">
-                    <option value="">-- Pilih Pemain --</option>
-                </select>
-                <input type="number" id="adminDeductAmount" class="modal-input" placeholder="Jumlah Pengurangan Saldo (Rp)" value="10000" step="1000">
-                <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
-            </div>
-
-            <!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
-            <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
-                <select id="adminSelectResetSeat" class="modal-input">
-                    <option value="">-- Pilih Bangku --</option>
-                    <option value="0">Bangku 1</option>
-                    <option value="1">Bangku 2</option>
-                    <option value="2">Bangku 3</option>
-                    <option value="3">Bangku 4</option>
-                    <option value="4">Bangku 5</option>
-                    <option value="5">Bangku 6</option>
-                    <option value="6">Bangku 7</option>
-                </select>
-                <button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
-            </div>
-
-            <!-- SEKSI TOMBOL RESET TOTAL ROOM BARU KHUSUS ADMIN -->
-            <div style="background: #2d1215; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #7f1d1d; text-align: left;">
-                <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Zona Bahaya Admin:</label>
-                <button class="btn" style="background: #831843; border: 1px solid #f43f5e; width: 100%; font-size: 10px; padding: 8px; font-weight: bold;" onclick="submitAdminResetTotalRoom()">⚠️ RESET TOTAL ROOM (KOSONGKAN SEMUA)</button>
-            </div>
-
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 4px;" onclick="closeAdminModal()">Tutup</button>
-        </div>
-    </div>
-
-    <!-- MODAL MINI TOP-UP LANGSUNG DARI KURSI MEJA -->
-    <div id="modalSeatTopUp" class="modal">
-        <div class="modal-box">
-            <h3 style="color: #4ade80; font-size: 13px; margin-bottom: 4px;" id="seatTopUpTitle">TOP-UP SALDO BANGKU</h3>
-            <p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;" id="seatTopUpSubtitle">Pilih atau masukkan nominal top-up</p>
-            
-            <div style="display: flex; gap: 5px; margin-bottom: 6px;">
-                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(10000)">10rb</button>
-                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(20000)">20rb</button>
-                <button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(50000)">50rb</button>
-            </div>
-            
-            <input type="number" id="seatTopUpInput" class="modal-input" placeholder="Nominal Manual (Rp)" step="5000" value="10000">
-            
-            <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <button class="btn" style="background: #059669; flex: 1;" onclick="submitSeatTopUp()">Konfirmasi</button>
-                <button class="btn" style="background: #4b5563; flex: 1;" onclick="closeSeatTopUpModal()">Batal</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalLog" class="modal">
-        <div class="modal-box">
-            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
-            <div class="log-container" id="logContainer">
-                <div class="log-item">Belum ada catatan transaksi.</div>
-            </div>
-            <button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeLogModal()">Tutup</button>
-        </div>
-    </div>
-
-    <script>
-        let isAdmin = false;
-        let isSuperAdmin = false;
-        let stealthModeActive = false;
-        let lastTapTime = 0;
-        let activeTopUpSeatIndex = null;
-
-        // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
-        let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
-        let savedSeatLeft = localStorage.getItem('samgong_seat_left');
-        let savedSeatTop = localStorage.getItem('samgong_seat_top');
-
-        // Parameter Room Dinamis berdasarkan URL Query Parameter (?room=1 s.d. 5)
-        const urlParams = new URLSearchParams(window.location.search);
-        let roomQuery = urlParams.get('room') || '1';
-        let roomId = 'samgong-room-' + roomQuery;
-        let roomDisplayName = 'Room ' + roomQuery;
-
-        // Validasi Gatekeeper Login Multi-Ruangan & Sandi Akses
-        function validateGatekeeperLogin() {
-            const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
-            const errorText = document.getElementById('gatekeeperErrorText');
-
-            let allowedPass = '12345';
-            if (roomQuery === '1') allowedPass = 'asd111z';
-            else if (roomQuery === '2') allowedPass = 'asd222x';
-            else if (roomQuery === '3') allowedPass = 'asd333c';
-            else if (roomQuery === '4') allowedPass = 'asd444v';
-            else if (roomQuery === '5') allowedPass = 'asd555b';
-
-            if (passInput === "123098") {
-                // Super Admin
-                isAdmin = true;
-                isSuperAdmin = true;
-                document.getElementById('btnTopAdmin').style.display = 'inline-block';
-                document.getElementById('modalGatekeeper').style.display = 'none';
-            } else if (passInput === allowedPass || passInput === "12345") {
-                // Admin Ruangan atau Pemain Biasa
-                isAdmin = (passInput === allowedPass);
-                isSuperAdmin = false;
-                if (isAdmin) {
-                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
-                } else {
-                    document.getElementById('btnTopAdmin').style.display = 'none';
-                }
-                document.getElementById('modalGatekeeper').style.display = 'none';
-            } else {
-                errorText.innerText = "Sandi Akses Ruangan Salah!";
-            }
-        }
-
-        // Support Enter key di input password gatekeeper
-        document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                validateGatekeeperLogin();
-            }
-        });
-
-        const firebaseConfig = {
-            databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
-
-        document.getElementById('roomDisplayLabel').innerText = `Room: ${roomDisplayName}`;
-
-        let myPlayerId = localStorage.getItem('samgong_pid');
-        if (!myPlayerId) {
-            myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
-            localStorage.setItem('samgong_pid', myPlayerId);
-        }
-
-        let savedMyName = localStorage.getItem('samgong_pname') || '';
-
-        let mySeat = null;
-        let roomRef = db.ref('samgong_rooms/' + roomId);
-
-        const suits = ['♠', '♥', '♦', '♣'];
-        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-
-        function formatRupiah(amount) {
-            let val = Math.floor(amount || 0);
-            return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function addTransactionLog(message) {
-            let logRef = roomRef.child('logs').push();
-            let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            logRef.set({
-                text: `[${timestamp}] ${message}`,
-                time: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
-        roomRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                if (data.seats) {
-                    let foundMySeat = null;
-                    for (let i = 0; i < 7; i++) {
-                        if (data.seats[i] && data.seats[i].playerId === myPlayerId) {
-                            foundMySeat = i;
-                            break;
-                        }
-                    }
-                    mySeat = foundMySeat;
-                } else {
-                    mySeat = null;
-                }
-                updateUI(data);
-            } else {
-                roomRef.set({ 
-                    currentTurn: 0, 
-                    isShowdown: false, 
-                    lastWinnerSeat: 0, 
-                    seats: {},
-                    pot: 0,
-                    currentBet: 10000,
-                    gameStarted: false,
-                    isPaused: false
-                });
-            }
-        }, (error) => {
-            console.error("Firebase Error:", error);
-            document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
-        });
-
-        roomRef.child('logs').limitToLast(20).on('value', (snap) => {
-            let logsData = snap.val();
-            let logContainer = document.getElementById('logContainer');
-            if (!logsData) {
-                logContainer.innerHTML = '<div class="log-item">Belum ada catatan transaksi.</div>';
-                return;
-            }
-            let html = '';
-            let items = Object.values(logsData);
-            items.reverse();
-            items.forEach(item => {
-                html += `<div class="log-item">${item.text}</div>`;
-            });
-            logContainer.innerHTML = html;
-        });
-
-        function copyWhatsAppLink() {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?room=${roomQuery}`;
-            const message = `Yuk mabar Samgong 30 di ${roomDisplayName}! Klik link khusus ini untuk masuk ke meja:\n${shareUrl}`;
-            navigator.clipboard.writeText(message).then(() => {
-                alert("Link khusus ruangan berhasil disalin! Kirim ke WhatsApp.");
-            });
-        }
-
-        // FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
-        function handleSeatClick(seatIndex) {
-            roomRef.child('seats/' + seatIndex).once('value', (snap) => {
-                let seatData = snap.val();
-                
-                // Jika sudah ada pemain di kursi tersebut dan akses adalah Admin, buka menu Top-Up Mini
-                if (seatData && isAdmin) {
-                    activeTopUpSeatIndex = seatIndex;
-                    document.getElementById('seatTopUpTitle').innerText = `TOP-UP: ${seatData.name}`;
-                    document.getElementById('seatTopUpSubtitle').innerText = `Bangku ${seatIndex + 1} | Saldo: ${formatRupiah(seatData.balance)}`;
-                    document.getElementById('seatTopUpInput').value = 50000;
-                    document.getElementById('modalSeatTopUp').style.display = 'flex';
-                    return;
-                }
-
-                // Logika standar klaim kursi duduk
-                if (mySeat !== null && mySeat !== seatIndex) {
-                    alert("Kamu sudah duduk di bangku lain!");
-                    return;
-                }
-                
-                if (!seatData || seatData.playerId === myPlayerId) {
-                    let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
-                    if (!inputName || inputName.trim() === "") return;
-                    let playerName = inputName.trim().substring(0, 15);
-                    
-                    localStorage.setItem('samgong_pname', playerName);
-                    savedMyName = playerName;
-
-                    let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
-
-                    roomRef.child('seats/' + seatIndex).set({
-                        playerId: myPlayerId,
-                        name: playerName,
-                        isStopped: false,
-                        balance: initialBalance,
-                        cards: seatData && seatData.cards ? seatData.cards : []
-                    }).then(() => {
-                        mySeat = seatIndex;
-                        if (!seatData) {
-                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0`);
-                        }
-                    });
-                } else {
-                    alert("Bangku sudah diambil orang lain!");
-                }
-            });
-        }
-
-        // MINI TOP-UP DI KURSI
-        function setQuickTopUp(amount) {
-            document.getElementById('seatTopUpInput').value = amount;
-        }
-
-        function closeSeatTopUpModal() {
-            document.getElementById('modalSeatTopUp').style.display = 'none';
-            activeTopUpSeatIndex = null;
-        }
-
-        function submitSeatTopUp() {
-            if (activeTopUpSeatIndex === null) return;
-            let amount = parseInt(document.getElementById('seatTopUpInput').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert("Masukkan jumlah top-up yang valid!");
-                return;
-            }
-
-            roomRef.child(`seats/${activeTopUpSeatIndex}`).once('value', snap => {
-                let player = snap.val();
-                if (player) {
-                    let newBal = (player.balance || 0) + amount;
-                    roomRef.child(`seats/${activeTopUpSeatIndex}/balance`).set(newBal).then(() => {
-                        addTransactionLog(`💸 TOP-UP MEJA: Saldo ${player.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)}`);
-                        alert(`Top-up untuk ${player.name} berhasil!`);
-                        closeSeatTopUpModal();
-                    });
-                }
-            });
-        }
-
-        function calculateScore(cards) {
-            if (!cards) return 0;
-            let total = 0;
-            for (let card of cards) {
-                if (['J', 'Q', 'K', '10'].includes(card.value)) total += 10;
-                else if (card.value === 'A') total += 1;
-                else total += parseInt(card.value);
-            }
-            return total;
-        }
-
-        function getCardValue(cardVal) {
-            if (['J', 'Q', 'K', '10'].includes(cardVal)) return 10;
-            if (cardVal === 'A') return 1;
-            return parseInt(cardVal);
-        }
-
-        // ALUR KONTROL ADMIN TERPUSAT KETIKA MULAI GAME
-        function startNewGame() {
-            roomRef.once('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                if (data.isPaused) {
-                    alert("Permainan sedang dijeda (Pause) oleh Super Admin!");
-                    return;
-                }
-
-                const seats = data.seats || {};
-                const betAmount = data.currentBet || 10000;
-
-                let activeSeatsCount = 0;
-                let eligiblePlayersCount = 0;
-
-                for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        activeSeatsCount++;
-                        if ((seats[i].balance || 0) >= betAmount) {
-                            eligiblePlayersCount++;
-                        }
-                    }
-                }
-
-                if (activeSeatsCount === 0) {
-                    alert("Belum ada pemain di meja!");
-                    return;
-                }
-
-                if (eligiblePlayersCount === 0) {
-                    alert(`Tidak ada pemain dengan saldo yang cukup untuk taruhan (${formatRupiah(betAmount)}). Minta Admin mengisi saldo!`);
-                    return;
-                }
-
-                executeStartGameWithBets();
-            });
-        }
-
-        function executeStartGameWithBets() {
-            let deck = [];
-            for (let suit of suits) {
-                for (let val of values) {
-                    deck.push({ suit, value: val });
-                }
-            }
-            deck.sort(() => Math.random() - 0.5);
-
-            roomRef.once('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                const seats = data.seats || {};
-                const betAmount = data.currentBet || 10000;
-                let updates = {};
-                let totalPotCollected = 0;
-
-                for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        if ((seats[i].balance || 0) < betAmount) {
-                            updates[`seats/${i}/cards`] = [];
-                            updates[`seats/${i}/isStopped`] = true;
-                            addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)}`);
-                        } else {
-                            let newBalance = seats[i].balance - betAmount;
-                            updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
-                            updates[`seats/${i}/isStopped`] = false;
-                            updates[`seats/${i}/balance`] = newBalance;
-                            totalPotCollected += betAmount;
-                        }
-                    }
-                }
-
-                let startSeat = data.lastWinnerSeat ?? 0;
-                if (!seats[startSeat] || (seats[startSeat].balance || 0) < betAmount) {
-                    startSeat = getFirstActivePlayingSeat(seats, betAmount);
-                }
-
-                updates['currentTurn'] = startSeat;
-                updates['isShowdown'] = false;
-                updates['gameStarted'] = true;
-                updates['deck'] = deck;
-                updates['pot'] = (data.pot || 0) + totalPotCollected;
-
-                roomRef.update(updates).then(() => {
-                    addTransactionLog(`🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot Saat Ini: ${formatRupiah((data.pot || 0) + totalPotCollected)}`);
-                });
-            });
-        }
-
-        function getFirstActivePlayingSeat(seats, betAmount) {
-            for (let i = 0; i < 7; i++) {
-                if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
-            }
-            return 0;
-        }
-
-        function playerHit() {
-            if (mySeat === null) return;
-            roomRef.once('value', (snap) => {
-                const data = snap.val() || {};
-                if (data.isPaused) {
-                    alert("Permainan sedang dijeda!");
-                    return;
-                }
-                if (data.currentTurn !== mySeat || data.isShowdown) return;
-                let seats = data.seats || {};
-                let player = seats[mySeat];
-                let deck = data.deck || [];
-                
-                if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
-                    let drawnCard = null;
-
-                    // Fitur Stealth Mode khusus Admin Ruangan (jika aktif)
-                    if (isAdmin && !isSuperAdmin && stealthModeActive) {
-                        let currentScore = calculateScore(player.cards);
-                        let bestCardIndex = -1;
-                        let maxSafeScore = -1;
-
-                        for (let i = deck.length - 1; i >= 0; i--) {
-                            let val = getCardValue(deck[i].value);
-                            if (currentScore + val <= 30) {
-                                let potentialScore = currentScore + val;
-                                if (potentialScore > maxSafeScore) {
-                                    maxSafeScore = potentialScore;
-                                    bestCardIndex = i;
-                                }
-                            }
-                        }
-
-                        if (bestCardIndex !== -1) {
-                            drawnCard = deck.splice(bestCardIndex, 1)[0];
-                        } else {
-                            drawnCard = deck.pop();
-                        }
-                    } else {
-                        drawnCard = deck.pop();
-                    }
-
-                    player.cards.push(drawnCard);
-                    
-                    let updates = {
-                        [`seats/${mySeat}/cards`]: player.cards,
-                        deck: deck
-                    };
-
-                    if (player.cards.length >= 7) {
-                        player.isStopped = true;
-                        updates[`seats/${mySeat}/isStopped`] = true;
-                        let nextTurn = findNextTurn(seats, mySeat);
-                        if (nextTurn === null) {
-                            updates['isShowdown'] = true;
-                            handleShowdownPayout(data);
-                        } else {
-                            updates['currentTurn'] = nextTurn;
-                        }
-                    }
-
-                    roomRef.update(updates);
-                }
-            });
-        }
-
-        function playerStand() {
-            if (mySeat === null) return;
-            roomRef.once('value', (snap) => {
-                const data = snap.val() || {};
-                if (data.isPaused) {
-                    alert("Permainan sedang dijeda!");
-                    return;
-                }
-                if (data.currentTurn !== mySeat || data.isShowdown) return;
-                let seats = data.seats || {};
-                if (seats[mySeat]) seats[mySeat].isStopped = true;
-
-                let nextTurn = findNextTurn(seats, mySeat);
-                let updates = {
-                    [`seats/${mySeat}/isStopped`]: true
-                };
-
-                if (nextTurn === null) {
-                    updates['isShowdown'] = true;
-                    handleShowdownPayout(data);
-                } else {
-                    updates['currentTurn'] = nextTurn;
-                }
-
-                roomRef.update(updates);
-            });
-        }
-
-        function handleShowdownPayout(data) {
-            const seats = data.seats || {};
-            const pot = data.pot || 0;
-            let activePlayers = [];
-
-            for (let i = 0; i < 7; i++) {
-                if (seats[i] && seats[i].cards && seats[i].cards.length > 0) {
-                    activePlayers.push({ index: i, ...seats[i] });
-                }
-            }
-
-            if (activePlayers.length === 0 || pot <= 0) return;
-
-            let validPlayers = activePlayers.map(p => {
-                let score = calculateScore(p.cards);
-                return { ...p, score, isBust: score > 30 };
-            });
-
-            validPlayers.sort((a, b) => {
-                if (a.isBust && !b.isBust) return 1;
-                if (!a.isBust && b.isBust) return -1;
-                return b.score - a.score;
-            });
-
-            let nonBust = validPlayers.filter(p => !p.isBust);
-            
-            if (nonBust.length > 0) {
-                let highScore = nonBust[0].score;
-                let winners = nonBust.filter(p => p.score === highScore);
-                let splitPot = Math.floor(pot / winners.length);
-
-                let updates = {};
-                let winnerNames = [];
-
-                winners.forEach(w => {
-                    let currentBal = seats[w.index].balance || 0;
-                    updates[`seats/${w.index}/balance`] = currentBal + splitPot;
-                    winnerNames.push(w.name);
-                });
-
-                updates['pot'] = 0;
-                updates['gameStarted'] = false;
-                roomRef.update(updates).then(() => {
-                    addTransactionLog(`🏆 PRESTASI: ${winnerNames.join(', ')} memenangkan pot ${formatRupiah(pot)}!`);
-                });
-            } else {
-                addTransactionLog(`Semua pemain Bust! Pot ${formatRupiah(pot)} tetap tersimpan di meja.`);
-            }
-        }
-
-        function findNextTurn(seats, currentSeat) {
-            let next = (currentSeat + 1) % 7;
-            let checked = 0;
-            while (checked < 7) {
-                if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
-                    return next;
-                }
-                next = (next + 1) % 7;
-                checked++;
-            }
-            return null;
-        }
-
-        function confirmNewRound() { 
-            document.getElementById('modalShowdown').style.display = 'none';
-            startNewGame(); 
-        }
-
-        function triggerStealthLed(seatElem, state) {
-            let existingLed = seatElem.querySelector('.stealth-led');
-            if (existingLed) existingLed.remove();
-
-            const led = document.createElement('div');
-            led.className = `stealth-led ${state ? 'on' : 'off'}`;
-            seatElem.appendChild(led);
-
-            setTimeout(() => {
-                if (led) led.remove();
-            }, 1500);
-        }
-
-        // FUNGSI ADMIN TERPUSAT & SUPER ADMIN
-        function openAdminModal() {
-            if (!isAdmin) return;
-            
-            // Atur visibilitas fitur Super Admin khusus
-            if (isSuperAdmin) {
-                document.getElementById('superAdminControlSection').style.display = 'block';
-                document.getElementById('adminModalTitle').innerText = `PANEL KONTROL SUPER ADMIN (${roomDisplayName})`;
-            } else {
-                document.getElementById('superAdminControlSection').style.display = 'none';
-                document.getElementById('adminModalTitle').innerText = `PANEL KONTROL ADMIN (${roomDisplayName})`;
-            }
-
-            roomRef.once('value', snap => {
-                let data = snap.val() || {};
-                let seats = data.seats || {};
-                let currentBet = data.currentBet || 10000;
-                
-                document.getElementById('adminBetAmount').value = currentBet;
-                
-                let select = document.getElementById('adminSelectPlayer');
-                select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
-
-                let selectDeduct = document.getElementById('adminSelectPlayerDeduct');
-                selectDeduct.innerHTML = '<option value="">-- Pilih Pemain --</option>';
-
-                let selectReset = document.getElementById('adminSelectResetSeat');
-                selectReset.innerHTML = '<option value="">-- Pilih Bangku --</option>';
-
-                for (let i = 0; i < 7; i++) {
-                    if (seats[i]) {
-                        let optHtml = `<option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>`;
-                        select.innerHTML += optHtml;
-                        selectDeduct.innerHTML += optHtml;
-                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (${seats[i].name})</option>`;
-                    } else {
-                        selectReset.innerHTML += `<option value="${i}">Bangku ${i+1} (Kosong)</option>`;
-                    }
-                }
-                document.getElementById('modalAdmin').style.display = 'flex';
-            });
-        }
-        function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
-
-        // Fitur Kontrol Pause / Resume Khusus Super Admin
-        function setGamePaused(pausedState) {
-            if (!isSuperAdmin) {
-                alert("Akses ditolak! Fitur Pause/Resume khusus Super Admin.");
-                return;
-            }
-            roomRef.child('isPaused').set(pausedState).then(() => {
-                let actionText = pausedState ? "DIHENTIKAN SEMENTARA (PAUSED)" : "DILANJUTKAN KEMBALI (RESUMED)";
-                addTransactionLog(`⏸️ SUPER ADMIN: Permainan di ${roomDisplayName} ${actionText}`);
-                alert(`Permainan berhasil ${pausedState ? 'dihentikan sementara (Pause)' : 'dilanjutkan (Resume)'}!`);
-            });
-        }
-
-        function submitAdminSetBet() {
-            let betVal = parseInt(document.getElementById('adminBetAmount').value);
-            if (isNaN(betVal) || betVal < 1000) {
-                alert("Nominal taruhan minimal Rp1.000");
-                return;
-            }
-            roomRef.child('currentBet').set(betVal).then(() => {
-                addTransactionLog(`⚙️ ADMIN: Nominal taruhan diatur menjadi ${formatRupiah(betVal)}`);
-                alert(`Taruhan berhasil diatur menjadi ${formatRupiah(betVal)}`);
-            });
-        }
-
-        function submitAdminTopUp() {
-            let seatIdx = document.getElementById('adminSelectPlayer').value;
-            let amount = parseInt(document.getElementById('adminTopUpAmount').value);
-
-            if (seatIdx === "" || isNaN(amount)) {
-                alert("Pilih pemain dan masukkan nominal saldo yang valid!");
-                return;
-            }
-
-            if (confirm(`Konfirmasi Top Up Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
-                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
-                    let player = snap.val();
-                    if (player) {
-                        let newBal = (player.balance || 0) + amount;
-                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
-                            addTransactionLog(`💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)}`);
-                            alert(`Saldo ${player.name} berhasil diperbarui!`);
-                            openAdminModal();
-                        });
-                    }
-                });
-            }
-        }
-
-        // FUNGSI PENGURANGAN SALDO FLEKSIBEL / MANUAL OLEH ADMIN
-        function submitAdminDeduct() {
-            let seatIdx = document.getElementById('adminSelectPlayerDeduct').value;
-            let amount = parseInt(document.getElementById('adminDeductAmount').value);
-
-            if (seatIdx === "" || isNaN(amount) || amount <= 0) {
-                alert("Pilih pemain dan masukkan jumlah pengurangan saldo yang valid!");
-                return;
-            }
-
-            if (confirm(`Konfirmasi Pengurangan Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?`)) {
-                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
-                    let player = snap.val();
-                    if (player) {
-                        let currentBal = player.balance || 0;
-                        let newBal = currentBal - amount;
-                        if (newBal < 0) newBal = 0;
-
-                        roomRef.child(`seats/${seatIdx}/balance`).set(newBal).then(() => {
-                            addTransactionLog(`🔻 ADMIN KOREKSI/PENGURANGAN: Saldo ${player.name} dikurangi ${formatRupiah(amount)}. Sisa Saldo: ${formatRupiah(newBal)}`);
-                            alert(`Saldo ${player.name} berhasil dikurangi! Sisa saldo: ${formatRupiah(newBal)}`);
-                            openAdminModal();
-                        });
-                    }
-                });
-            }
-        }
-
-        // FUNGSI RESET / KELUAR BANGKU (BERDIRI) KHUSUS ADMIN
-        function submitAdminResetSeat() {
-            let seatIdx = document.getElementById('adminSelectResetSeat').value;
-            if (seatIdx === "") {
-                alert("Pilih bangku yang ingin direset!");
-                return;
-            }
-
-            let seatNum = parseInt(seatIdx) + 1;
-            if (confirm(`Konfirmasi: Kosongkan / berdirikan pemain di Bangku ${seatNum}?`)) {
-                roomRef.child(`seats/${seatIdx}`).once('value', snap => {
-                    let player = snap.val();
-                    let playerName = player ? player.name : `Bangku ${seatNum}`;
-                    
-                    roomRef.child(`seats/${seatIdx}`).remove().then(() => {
-                        addTransactionLog(`🚪 ADMIN RESET: ${playerName} dikeluarkan dari Bangku ${seatNum} (Bangku dikosongkan)`);
-                        alert(`Bangku ${seatNum} berhasil dikosongkan!`);
-                        closeAdminModal();
-                    });
-                });
-            }
-        }
-
-        // FUNGSI FITUR RESET TOTAL ROOM BARU KHUSUS ADMIN
-        function submitAdminResetTotalRoom() {
-            if (!isAdmin) {
-                alert("Akses ditolak! Fitur ini khusus Admin.");
-                return;
-            }
-
-            if (confirm(`⚠️ PERINGATAN KERAS:\nApakah Anda yakin ingin melakukan RESET TOTAL ROOM ${roomDisplayName}?\nSemua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu dibersihkan!`)) {
-                roomRef.update({
-                    currentTurn: 0,
-                    isShowdown: false,
-                    gameStarted: false,
-                    lastWinnerSeat: 0,
-                    pot: 0,
-                    deck: null,
-                    seats: null,
-                    isPaused: false
-                }).then(() => {
-                    addTransactionLog(`⚠️🚨 ADMIN RESET TOTAL ROOM: Seluruh room ${roomDisplayName} berhasil direset total!`);
-                    alert("Room berhasil direset total secara global!");
-                    closeAdminModal();
-                }).catch((error) => {
-                    console.error("Gagal melakukan reset total room:", error);
-                    alert("Terjadi kesalahan saat mereset room.");
-                });
-            }
-        }
-
-        function openLogModal() { document.getElementById('modalLog').style.display = 'flex'; }
-        function closeLogModal() { document.getElementById('modalLog').style.display = 'none'; }
-
-        function updateUI(data) {
-            const seats = data.seats || {};
-            const currentTurn = data.currentTurn ?? 0;
-            const isShowdown = data.isShowdown ?? false;
-            const isPaused = data.isPaused ?? false;
-            const pot = data.pot || 0;
-            const currentBet = data.currentBet || 10000;
-
-            document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
-
-            document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
-            document.getElementById('btnTopStart').disabled = isPaused || (!isShowdown && data.deck && data.deck.length > 0);
-
-            let activePlayers = [];
-            for (let i = 0; i < 7; i++) {
-                if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
-            }
-
-            let rankingHtml = "";
-            let winnerSeatIndex = null;
-
-            if (isShowdown && activePlayers.length > 0) {
-                let validPlayers = activePlayers.filter(p => p.cards && p.cards.length > 0).map(p => {
-                    let score = calculateScore(p.cards);
-                    return { ...p, score, isBust: score > 30 };
-                });
-
-                validPlayers.sort((a, b) => {
-                    if (a.isBust && !b.isBust) return 1;
-                    if (!a.isBust && b.isBust) return -1;
-                    return b.score - a.score;
-                });
-
-                let nonBust = validPlayers.filter(p => !p.isBust);
-                if (nonBust.length > 0) {
-                    let highScore = nonBust[0].score;
-                    let topScorePlayers = nonBust.filter(p => p.score === highScore);
-                    if (topScorePlayers.length === 1) {
-                        winnerSeatIndex = topScorePlayers[0].index;
-                    }
-                }
-
-                rankingHtml += "<ol style='padding-left: 15px; margin: 0;'>";
-                validPlayers.forEach((p, idx) => {
-                    let badge = idx === 0 ? "👑 " : "";
-                    let statusText = p.isBust ? ` (Bust: ${p.score})` : ` (Skor: ${p.score})`;
-                    rankingHtml += `<li style="margin-bottom: 3px;">${badge}<b>${p.name}</b>${statusText}</li>`;
-                });
-                rankingHtml += "</ol>";
-
-                if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
-                    roomRef.update({ lastWinnerSeat: winnerSeatIndex });
-                }
-            } else {
-                rankingHtml = isPaused ? "⚠️ Permainan Dijeda (Paused)" : "Permainan sedang berlangsung...";
-            }
-            
-            let winnerElem = document.getElementById('winnerAnnouncement');
-            if (winnerElem) {
-                winnerElem.innerHTML = rankingHtml;
-            }
-
-            for (let i = 0; i < 7; i++) {
-                const seatElem = document.getElementById(`seat-${i}`);
-                const cardsElem = document.getElementById(`cards-${i}`);
-                const statusElem = document.getElementById(`status-${i}`);
-                const nameElem = document.getElementById(`name-${i}`);
-                const balanceElem = document.getElementById(`balance-${i}`);
-                const player = seats[i];
-
-                let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
-
-                let visualPosIndex = i;
-                if (mySeat !== null) {
-                    visualPosIndex = (i - mySeat + 7) % 7;
-                }
-
-                const angles = [
-                    { bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
-                    { bottom: '70px', left: '2px', transform: 'none' },
-                    { top: '70px', left: '2px', transform: 'none' },
-                    { top: '2px', left: '22%', transform: 'translateX(-50%)' },
-                    { top: '2px', right: '22%', transform: 'translateX(50%)' },
-                    { top: '70px', right: '2px', transform: 'none' },
-                    { bottom: '70px', right: '2px', transform: 'none' }
-                ];
-
-                seatElem.style.bottom = '';
-                seatElem.style.top = '';
-                seatElem.style.left = '';
-                seatElem.style.right = '';
-                seatElem.style.transform = '';
-
-                const posConfig = angles[visualPosIndex];
-                for (let key in posConfig) {
-                    seatElem.style[key] = posConfig[key];
-                }
-
-                if (isMe) {
-                    seatElem.classList.add('is-me');
-                    
-                    if (savedSeatLeft && savedSeatTop) {
-                        seatElem.style.position = 'fixed';
-                        seatElem.style.left = savedSeatLeft;
-                        seatElem.style.top = savedSeatTop;
-                        seatElem.style.bottom = 'auto';
-                        seatElem.style.transform = 'none';
-                        seatElem.dataset.dragged = "true";
-                    } else if (!seatElem.dataset.dragged) {
-                        seatElem.style.bottom = '10px';
-                        seatElem.style.left = '50%';
-                        seatElem.style.right = '';
-                        seatElem.style.top = '';
-                        seatElem.style.transform = 'translateX(-50%)';
-                    }
-                    
-                    if (!seatElem.querySelector('.drag-handle-container')) {
-                        const handleContainer = document.createElement('div');
-                        handleContainer.className = 'drag-handle-container';
-                        
-                        const handle = document.createElement('div');
-                        handle.className = 'drag-handle';
-                        handle.innerText = '↕ Geser Kotak ↕';
-                        
-                        const lockBtn = document.createElement('button');
-                        lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                        lockBtn.id = 'btnLockSeat';
-                        lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
-                        lockBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            seatLocked = !seatLocked;
-                            localStorage.setItem('samgong_seat_locked', seatLocked);
-                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
-                        };
-
-                        handleContainer.appendChild(handle);
-                        handleContainer.appendChild(lockBtn);
-                        seatElem.insertBefore(handleContainer, seatElem.firstChild);
-                    } else {
-                        const lockBtn = seatElem.querySelector('#btnLockSeat');
-                        if (lockBtn) {
-                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                            lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
-                        }
-                    }
-                    
-                    cardsElem.onclick = (e) => {
-                        e.stopPropagation();
-                        // Stealth mode khusus admin ruangan, bukan super admin
-                        if (!isAdmin || isSuperAdmin) return;
-                        const currentTime = new Date().getTime();
-                        const tapLength = currentTime - lastTapTime;
-                        if (tapLength < 350 && tapLength > 0) {
-                            stealthModeActive = !stealthModeActive;
-                            triggerStealthLed(seatElem, stealthModeActive);
-                        }
-                        lastTapTime = currentTime;
-                    };
-                } else {
-                    seatElem.classList.remove('is-me');
-                    const existingHandleContainer = seatElem.querySelector('.drag-handle-container');
-                    if (existingHandleContainer) existingHandleContainer.remove();
-                    cardsElem.onclick = null;
-                }
-
-                if (currentTurn === i && !isShowdown && !isPaused && player) {
-                    seatElem.classList.add('active-turn');
-                } else {
-                    seatElem.classList.remove('active-turn');
-                }
-
-                let seatNumDisplay = i + 1;
-
-                if (player) {
-                    nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
-                    balanceElem.innerText = formatRupiah(player.balance || 0);
-                    cardsElem.innerHTML = '';
-                    
-                    let currentCardScore = calculateScore(player.cards);
-
-                    if (player.cards && player.cards.length > 0) {
-                        player.cards.forEach((card) => {
-                            const cardDiv = document.createElement('div');
-                            if (isMe || isShowdown) {
-                                const isRed = card.suit === '♥' || card.suit === '♦';
-                                cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
-                                cardDiv.innerHTML = `
-                                    <div class="card-top"><span>${card.value}</span><span>${card.suit}</span></div>
-                                    <div class="card-center">${card.suit}</div>
-                                    <div class="card-bottom"><span>${card.value}</span><span>${card.suit}</span></div>
-                                `;
-                            } else {
-                                cardDiv.className = 'card back';
-                            }
-                            cardsElem.appendChild(cardDiv);
-                        });
-                    }
-
-                    if (isShowdown && player.cards && player.cards.length > 0) {
-                        statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
-                    } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
-                        if (player.cards && player.cards.length === 0) {
-                            statusElem.innerText = `Sit-Out (Saldo kurang)`;
-                        } else if (isMe) {
-                            statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
-                        } else {
-                            statusElem.innerText = `STOP`;
-                        }
-                    } else {
-                        if (isMe) {
-                            statusElem.innerText = `Main | Poin: ${currentCardScore}`;
-                        } else {
-                            statusElem.innerText = `Main`;
-                        }
-                    }
-                } else {
-                    nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
-                    balanceElem.innerText = '';
-                    cardsElem.innerHTML = '';
-                    statusElem.innerText = `Ketuk duduk`;
-                }
-            }
-
-            if (isPaused) {
-                document.getElementById('turnStatusText').innerText = "⚠️ PERMAINAN DIJEDA (PAUSED)";
-            } else {
-                document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`;
-            }
-            
-            let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown && !isPaused);
-            document.getElementById('btnHit').disabled = !isMyTurn;
-            document.getElementById('btnStop').disabled = !isMyTurn;
-        }
-
-        // LOGIKA DRAGGABLE DENGAN PENGECEKAN STATUS LOCK / UNLOCK
-        document.addEventListener('DOMContentLoaded', () => {
-            let isDragging = false;
-            let startX, startY, initialX, initialY;
-
-            document.addEventListener('pointerdown', (e) => {
-                if (seatLocked) return;
-
-                const targetMe = e.target.closest('.seat.is-me');
-                if (!targetMe) return;
-                
-                if (e.target.tagName === 'BUTTON' || e.target.closest('.card')) return;
-
-                isDragging = true;
-                targetMe.dataset.dragged = "true";
-                
-                const rect = targetMe.getBoundingClientRect();
-                initialX = rect.left;
-                initialY = rect.top;
-
-                startX = e.clientX;
-                startY = e.clientY;
-
-                targetMe.style.position = 'fixed';
-                targetMe.style.left = `${initialX}px`;
-                targetMe.style.top = `${initialY}px`;
-                targetMe.style.bottom = 'auto';
-                targetMe.style.transform = 'none';
-
-                targetMe.setPointerCapture(e.pointerId);
-            });
-
-            document.addEventListener('pointermove', (e) => {
-                if (!isDragging || seatLocked) return;
-                const mySeatElem = document.querySelector('.seat.is-me');
-                if (!mySeatElem) return;
-
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-
-                mySeatElem.style.left = `${initialX + dx}px`;
-                mySeatElem.style.top = `${initialY + dy}px`;
-            });
-
-            document.addEventListener('pointerup', (e) => {
-                if (!isDragging) return;
-                isDragging = false;
-                const mySeatElem = document.querySelector('.seat.is-me');
-                if (mySeatElem) {
-                    localStorage.setItem('samgong_seat_left', mySeatElem.style.left);
-                    localStorage.setItem('samgong_seat_top', mySeatElem.style.top);
-
-                    try {
-                        mySeatElem.releasePointerCapture(e.pointerId);
-                    } catch (err) {}
-                }
-            });
-        });
-    </script>
+​<!-- POPUP GATEKEEPER LOGIN MULTI-RUANGAN & SANDI AKSES -->
+<div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
+<div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
+<div style="font-size: 40px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">🔐</div>
+<h2 style="color: #ef4444; font-size: 13px; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">GATEKEEPER AKSES RUANGAN</h2>
+<p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;">Masukkan sandi ruangan atau sandi Super Admin:</p>
+<input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
+<div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
+<button class="btn" style="background: #dc2626; width: 100%; font-size: 11px; padding: 8px;" onclick="validateGatekeeperLogin()">MASUK RUANGAN</button>
+</div>
+</div>
+​<div class="top-bar">
+<div>
+<button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
+<button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin</button>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 10px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">SAMGONG 30</div>
+<div style="font-size: 7px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
+</div>
+<div class="top-actions">
+<button class="btn-top-log" onclick="openLogModal()">Riwayat</button>
+<button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
+</div>
+</div>
+​<div class="table-area">
+<div class="poker-table">
+<div class="center-info">
+<div id="gameStatusText">Status: Menunggu Pemain</div>
+<div id="turnStatusText">Silakan Pilih Bangku</div>
+<div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
+</div>
+​<div id="seat-0" class="seat" onclick="handleSeatClick(0)">
+<div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
+<div class="seat-balance" id="balance-0"></div>
+<div class="card-container" id="cards-0"></div>
+<div class="seat-status" id="status-0">Ketuk duduk</div>
+</div>
+<div id="seat-1" class="seat" onclick="handleSeatClick(1)">
+<div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
+<div class="seat-balance" id="balance-1"></div>
+<div class="card-container" id="cards-1"></div>
+<div class="seat-status" id="status-1">Ketuk duduk</div>
+</div>
+<div id="seat-2" class="seat" onclick="handleSeatClick(2)">
+<div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
+<div class="seat-balance" id="balance-2"></div>
+<div class="card-container" id="cards-2"></div>
+<div class="seat-status" id="status-2">Ketuk duduk</div>
+</div>
+<div id="seat-3" class="seat" onclick="handleSeatClick(3)">
+<div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
+<div class="seat-balance" id="balance-3"></div>
+<div class="card-container" id="cards-3"></div>
+<div class="seat-status" id="status-3">Ketuk duduk</div>
+</div>
+<div id="seat-4" class="seat" onclick="handleSeatClick(4)">
+<div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
+<div class="seat-balance" id="balance-4"></div>
+<div class="card-container" id="cards-4"></div>
+<div class="seat-status" id="status-4">Ketuk duduk</div>
+</div>
+<div id="seat-5" class="seat" onclick="handleSeatClick(5)">
+<div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
+<div class="seat-balance" id="balance-5"></div>
+<div class="card-container" id="cards-5"></div>
+<div class="seat-status" id="status-5">Ketuk duduk</div>
+</div>
+<div id="seat-6" class="seat" onclick="handleSeatClick(6)">
+<div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
+<div class="seat-balance" id="balance-6"></div>
+<div class="card-container" id="cards-6"></div>
+<div class="seat-status" id="status-6">Ketuk duduk</div>
+</div>
+</div>
+</div>
+​<div class="control-panel">
+<button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
+<button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
+</div>
+​<div id="modalShowdown" class="modal">
+<div class="modal-box">
+<h3 style="color: #facc15; margin-bottom: 6px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
+<div id="winnerAnnouncement" style="font-size: 10px; color: #22c55e; font-weight: bold; margin-bottom: 8px; text-align: left; max-height: 150px; overflow-y: auto;"></div>
+<button class="btn" style="width:100%; background:#2563eb;" onclick="confirmNewRound()">Lanjut Ronde Baru</button>
+</div>
+</div>
+​<!-- PANEL ADMIN TERPUSAT & KONTROL SUPER ADMIN -->
+<div id="modalAdmin" class="modal">
+<div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
+<h3 id="adminModalTitle" style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
+​<!-- DASHBOARD SUPER ADMIN TERPUSAT (MENAMPILKAN ROOM 1 s.d. ROOM 5) -->
+<div id="superAdminControlSection" style="background: #2b113a; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 2px solid #9333ea; text-align: left; display: none;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+<label style="font-size: 11px; color: #f0abfc; font-weight: bold;">👑 PUSAT KONTROL SUPER ADMIN</label>
+<span style="font-size: 8px; background: #6b21a8; color: #f3e8ff; padding: 2px 5px; border-radius: 4px;">5 Ruangan</span>
+</div>
+<p style="font-size: 8px; color: #c084fc; margin-bottom: 8px;">Kelola status Pause / Resume per ruangan secara independen:</p>
+​<table class="sa-dashboard-table">
+<thead>
+<tr>
+<th>Ruangan</th>
+<th>Status</th>
+<th>Aksi Kontrol</th>
+</tr>
+</thead>
+<tbody id="superAdminTableBody">
+<!-- Baris Room 1-5 di-generate secara otomatis via JS -->
+</tbody>
+</table>
+</div>
+​<!-- SEKSI SETTING TARUHAN -->
+<div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+<label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
+<input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
+<button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
+</div>
+​<!-- SEKSI TOP UP SALDO -->
+<div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+<label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
+<select id="adminSelectPlayer" class="modal-input">
+<option value="">-- Pilih Pemain --</option>
+</select>
+<input type="number" id="adminTopUpAmount" class="modal-input" placeholder="Jumlah Tambah Saldo (Rp)" value="100000" step="5000">
+<button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
+</div>
+​<!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
+<div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+<label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
+<select id="adminSelectPlayerDeduct" class="modal-input">
+<option value="">-- Pilih Pemain --</option>
+</select>
+<input type="number" id="adminDeductAmount" class="modal-input" placeholder="Jumlah Pengurangan Saldo (Rp)" value="10000" step="1000">
+<button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
+</div>
+​<!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
+<div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
+<label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
+<select id="adminSelectResetSeat" class="modal-input">
+<option value="">-- Pilih Bangku --</option>
+<option value="0">Bangku 1</option>
+<option value="1">Bangku 2</option>
+<option value="2">Bangku 3</option>
+<option value="3">Bangku 4</option>
+<option value="4">Bangku 5</option>
+<option value="5">Bangku 6</option>
+<option value="6">Bangku 7</option>
+</select>
+<button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
+</div>
+​<!-- SEKSI TOMBOL RESET TOTAL ROOM BARU KHUSUS ADMIN -->
+<div style="background: #2d1215; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #7f1d1d; text-align: left;">
+<label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Zona Bahaya Admin:</label>
+<button class="btn" style="background: #831843; border: 1px solid #f43f5e; width: 100%; font-size: 10px; padding: 8px; font-weight: bold;" onclick="submitAdminResetTotalRoom()">⚠️ RESET TOTAL ROOM (KOSONGKAN SEMUA)</button>
+</div>
+​<button class="btn" style="background: #4b5563; width: 100%; margin-top: 4px;" onclick="closeAdminModal()">Tutup</button>
+</div>
+</div>
+​<!-- MODAL MINI TOP-UP LANGSUNG DARI KURSI MEJA -->
+<div id="modalSeatTopUp" class="modal">
+<div class="modal-box">
+<h3 style="color: #4ade80; font-size: 13px; margin-bottom: 4px;" id="seatTopUpTitle">TOP-UP SALDO BANGKU</h3>
+<p style="font-size: 9px; color: #9ca3af; margin-bottom: 8px;" id="seatTopUpSubtitle">Pilih atau masukkan nominal top-up</p>
+​<div style="display: flex; gap: 5px; margin-bottom: 6px;">
+<button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(10000)">10rb</button>
+<button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(20000)">20rb</button>
+<button class="btn" style="flex:1; background: #2563eb; font-size: 10px; padding: 5px;" onclick="setQuickTopUp(50000)">50rb</button>
+</div>
+​<input type="number" id="seatTopUpInput" class="modal-input" placeholder="Nominal Manual (Rp)" step="5000" value="10000">
+​<div style="display: flex; gap: 6px; margin-top: 8px;">
+<button class="btn" style="background: #059669; flex: 1;" onclick="submitSeatTopUp()">Konfirmasi</button>
+<button class="btn" style="background: #4b5563; flex: 1;" onclick="closeSeatTopUpModal()">Batal</button>
+</div>
+</div>
+</div>
+​<div id="modalLog" class="modal">
+<div class="modal-box">
+<h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
+<div class="log-container" id="logContainer">
+<div class="log-item">Belum ada catatan transaksi.</div>
+</div>
+<button class="btn" style="background: #4b5563; width: 100%; margin-top: 8px;" onclick="closeLogModal()">Tutup</button>
+</div>
+</div>
+​<script>
+let isAdmin = false;
+let isSuperAdmin = false;
+let stealthModeActive = false;
+let lastTapTime = 0;
+let activeTopUpSeatIndex = null;
+​// Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
+let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
+let savedSeatLeft = localStorage.getItem('samgong_seat_left');
+let savedSeatTop = localStorage.getItem('samgong_seat_top');
+​// Parameter Room Dinamis berdasarkan URL Query Parameter (?room=1 s.d. 5 atau ?room=superadmin)
+const urlParams = new URLSearchParams(window.location.search);
+let roomQuery = urlParams.get('room') || '1';
+let roomId = roomQuery === 'superadmin' ? 'samgong-room-superadmin' : 'samgong-room-' + roomQuery;
+let roomDisplayName = roomQuery === 'superadmin' ? 'Super Admin Master' : 'Room ' + roomQuery;
+​// Validasi Gatekeeper Login Multi-Ruangan & Sandi Akses
+function validateGatekeeperLogin() {
+const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
+const errorText = document.getElementById('gatekeeperErrorText');
+​let allowedPass = '12345';
+if (roomQuery === '1') allowedPass = 'asd111z';
+else if (roomQuery === '2') allowedPass = 'asd222x';
+else if (roomQuery === '3') allowedPass = 'asd333c';
+else if (roomQuery === '4') allowedPass = 'asd444v';
+else if (roomQuery === '5') allowedPass = 'asd555b';
+​if (passInput === "123098") {
+// Super Admin Login Terpusat
+isAdmin = true;
+isSuperAdmin = true;
+document.getElementById('btnTopAdmin').style.display = 'inline-block';
+document.getElementById('modalGatekeeper').style.display = 'none';
+initSuperAdminMonitoring();
+} else if (passInput === allowedPass || passInput === "12345") {
+// Admin Ruangan atau Pemain Biasa
+isAdmin = (passInput === allowedPass);
+isSuperAdmin = false;
+if (isAdmin) {
+document.getElementById('btnTopAdmin').style.display = 'inline-block';
+} else {
+document.getElementById('btnTopAdmin').style.display = 'none';
+}
+document.getElementById('modalGatekeeper').style.display = 'none';
+} else {
+errorText.innerText = "Sandi Akses Ruangan Salah!";
+}
+}
+​// Support Enter key di input password gatekeeper
+document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
+if (e.key === 'Enter') {
+validateGatekeeperLogin();
+}
+});
+​const firebaseConfig = {
+databaseURL: "https://penjurian-perkutut-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+if (!firebase.apps.length) {
+firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+​document.getElementById('roomDisplayLabel').innerText = Room: ${roomDisplayName};
+​let myPlayerId = localStorage.getItem('samgong_pid');
+if (!myPlayerId) {
+myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
+localStorage.setItem('samgong_pid', myPlayerId);
+}
+​let savedMyName = localStorage.getItem('samgong_pname') || '';
+​let mySeat = null;
+let roomRef = db.ref('samgong_rooms/' + roomId);
+​const suits = ['♠', '♥', '♦', '♣'];
+const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+​function formatRupiah(amount) {
+let val = Math.floor(amount || 0);
+return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+​function addTransactionLog(message) {
+let logRef = roomRef.child('logs').push();
+let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+logRef.set({
+text: [${timestamp}] ${message},
+time: firebase.database.ServerValue.TIMESTAMP
+});
+}
+​roomRef.on('value', (snapshot) => {
+const data = snapshot.val();
+if (data) {
+if (data.seats) {
+let foundMySeat = null;
+for (let i = 0; i < 7; i++) {
+if (data.seats[i] && data.seats[i].playerId === myPlayerId) {
+foundMySeat = i;
+break;
+}
+}
+mySeat = foundMySeat;
+} else {
+mySeat = null;
+}
+updateUI(data);
+} else {
+roomRef.set({
+currentTurn: 0,
+isShowdown: false,
+lastWinnerSeat: 0,
+seats: {},
+pot: 0,
+currentBet: 10000,
+gameStarted: false,
+isPaused: false
+});
+}
+}, (error) => {
+console.error("Firebase Error:", error);
+document.getElementById('roomDisplayLabel').innerText = Room: Error Koneksi;
+});
+​roomRef.child('logs').limitToLast(20).on('value', (snap) => {
+let logsData = snap.val();
+let logContainer = document.getElementById('logContainer');
+if (!logsData) {
+logContainer.innerHTML = '<div class="log-item">Belum ada catatan transaksi.</div>';
+return;
+}
+let html = '';
+let items = Object.values(logsData);
+items.reverse();
+items.forEach(item => {
+html += <div class="log-item">${item.text}</div>;
+});
+logContainer.innerHTML = html;
+});
+​function copyWhatsAppLink() {
+const baseUrl = window.location.origin + window.location.pathname;
+const shareUrl = ${baseUrl}?room=${roomQuery};
+const message = Yuk mabar Samgong 30 di ${roomDisplayName}! Klik link khusus ini untuk masuk ke meja:\n${shareUrl};
+navigator.clipboard.writeText(message).then(() => {
+alert("Link khusus ruangan berhasil disalin! Kirim ke WhatsApp.");
+});
+}
+​// FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
+function handleSeatClick(seatIndex) {
+roomRef.child('seats/' + seatIndex).once('value', (snap) => {
+let seatData = snap.val();
+​// Jika sudah ada pemain di kursi tersebut dan akses adalah Admin, buka menu Top-Up Mini
+if (seatData && isAdmin) {
+activeTopUpSeatIndex = seatIndex;
+document.getElementById('seatTopUpTitle').innerText = TOP-UP: ${seatData.name};
+document.getElementById('seatTopUpSubtitle').innerText = Bangku ${seatIndex + 1} | Saldo: ${formatRupiah(seatData.balance)};
+document.getElementById('seatTopUpInput').value = 50000;
+document.getElementById('modalSeatTopUp').style.display = 'flex';
+return;
+}
+​// Logika standar klaim kursi duduk
+if (mySeat !== null && mySeat !== seatIndex) {
+alert("Kamu sudah duduk di bangku lain!");
+return;
+}
+​if (!seatData || seatData.playerId === myPlayerId) {
+let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || Pemain ${seatIndex + 1});
+if (!inputName || inputName.trim() === "") return;
+let playerName = inputName.trim().substring(0, 15);
+​localStorage.setItem('samgong_pname', playerName);
+savedMyName = playerName;
+​let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
+​roomRef.child('seats/' + seatIndex).set({
+playerId: myPlayerId,
+name: playerName,
+isStopped: false,
+balance: initialBalance,
+cards: seatData && seatData.cards ? seatData.cards : []
+}).then(() => {
+mySeat = seatIndex;
+if (!seatData) {
+addTransactionLog(${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0);
+}
+});
+} else {
+alert("Bangku sudah diambil orang lain!");
+}
+});
+}
+​// MINI TOP-UP DI KURSI
+function setQuickTopUp(amount) {
+document.getElementById('seatTopUpInput').value = amount;
+}
+​function closeSeatTopUpModal() {
+document.getElementById('modalSeatTopUp').style.display = 'none';
+activeTopUpSeatIndex = null;
+}
+​function submitSeatTopUp() {
+if (activeTopUpSeatIndex === null) return;
+let amount = parseInt(document.getElementById('seatTopUpInput').value);
+if (isNaN(amount) || amount <= 0) {
+alert("Masukkan jumlah top-up yang valid!");
+return;
+}
+​roomRef.child(seats/${activeTopUpSeatIndex}).once('value', snap => {
+let player = snap.val();
+if (player) {
+let newBal = (player.balance || 0) + amount;
+roomRef.child(seats/${activeTopUpSeatIndex}/balance).set(newBal).then(() => {
+addTransactionLog(💸 TOP-UP MEJA: Saldo ${player.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)});
+alert(Top-up untuk ${player.name} berhasil!);
+closeSeatTopUpModal();
+});
+}
+});
+}
+​function calculateScore(cards) {
+if (!cards) return 0;
+let total = 0;
+for (let card of cards) {
+if (['J', 'Q', 'K', '10'].includes(card.value)) total += 10;
+else if (card.value === 'A') total += 1;
+else total += parseInt(card.value);
+}
+return total;
+}
+​function getCardValue(cardVal) {
+if (['J', 'Q', 'K', '10'].includes(cardVal)) return 10;
+if (cardVal === 'A') return 1;
+return parseInt(cardVal);
+}
+​// ALUR KONTROL ADMIN TERPUSAT KETIKA MULAI GAME
+function startNewGame() {
+roomRef.once('value', (snapshot) => {
+const data = snapshot.val() || {};
+if (data.isPaused) {
+alert("Permainan sedang dijeda (Pause) oleh Super Admin!");
+return;
+}
+​const seats = data.seats || {};
+const betAmount = data.currentBet || 10000;
+​let activeSeatsCount = 0;
+let eligiblePlayersCount = 0;
+​for (let i = 0; i < 7; i++) {
+if (seats[i]) {
+activeSeatsCount++;
+if ((seats[i].balance || 0) >= betAmount) {
+eligiblePlayersCount++;
+}
+}
+}
+​if (activeSeatsCount === 0) {
+alert("Belum ada pemain di meja!");
+return;
+}
+​if (eligiblePlayersCount === 0) {
+alert(Tidak ada pemain dengan saldo yang cukup untuk taruhan (${formatRupiah(betAmount)}). Minta Admin mengisi saldo!);
+return;
+}
+​executeStartGameWithBets();
+});
+}
+​function executeStartGameWithBets() {
+let deck = [];
+for (let suit of suits) {
+for (let val of values) {
+deck.push({ suit, value: val });
+}
+}
+deck.sort(() => Math.random() - 0.5);
+​roomRef.once('value', (snapshot) => {
+const data = snapshot.val() || {};
+const seats = data.seats || {};
+const betAmount = data.currentBet || 10000;
+let updates = {};
+let totalPotCollected = 0;
+​for (let i = 0; i < 7; i++) {
+if (seats[i]) {
+if ((seats[i].balance || 0) < betAmount) {
+updates[seats/${i}/cards] = [];
+updates[seats/${i}/isStopped] = true;
+addTransactionLog(ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)});
+} else {
+let newBalance = seats[i].balance - betAmount;
+updates[seats/${i}/cards] = [deck.pop(), deck.pop(), deck.pop()];
+updates[seats/${i}/isStopped] = false;
+updates[seats/${i}/balance] = newBalance;
+totalPotCollected += betAmount;
+}
+}
+}
+​let startSeat = data.lastWinnerSeat ?? 0;
+if (!seats[startSeat] || (seats[startSeat].balance || 0) < betAmount) {
+startSeat = getFirstActivePlayingSeat(seats, betAmount);
+}
+​updates['currentTurn'] = startSeat;
+updates['isShowdown'] = false;
+updates['gameStarted'] = true;
+updates['deck'] = deck;
+updates['pot'] = (data.pot || 0) + totalPotCollected;
+​roomRef.update(updates).then(() => {
+addTransactionLog(🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}/pemain. Total Pot Saat Ini: ${formatRupiah((data.pot || 0) + totalPotCollected)});
+});
+});
+}
+​function getFirstActivePlayingSeat(seats, betAmount) {
+for (let i = 0; i < 7; i++) {
+if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
+}
+return 0;
+}
+​function playerHit() {
+if (mySeat === null) return;
+roomRef.once('value', (snap) => {
+const data = snap.val() || {};
+if (data.isPaused) {
+alert("Permainan sedang dijeda!");
+return;
+}
+if (data.currentTurn !== mySeat || data.isShowdown) return;
+let seats = data.seats || {};
+let player = seats[mySeat];
+let deck = data.deck || [];
+​if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
+let drawnCard = null;
+​// Fitur Stealth Mode khusus Admin Ruangan (jika aktif)
+if (isAdmin && !isSuperAdmin && stealthModeActive) {
+let currentScore = calculateScore(player.cards);
+let bestCardIndex = -1;
+let maxSafeScore = -1;
+​for (let i = deck.length - 1; i >= 0; i--) {
+let val = getCardValue(deck[i].value);
+if (currentScore + val <= 30) {
+let potentialScore = currentScore + val;
+if (potentialScore > maxSafeScore) {
+maxSafeScore = potentialScore;
+bestCardIndex = i;
+}
+}
+}
+​if (bestCardIndex !== -1) {
+drawnCard = deck.splice(bestCardIndex, 1)[0];
+} else {
+drawnCard = deck.pop();
+}
+} else {
+drawnCard = deck.pop();
+}
+​player.cards.push(drawnCard);
+​let updates = {
+[seats/${mySeat}/cards]: player.cards,
+deck: deck
+};
+​if (player.cards.length >= 7) {
+player.isStopped = true;
+updates[seats/${mySeat}/isStopped] = true;
+let nextTurn = findNextTurn(seats, mySeat);
+if (nextTurn === null) {
+updates['isShowdown'] = true;
+handleShowdownPayout(data);
+} else {
+updates['currentTurn'] = nextTurn;
+}
+}
+​roomRef.update(updates);
+}
+});
+}
+​function playerStand() {
+if (mySeat === null) return;
+roomRef.once('value', (snap) => {
+const data = snap.val() || {};
+if (data.isPaused) {
+alert("Permainan sedang dijeda!");
+return;
+}
+if (data.currentTurn !== mySeat || data.isShowdown) return;
+let seats = data.seats || {};
+if (seats[mySeat]) seats[mySeat].isStopped = true;
+​let nextTurn = findNextTurn(seats, mySeat);
+let updates = {
+[seats/${mySeat}/isStopped]: true
+};
+​if (nextTurn === null) {
+updates['isShowdown'] = true;
+handleShowdownPayout(data);
+} else {
+updates['currentTurn'] = nextTurn;
+}
+​roomRef.update(updates);
+});
+}
+​function handleShowdownPayout(data) {
+const seats = data.seats || {};
+const pot = data.pot || 0;
+let activePlayers = [];
+​for (let i = 0; i < 7; i++) {
+if (seats[i] && seats[i].cards && seats[i].cards.length > 0) {
+activePlayers.push({ index: i, ...seats[i] });
+}
+}
+​if (activePlayers.length === 0 || pot <= 0) return;
+​let validPlayers = activePlayers.map(p => {
+let score = calculateScore(p.cards);
+return { ...p, score, isBust: score > 30 };
+});
+​validPlayers.sort((a, b) => {
+if (a.isBust && !b.isBust) return 1;
+if (!a.isBust && b.isBust) return -1;
+return b.score - a.score;
+});
+​let nonBust = validPlayers.filter(p => !p.isBust);
+​if (nonBust.length > 0) {
+let highScore = nonBust[0].score;
+let winners = nonBust.filter(p => p.score === highScore);
+let splitPot = Math.floor(pot / winners.length);
+​let updates = {};
+let winnerNames = [];
+​winners.forEach(w => {
+let currentBal = seats[w.index].balance || 0;
+updates[seats/${w.index}/balance] = currentBal + splitPot;
+winnerNames.push(w.name);
+});
+​updates['pot'] = 0;
+updates['gameStarted'] = false;
+roomRef.update(updates).then(() => {
+addTransactionLog(🏆 PRESTASI: ${winnerNames.join(', ')} memenangkan pot ${formatRupiah(pot)}!);
+});
+} else {
+addTransactionLog(Semua pemain Bust! Pot ${formatRupiah(pot)} tetap tersimpan di meja.);
+}
+}
+​function findNextTurn(seats, currentSeat) {
+let next = (currentSeat + 1) % 7;
+let checked = 0;
+while (checked < 7) {
+if (seats[next] && seats[next].cards && seats[next].cards.length > 0 && !seats[next].isStopped) {
+return next;
+}
+next = (next + 1) % 7;
+checked++;
+}
+return null;
+}
+​function confirmNewRound() {
+document.getElementById('modalShowdown').style.display = 'none';
+startNewGame();
+}
+​function triggerStealthLed(seatElem, state) {
+let existingLed = seatElem.querySelector('.stealth-led');
+if (existingLed) existingLed.remove();
+​const led = document.createElement('div');
+led.className = stealth-led ${state ? 'on' : 'off'};
+seatElem.appendChild(led);
+​setTimeout(() => {
+if (led) led.remove();
+}, 1500);
+}
+​// FUNGSI ADMIN TERPUSAT & SUPER ADMIN MONITORING REAL-TIME
+let roomsStateStore = {};
+​function initSuperAdminMonitoring() {
+for (let r = 1; r <= 5; r++) {
+let targetRoomId = samgong-room-${r};
+db.ref(samgong_rooms/${targetRoomId}/isPaused).on('value', (snap) => {
+roomsStateStore[r] = snap.val() === true;
+renderSuperAdminDashboardTable();
+});
+}
+}
+​function renderSuperAdminDashboardTable() {
+let tbody = document.getElementById('superAdminTableBody');
+if (!tbody) return;
+​let html = '';
+for (let r = 1; r <= 5; r++) {
+let isPaused = roomsStateStore[r] === true;
+let statusLabel = isPaused ?
+'<span class="status-badge status-paused">Paused</span>' :
+'<span class="status-badge status-active">Aktif</span>';
+​let actionBtn = isPaused ?
+<button class="btn-sa-action btn-sa-resume" onclick="setRoomPausedState(${r}, false)">▶ Lanjutkan</button> :
+<button class="btn-sa-action btn-sa-pause" onclick="setRoomPausedState(${r}, true)">⏸ Berhenti</button>;
+​html += <tr> <td style="font-weight: bold; color: #f3f4f6;">Room ${r}</td> <td>${statusLabel}</td> <td>${actionBtn}</td> </tr>;
+}
+tbody.innerHTML = html;
+}
+​function setRoomPausedState(roomNumber, pausedState) {
+if (!isSuperAdmin) {
+alert("Akses ditolak! Fitur Pause/Resume khusus Super Admin.");
+return;
+}
+let targetRoomId = samgong-room-${roomNumber};
+db.ref(samgong_rooms/${targetRoomId}/isPaused).set(pausedState).then(() => {
+let statusText = pausedState ? "DIBERHENTIKAN (PAUSED)" : "DILANJUTKAN (RESUMED)";
+​// Catat log di ruangan bersangkutan
+let timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+db.ref(samgong_rooms/${targetRoomId}/logs).push({
+text: [${timestamp}] ⏸️ KONTROL SUPER ADMIN: Game ${statusText},
+time: firebase.database.ServerValue.TIMESTAMP
+});
+});
+}
+​function openAdminModal() {
+if (!isAdmin) return;
+​// Atur visibilitas fitur Super Admin khusus
+if (isSuperAdmin) {
+document.getElementById('superAdminControlSection').style.display = 'block';
+document.getElementById('adminModalTitle').innerText = PANEL KONTROL SUPER ADMIN (${roomDisplayName});
+renderSuperAdminDashboardTable();
+} else {
+document.getElementById('superAdminControlSection').style.display = 'none';
+document.getElementById('adminModalTitle').innerText = PANEL KONTROL ADMIN (${roomDisplayName});
+}
+​roomRef.once('value', snap => {
+let data = snap.val() || {};
+let seats = data.seats || {};
+let currentBet = data.currentBet || 10000;
+​document.getElementById('adminBetAmount').value = currentBet;
+​let select = document.getElementById('adminSelectPlayer');
+select.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+​let selectDeduct = document.getElementById('adminSelectPlayerDeduct');
+selectDeduct.innerHTML = '<option value="">-- Pilih Pemain --</option>';
+​let selectReset = document.getElementById('adminSelectResetSeat');
+selectReset.innerHTML = '<option value="">-- Pilih Bangku --</option>';
+​for (let i = 0; i < 7; i++) {
+if (seats[i]) {
+let optHtml = <option value="${i}">${seats[i].name} (Bangku ${i+1}) - Saldo: ${formatRupiah(seats[i].balance)}</option>;
+select.innerHTML += optHtml;
+selectDeduct.innerHTML += optHtml;
+selectReset.innerHTML += <option value="${i}">Bangku ${i+1} (${seats[i].name})</option>;
+} else {
+selectReset.innerHTML += <option value="${i}">Bangku ${i+1} (Kosong)</option>;
+}
+}
+document.getElementById('modalAdmin').style.display = 'flex';
+});
+}
+function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
+​function submitAdminSetBet() {
+let betVal = parseInt(document.getElementById('adminBetAmount').value);
+if (isNaN(betVal) || betVal < 1000) {
+alert("Nominal taruhan minimal Rp1.000");
+return;
+}
+roomRef.child('currentBet').set(betVal).then(() => {
+addTransactionLog(⚙️ ADMIN: Nominal taruhan diatur menjadi ${formatRupiah(betVal)});
+alert(Taruhan berhasil diatur menjadi ${formatRupiah(betVal)});
+});
+}
+​function submitAdminTopUp() {
+let seatIdx = document.getElementById('adminSelectPlayer').value;
+let amount = parseInt(document.getElementById('adminTopUpAmount').value);
+​if (seatIdx === "" || isNaN(amount)) {
+alert("Pilih pemain dan masukkan nominal saldo yang valid!");
+return;
+}
+​if (confirm(Konfirmasi Top Up Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?)) {
+roomRef.child(seats/${seatIdx}).once('value', snap => {
+let player = snap.val();
+if (player) {
+let newBal = (player.balance || 0) + amount;
+roomRef.child(seats/${seatIdx}/balance).set(newBal).then(() => {
+addTransactionLog(💸 ADMIN TOP UP: Saldo ${player.name} ditambah ${formatRupiah(amount)}. Total Saldo: ${formatRupiah(newBal)});
+alert(Saldo ${player.name} berhasil diperbarui!);
+openAdminModal();
+});
+}
+});
+}
+}
+​// FUNGSI PENGURANGAN SALDO FLEKSIBEL / MANUAL OLEH ADMIN
+function submitAdminDeduct() {
+let seatIdx = document.getElementById('adminSelectPlayerDeduct').value;
+let amount = parseInt(document.getElementById('adminDeductAmount').value);
+​if (seatIdx === "" || isNaN(amount) || amount <= 0) {
+alert("Pilih pemain dan masukkan jumlah pengurangan saldo yang valid!");
+return;
+}
+​if (confirm(Konfirmasi Pengurangan Saldo sebesar ${formatRupiah(amount)} untuk pemain di Bangku ${parseInt(seatIdx)+1}?)) {
+roomRef.child(seats/${seatIdx}).once('value', snap => {
+let player = snap.val();
+if (player) {
+let currentBal = player.balance || 0;
+let newBal = currentBal - amount;
+if (newBal < 0) newBal = 0;
+​roomRef.child(seats/${seatIdx}/balance).set(newBal).then(() => {
+addTransactionLog(🔻 ADMIN KOREKSI/PENGURANGAN: Saldo ${player.name} dikurangi ${formatRupiah(amount)}. Sisa Saldo: ${formatRupiah(newBal)});
+alert(Saldo ${player.name} berhasil dikurangi! Sisa saldo: ${formatRupiah(newBal)});
+openAdminModal();
+});
+}
+});
+}
+}
+​// FUNGSI RESET / KELUAR BANGKU (BERDIRI) KHUSUS ADMIN
+function submitAdminResetSeat() {
+let seatIdx = document.getElementById('adminSelectResetSeat').value;
+if (seatIdx === "") {
+alert("Pilih bangku yang ingin direset!");
+return;
+}
+​let seatNum = parseInt(seatIdx) + 1;
+if (confirm(Konfirmasi: Kosongkan / berdirikan pemain di Bangku ${seatNum}?)) {
+roomRef.child(seats/${seatIdx}).once('value', snap => {
+let player = snap.val();
+let playerName = player ? player.name : Bangku ${seatNum};
+​roomRef.child(seats/${seatIdx}).remove().then(() => {
+addTransactionLog(🚪 ADMIN RESET: ${playerName} dikeluarkan dari Bangku ${seatNum} (Bangku dikosongkan));
+alert(Bangku ${seatNum} berhasil dikosongkan!);
+closeAdminModal();
+});
+});
+}
+}
+​// FUNGSI FITUR RESET TOTAL ROOM BARU KHUSUS ADMIN
+function submitAdminResetTotalRoom() {
+if (!isAdmin) {
+alert("Akses ditolak! Fitur ini khusus Admin.");
+return;
+}
+​if (confirm(⚠️ PERINGATAN KERAS:\nApakah Anda yakin ingin melakukan RESET TOTAL ROOM ${roomDisplayName}?\nSemua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu dibersihkan!)) {
+roomRef.update({
+currentTurn: 0,
+isShowdown: false,
+gameStarted: false,
+lastWinnerSeat: 0,
+pot: 0,
+deck: null,
+seats: null,
+isPaused: false
+}).then(() => {
+addTransactionLog(⚠️🚨 ADMIN RESET TOTAL ROOM: Seluruh room ${roomDisplayName} berhasil direset total!);
+alert("Room berhasil direset total secara global!");
+closeAdminModal();
+}).catch((error) => {
+console.error("Gagal melakukan reset total room:", error);
+alert("Terjadi kesalahan saat mereset room.");
+});
+}
+}
+​function openLogModal() { document.getElementById('modalLog').style.display = 'flex'; }
+function closeLogModal() { document.getElementById('modalLog').style.display = 'none'; }
+​function updateUI(data) {
+const seats = data.seats || {};
+const currentTurn = data.currentTurn ?? 0;
+const isShowdown = data.isShowdown ?? false;
+const isPaused = data.isPaused ?? false;
+const pot = data.pot || 0;
+const currentBet = data.currentBet || 10000;
+​document.getElementById('potDisplayLabel').innerText = POT: ${formatRupiah(pot)};
+​document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
+document.getElementById('btnTopStart').disabled = isPaused || (!isShowdown && data.deck && data.deck.length > 0);
+​let activePlayers = [];
+for (let i = 0; i < 7; i++) {
+if (seats[i]) activePlayers.push({ index: i, ...seats[i] });
+}
+​let rankingHtml = "";
+let winnerSeatIndex = null;
+​if (isShowdown && activePlayers.length > 0) {
+let validPlayers = activePlayers.filter(p => p.cards && p.cards.length > 0).map(p => {
+let score = calculateScore(p.cards);
+return { ...p, score, isBust: score > 30 };
+});
+​validPlayers.sort((a, b) => {
+if (a.isBust && !b.isBust) return 1;
+if (!a.isBust && b.isBust) return -1;
+return b.score - a.score;
+});
+​let nonBust = validPlayers.filter(p => !p.isBust);
+if (nonBust.length > 0) {
+let highScore = nonBust[0].score;
+let topScorePlayers = nonBust.filter(p => p.score === highScore);
+if (topScorePlayers.length === 1) {
+winnerSeatIndex = topScorePlayers[0].index;
+}
+}
+​rankingHtml += "<ol style='padding-left: 15px; margin: 0;'>";
+validPlayers.forEach((p, idx) => {
+let badge = idx === 0 ? "👑 " : "";
+let statusText = p.isBust ?  (Bust: ${p.score}) :  (Skor: ${p.score});
+rankingHtml += <li style="margin-bottom: 3px;">${badge}<b>${p.name}</b>${statusText}</li>;
+});
+rankingHtml += "</ol>";
+​if (winnerSeatIndex !== null && data.lastWinnerSeat !== winnerSeatIndex) {
+roomRef.update({ lastWinnerSeat: winnerSeatIndex });
+}
+} else {
+rankingHtml = isPaused ? "⚠️ Permainan Dijeda (Paused)" : "Permainan sedang berlangsung...";
+}
+​let winnerElem = document.getElementById('winnerAnnouncement');
+if (winnerElem) {
+winnerElem.innerHTML = rankingHtml;
+}
+​for (let i = 0; i < 7; i++) {
+const seatElem = document.getElementById(seat-${i});
+const cardsElem = document.getElementById(cards-${i});
+const statusElem = document.getElementById(status-${i});
+const nameElem = document.getElementById(name-${i});
+const balanceElem = document.getElementById(balance-${i});
+const player = seats[i];
+​let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
+​let visualPosIndex = i;
+if (mySeat !== null) {
+visualPosIndex = (i - mySeat + 7) % 7;
+}
+​const angles = [
+{ bottom: '2px', left: '50%', transform: 'translateX(-50%)' },
+{ bottom: '70px', left: '2px', transform: 'none' },
+{ top: '70px', left: '2px', transform: 'none' },
+{ top: '2px', left: '22%', transform: 'translateX(-50%)' },
+{ top: '2px', right: '22%', transform: 'translateX(50%)' },
+{ top: '70px', right: '2px', transform: 'none' },
+{ bottom: '70px', right: '2px', transform: 'none' }
+];
+​seatElem.style.bottom = '';
+seatElem.style.top = '';
+seatElem.style.left = '';
+seatElem.style.right = '';
+seatElem.style.transform = '';
+​const posConfig = angles[visualPosIndex];
+for (let key in posConfig) {
+seatElem.style[key] = posConfig[key];
+}
+​if (isMe) {
+seatElem.classList.add('is-me');
+​if (savedSeatLeft && savedSeatTop) {
+seatElem.style.position = 'fixed';
+seatElem.style.left = savedSeatLeft;
+seatElem.style.top = savedSeatTop;
+seatElem.style.bottom = 'auto';
+seatElem.style.transform = 'none';
+seatElem.dataset.dragged = "true";
+} else if (!seatElem.dataset.dragged) {
+seatElem.style.bottom = '10px';
+seatElem.style.left = '50%';
+seatElem.style.right = '';
+seatElem.style.top = '';
+seatElem.style.transform = 'translateX(-50%)';
+}
+​if (!seatElem.querySelector('.drag-handle-container')) {
+const handleContainer = document.createElement('div');
+handleContainer.className = 'drag-handle-container';
+​const handle = document.createElement('div');
+handle.className = 'drag-handle';
+handle.innerText = '↕ Geser Kotak ↕';
+​const lockBtn = document.createElement('button');
+lockBtn.className = btn-lock-seat ${seatLocked ? 'locked' : ''};
+lockBtn.id = 'btnLockSeat';
+lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+lockBtn.onclick = (e) => {
+e.stopPropagation();
+seatLocked = !seatLocked;
+localStorage.setItem('samgong_seat_locked', seatLocked);
+lockBtn.className = btn-lock-seat ${seatLocked ? 'locked' : ''};
+lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+};
+​handleContainer.appendChild(handle);
+handleContainer.appendChild(lockBtn);
+seatElem.insertBefore(handleContainer, seatElem.firstChild);
+} else {
+const lockBtn = seatElem.querySelector('#btnLockSeat');
+if (lockBtn) {
+lockBtn.className = btn-lock-seat ${seatLocked ? 'locked' : ''};
+lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
+}
+}
+​cardsElem.onclick = (e) => {
+e.stopPropagation();
+// Stealth mode khusus admin ruangan, bukan super admin
+if (!isAdmin || isSuperAdmin) return;
+const currentTime = new Date().getTime();
+const tapLength = currentTime - lastTapTime;
+if (tapLength < 350 && tapLength > 0) {
+stealthModeActive = !stealthModeActive;
+triggerStealthLed(seatElem, stealthModeActive);
+}
+lastTapTime = currentTime;
+};
+} else {
+seatElem.classList.remove('is-me');
+const existingHandleContainer = seatElem.querySelector('.drag-handle-container');
+if (existingHandleContainer) existingHandleContainer.remove();
+cardsElem.onclick = null;
+}
+​if (currentTurn === i && !isShowdown && !isPaused && player) {
+seatElem.classList.add('active-turn');
+} else {
+seatElem.classList.remove('active-turn');
+}
+​let seatNumDisplay = i + 1;
+​if (player) {
+nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
+balanceElem.innerText = formatRupiah(player.balance || 0);
+cardsElem.innerHTML = '';
+​let currentCardScore = calculateScore(player.cards);
+​if (player.cards && player.cards.length > 0) {
+player.cards.forEach((card) => {
+const cardDiv = document.createElement('div');
+if (isMe || isShowdown) {
+const isRed = card.suit === '♥' || card.suit === '♦';
+cardDiv.className = card ${isRed ? 'red' : 'black'};
+cardDiv.innerHTML = <div class="card-top"><span>${card.value}</span><span>${card.suit}</span></div> <div class="card-center">${card.suit}</div> <div class="card-bottom"><span>${card.value}</span><span>${card.suit}</span></div>;
+} else {
+cardDiv.className = 'card back';
+}
+cardsElem.appendChild(cardDiv);
+});
+}
+​if (isShowdown && player.cards && player.cards.length > 0) {
+statusElem.innerText = Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''};
+} else if (player.isStopped || (player.cards && player.cards.length === 0)) {
+if (player.cards && player.cards.length === 0) {
+statusElem.innerText = Sit-Out (Saldo kurang);
+} else if (isMe) {
+statusElem.innerText = STOP (Poin: ${currentCardScore});
+} else {
+statusElem.innerText = STOP;
+}
+} else {
+if (isMe) {
+statusElem.innerText = Main | Poin: ${currentCardScore};
+} else {
+statusElem.innerText = Main;
+}
+}
+} else {
+nameElem.innerText = Bangku ${seatNumDisplay} (Kosong);
+balanceElem.innerText = '';
+cardsElem.innerHTML = '';
+statusElem.innerText = Ketuk duduk;
+}
+}
+​if (isPaused) {
+document.getElementById('turnStatusText').innerText = "⚠️ PERMAINAN DIJEDA (PAUSED)";
+} else {
+document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : Giliran: Bangku ${currentTurn + 1};
+}
+​let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown && !isPaused);
+document.getElementById('btnHit').disabled = !isMyTurn;
+document.getElementById('btnStop').disabled = !isMyTurn;
+}
+​// LOGIKA DRAGGABLE DENGAN PENGECEKAN STATUS LOCK / UNLOCK
+document.addEventListener('DOMContentLoaded', () => {
+let isDragging = false;
+let startX, startY, initialX, initialY;
+​document.addEventListener('pointerdown', (e) => {
+if (seatLocked) return;
+​const targetMe = e.target.closest('.seat.is-me');
+if (!targetMe) return;
+​if (e.target.tagName === 'BUTTON' || e.target.closest('.card')) return;
+​isDragging = true;
+targetMe.dataset.dragged = "true";
+​const rect = targetMe.getBoundingClientRect();
+initialX = rect.left;
+initialY = rect.top;
+​startX = e.clientX;
+startY = e.clientY;
+​targetMe.style.position = 'fixed';
+targetMe.style.left = ${initialX}px;
+targetMe.style.top = ${initialY}px;
+targetMe.style.bottom = 'auto';
+targetMe.style.transform = 'none';
+​targetMe.setPointerCapture(e.pointerId);
+});
+​document.addEventListener('pointermove', (e) => {
+if (!isDragging || seatLocked) return;
+const mySeatElem = document.querySelector('.seat.is-me');
+if (!mySeatElem) return;
+​const dx = e.clientX - startX;
+const dy = e.clientY - startY;
+​mySeatElem.style.left = ${initialX + dx}px;
+mySeatElem.style.top = ${initialY + dy}px;
+});
+​document.addEventListener('pointerup', (e) => {
+if (!isDragging) return;
+isDragging = false;
+const mySeatElem = document.querySelector('.seat.is-me');
+if (mySeatElem) {
+localStorage.setItem('samgong_seat_left', mySeatElem.style.left);
+localStorage.setItem('samgong_seat_top', mySeatElem.style.top);
+​try {
+mySeatElem.releasePointerCapture(e.pointerId);
+} catch (err) {}
+}
+});
+});
+</script>
 </body>
 </html>
