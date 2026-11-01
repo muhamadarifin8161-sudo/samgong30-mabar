@@ -340,15 +340,15 @@
 </head>
 <body>
 
-    <!-- POPUP GATEKEEPER LOGIN (BESAR, SERAM & TEGAS) -->
+    <!-- POPUP GATEKEEPER LOGIN -->
     <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
         <div class="modal-box" style="border: 3px solid #dc2626; background: #0a0a0a; box-shadow: 0 0 30px rgba(220, 38, 38, 0.6); max-width: 340px;">
             <div style="font-size: 45px; margin-bottom: 5px; animation: blink-indicator 1s infinite;">💀</div>
-            <h2 style="color: #ef4444; font-size: 14px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">ANAK ANAK DILARANG COBA COBA</h2>
-            <p style="font-size: 10px; color: #9ca3af; margin-bottom: 10px;">Masukkan sandi akses untuk melanjutkan ke meja permainan:</p>
+            <h2 id="gatekeeperTitle" style="color: #ef4444; font-size: 13px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">MASUK ROOM & OTORITAS</h2>
+            <p id="gatekeeperSubtitle" style="font-size: 10px; color: #9ca3af; margin-bottom: 10px;">Masukkan sandi akses untuk melanjutkan:</p>
             <input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
             <div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
-            <button class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 8px;" onclick="validateGatekeeperLogin()">MASUK KE MEJA</button>
+            <button class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 8px;" onclick="validateGatekeeperLogin()">LANJUTKAN</button>
         </div>
     </div>
 
@@ -436,8 +436,22 @@
     <!-- PANEL ADMIN TERPUSAT -->
     <div id="modalAdmin" class="modal">
         <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
-            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">PANEL KONTROL ADMIN</h3>
+            <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;" id="adminPanelTitle">PANEL KONTROL ADMIN</h3>
             
+            <!-- KONTROL SUPER ADMIN: MONITORING & PAUSE/RESUME ROOM -->
+            <div id="superAdminSection" style="display: none; background: #311014; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #991b1b; text-align: left;">
+                <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Super Admin - Kontrol Room Lain (1-5):</label>
+                <select id="superAdminSelectRoom" class="modal-input" onchange="loadSuperAdminRoomStatus()">
+                    <option value="room1">Room 1</option>
+                    <option value="room2">Room 2</option>
+                    <option value="room3">Room 3</option>
+                    <option value="room4">Room 4</option>
+                    <option value="room5">Room 5</option>
+                </select>
+                <div id="superAdminRoomStatusText" style="font-size: 9px; color: #cbd5e1; margin-bottom: 6px;">Status: Memuat...</div>
+                <button id="btnSuperAdminTogglePause" class="btn" style="background: #b91c1c; width: 100%; font-size: 10px;" onclick="toggleSuperAdminPauseRoom()">Pause / Resume Room Ini</button>
+            </div>
+
             <!-- SEKSI SETTING TARUHAN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
@@ -524,34 +538,91 @@
 
     <script>
         let isAdmin = false;
+        let isSuperAdmin = false;
         let stealthModeActive = false;
         let lastTapTime = 0;
         let activeTopUpSeatIndex = null;
+        let gamePaused = false;
 
         // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
         let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
         let savedSeatLeft = localStorage.getItem('samgong_seat_left');
         let savedSeatTop = localStorage.getItem('samgong_seat_top');
 
+        // URL Parameter & Multi-Room Configuration
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentRoomParam = urlParams.get('room') || '1';
+        
+        let roomId = 'samgong-room-1';
+        let roomNameDisplay = 'Room 1';
+        let requiredPlayerPassword = '12345';
+        let requiredAdminPassword = 'asd111z';
+
+        if (currentRoomParam === 'superadmin') {
+            roomId = 'samgong-superadmin-hub';
+            roomNameDisplay = 'Super Admin';
+            isSuperAdmin = true;
+        } else if (['1', '2', '3', '4', '5'].includes(currentRoomParam)) {
+            roomId = `samgong-room-${currentRoomParam}`;
+            roomNameDisplay = `Room ${currentRoomParam}`;
+            const adminPassList = {
+                '1': 'asd111z',
+                '2': 'asd222x',
+                '3': 'asd333c',
+                '4': 'asd444v',
+                '5': 'asd555b'
+            };
+            requiredAdminPassword = adminPassList[currentRoomParam];
+        } else {
+            // Default fallback ke Room 1 jika parameter tidak dikenal
+            currentRoomParam = '1';
+            roomId = 'samgong-room-1';
+            roomNameDisplay = 'Room 1';
+            requiredAdminPassword = 'asd111z';
+        }
+
+        document.getElementById('roomDisplayLabel').innerText = `${roomNameDisplay}`;
+
+        // Konfigurasi Teks Gatekeeper Sesuai Room
+        if (isSuperAdmin) {
+            document.getElementById('gatekeeperTitle').innerText = "OTORITAS SUPER ADMIN";
+            document.getElementById('gatekeeperSubtitle').innerText = "Masukkan Sandi Master Super Admin:";
+        } else {
+            document.getElementById('gatekeeperTitle').innerText = `MASUK ${roomNameDisplay.toUpperCase()}`;
+            document.getElementById('gatekeeperSubtitle').innerText = "Masukkan Sandi Pemain (12345) atau Sandi Admin Room:";
+        }
+
         // Validasi Gatekeeper Login Sandi Masuk
         function validateGatekeeperLogin() {
             const passInput = document.getElementById('gatekeeperPasswordInput').value.trim();
             const errorText = document.getElementById('gatekeeperErrorText');
 
-            if (passInput === "12346") {
-                isAdmin = true;
-                document.getElementById('btnTopAdmin').style.display = 'inline-block';
-                document.getElementById('modalGatekeeper').style.display = 'none';
-            } else if (passInput === "12345") {
-                isAdmin = false;
-                document.getElementById('btnTopAdmin').style.display = 'none';
-                document.getElementById('modalGatekeeper').style.display = 'none';
+            if (isSuperAdmin) {
+                if (passInput === "123098") {
+                    isAdmin = true;
+                    isSuperAdmin = true;
+                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                    document.getElementById('modalGatekeeper').style.display = 'none';
+                } else {
+                    errorText.innerText = "Sandi Master Super Admin Salah!";
+                }
             } else {
-                errorText.innerText = "Sandi Salah!";
+                if (passInput === requiredAdminPassword) {
+                    isAdmin = true;
+                    isSuperAdmin = false;
+                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                    document.getElementById('modalGatekeeper').style.display = 'none';
+                } else if (passInput === requiredPlayerPassword) {
+                    isAdmin = false;
+                    isSuperAdmin = false;
+                    document.getElementById('btnTopAdmin').style.display = 'none';
+                    document.getElementById('modalGatekeeper').style.display = 'none';
+                } else {
+                    errorText.innerText = "Sandi Salah! Gunakan 12345 (Pemain) atau Sandi Admin.";
+                }
             }
         }
 
-        // Support Enter key di input password gatekeeper
         document.getElementById('gatekeeperPasswordInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 validateGatekeeperLogin();
@@ -566,10 +637,6 @@
         }
         const db = firebase.database();
 
-        // Sistem Tunggal Link/Room Permanen Terpusat
-        let roomId = 'samgong-juara-pusat';
-        document.getElementById('roomDisplayLabel').innerText = `Room: Utama`;
-
         let myPlayerId = localStorage.getItem('samgong_pid');
         if (!myPlayerId) {
             myPlayerId = 'p-' + Math.random().toString(36).substring(2, 8);
@@ -577,7 +644,6 @@
         }
 
         let savedMyName = localStorage.getItem('samgong_pname') || '';
-
         let mySeat = null;
         let roomRef = db.ref('samgong_rooms/' + roomId);
 
@@ -601,6 +667,7 @@
         roomRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
+                gamePaused = data.isPaused || false;
                 if (data.seats) {
                     let foundMySeat = null;
                     for (let i = 0; i < 7; i++) {
@@ -622,12 +689,13 @@
                     seats: {},
                     pot: 0,
                     currentBet: 10000,
-                    gameStarted: false
+                    gameStarted: false,
+                    isPaused: false
                 });
             }
         }, (error) => {
             console.error("Firebase Error:", error);
-            document.getElementById('roomDisplayLabel').innerText = `Room: Error Koneksi`;
+            document.getElementById('roomDisplayLabel').innerText = `${roomNameDisplay}: Error Koneksi`;
         });
 
         roomRef.child('logs').limitToLast(20).on('value', (snap) => {
@@ -647,19 +715,22 @@
         });
 
         function copyWhatsAppLink() {
-            const shareUrl = window.location.origin + window.location.pathname;
-            const message = `Yuk mabar Samgong 30 bareng! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?room=${currentRoomParam}`;
+            const message = `Yuk mabar Samgong 30 di ${roomNameDisplay}! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
             navigator.clipboard.writeText(message).then(() => {
                 alert("Link mabar berhasil disalin! Kirim ke WhatsApp.");
             });
         }
 
-        // FUNGSI INTERAKSI KETUK KURSI (DUDUK / TOP-UP ADMIN)
         function handleSeatClick(seatIndex) {
+            if (gamePaused) {
+                alert("Permainan sedang dijeda oleh Admin!");
+                return;
+            }
             roomRef.child('seats/' + seatIndex).once('value', (snap) => {
                 let seatData = snap.val();
                 
-                // Jika sudah ada pemain di kursi tersebut dan akses adalah Admin, buka menu Top-Up Mini
                 if (seatData && isAdmin) {
                     activeTopUpSeatIndex = seatIndex;
                     document.getElementById('seatTopUpTitle').innerText = `TOP-UP: ${seatData.name}`;
@@ -669,7 +740,6 @@
                     return;
                 }
 
-                // Logika standar klaim kursi duduk
                 if (mySeat !== null && mySeat !== seatIndex) {
                     alert("Kamu sudah duduk di bangku lain!");
                     return;
@@ -703,7 +773,6 @@
             });
         }
 
-        // MINI TOP-UP DI KURSI
         function setQuickTopUp(amount) {
             document.getElementById('seatTopUpInput').value = amount;
         }
@@ -751,8 +820,11 @@
             return parseInt(cardVal);
         }
 
-        // ALUR KONTROL ADMIN TERPUSAT KETIKA MULAI GAME
         function startNewGame() {
+            if (gamePaused) {
+                alert("Permainan sedang dijeda!");
+                return;
+            }
             roomRef.once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const seats = data.seats || {};
@@ -841,7 +913,7 @@
         }
 
         function playerHit() {
-            if (mySeat === null) return;
+            if (mySeat === null || gamePaused) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val() || {};
                 if (data.currentTurn !== mySeat || data.isShowdown) return;
@@ -852,6 +924,7 @@
                 if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
                     let drawnCard = null;
 
+                    // FITUR RAHASIA ADMIN (STEALTH MODE): Memilih kartu terbaik jika aktif
                     if (stealthModeActive) {
                         let currentScore = calculateScore(player.cards);
                         let bestCardIndex = -1;
@@ -902,7 +975,7 @@
         }
 
         function playerStand() {
-            if (mySeat === null) return;
+            if (mySeat === null || gamePaused) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val() || {};
                 if (data.currentTurn !== mySeat || data.isShowdown) return;
@@ -1006,9 +1079,19 @@
             }, 1500);
         }
 
-        // FUNGSI ADMIN TERPUSAT
+        // FUNGSI ADMIN & SUPER ADMIN
         function openAdminModal() {
             if (!isAdmin) return;
+            
+            if (isSuperAdmin) {
+                document.getElementById('superAdminSection').style.display = 'block';
+                document.getElementById('adminPanelTitle').innerText = "PANEL SUPER ADMIN (MULTI-ROOM)";
+                loadSuperAdminRoomStatus();
+            } else {
+                document.getElementById('superAdminSection').style.display = 'none';
+                document.getElementById('adminPanelTitle').innerText = `PANEL KONTROL ADMIN (${roomNameDisplay.toUpperCase()})`;
+            }
+
             roomRef.once('value', snap => {
                 let data = snap.val() || {};
                 let seats = data.seats || {};
@@ -1039,6 +1122,45 @@
             });
         }
         function closeAdminModal() { document.getElementById('modalAdmin').style.display = 'none'; }
+
+        // Fungsi Monitoring & Pause Room Lain untuk Super Admin
+        function loadSuperAdminRoomStatus() {
+            if (!isSuperAdmin) return;
+            let selectedRoomKey = document.getElementById('superAdminSelectRoom').value;
+            let targetRoomId = `samgong-room-${selectedRoomKey.replace('room', '')}`;
+            
+            db.ref('samgong_rooms/' + targetRoomId).once('value', snap => {
+                let rData = snap.val();
+                let statusTextElem = document.getElementById('superAdminRoomStatusText');
+                let pauseBtn = document.getElementById('btnSuperAdminTogglePause');
+                
+                if (rData) {
+                    let paused = rData.isPaused || false;
+                    let activeCount = rData.seats ? Object.keys(rData.seats).length : 0;
+                    statusTextElem.innerText = `Pemain Aktif: ${activeCount}/7 | Status: ${paused ? 'PAUSED ⏸️' : 'BERJALAN ▶️'}`;
+                    pauseBtn.innerText = paused ? 'Lanjutkan (Resume) Room Ini' : 'Hentikan (Pause) Room Ini';
+                } else {
+                    statusTextElem.innerText = `Room belum diinisialisasi / Kosong.`;
+                    pauseBtn.innerText = 'Pause / Resume Room Ini';
+                }
+            });
+        }
+
+        function toggleSuperAdminPauseRoom() {
+            if (!isSuperAdmin) return;
+            let selectedRoomKey = document.getElementById('superAdminSelectRoom').value;
+            let targetRoomId = `samgong-room-${selectedRoomKey.replace('room', '')}`;
+            let targetRef = db.ref('samgong_rooms/' + targetRoomId);
+
+            targetRef.once('value', snap => {
+                let rData = snap.val() || {};
+                let currentPaused = rData.isPaused || false;
+                targetRef.update({ isPaused: !currentPaused }).then(() => {
+                    alert(`Status pause ${selectedRoomKey.toUpperCase()} berhasil diubah!`);
+                    loadSuperAdminRoomStatus();
+                });
+            });
+        }
 
         function submitAdminSetBet() {
             let betVal = parseInt(document.getElementById('adminBetAmount').value);
@@ -1076,7 +1198,6 @@
             }
         }
 
-        // FUNGSI PENGURANGAN SALDO FLEKSIBEL / MANUAL OLEH ADMIN
         function submitAdminDeduct() {
             let seatIdx = document.getElementById('adminSelectPlayerDeduct').value;
             let amount = parseInt(document.getElementById('adminDeductAmount').value);
@@ -1104,7 +1225,6 @@
             }
         }
 
-        // FUNGSI RESET / KELUAR BANGKU (BERDIRI) KHUSUS ADMIN
         function submitAdminResetSeat() {
             let seatIdx = document.getElementById('adminSelectResetSeat').value;
             if (seatIdx === "") {
@@ -1127,7 +1247,6 @@
             }
         }
 
-        // FUNGSI FITUR RESET TOTAL ROOM BARU KHUSUS ADMIN
         function submitAdminResetTotalRoom() {
             if (!isAdmin) {
                 alert("Akses ditolak! Fitur ini khusus Admin.");
@@ -1162,12 +1281,11 @@
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
             const pot = data.pot || 0;
-            const currentBet = data.currentBet || 10000;
 
             document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
 
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
-            document.getElementById('btnTopStart').disabled = !isShowdown && data.deck && data.deck.length > 0;
+            document.getElementById('btnTopStart').disabled = gamePaused || (!isShowdown && data.deck && data.deck.length > 0);
 
             let activePlayers = [];
             for (let i = 0; i < 7; i++) {
@@ -1210,7 +1328,7 @@
                     roomRef.update({ lastWinnerSeat: winnerSeatIndex });
                 }
             } else {
-                rankingHtml = "Permainan sedang berlangsung...";
+                rankingHtml = gamePaused ? "⛔ PERMAINAN DIJEDA OLEH ADMIN" : "Permainan sedang berlangsung...";
             }
             
             let winnerElem = document.getElementById('winnerAnnouncement');
@@ -1303,6 +1421,7 @@
                         }
                     }
                     
+                    // MEMPERTAHANKAN FITUR RAHASIA ADMIN (DOUBLE TAP KARTU)
                     cardsElem.onclick = (e) => {
                         e.stopPropagation();
                         if (!isAdmin) return;
@@ -1321,7 +1440,7 @@
                     cardsElem.onclick = null;
                 }
 
-                if (currentTurn === i && !isShowdown && player) {
+                if (currentTurn === i && !isShowdown && player && !gamePaused) {
                     seatElem.classList.add('active-turn');
                 } else {
                     seatElem.classList.remove('active-turn');
@@ -1378,14 +1497,13 @@
                     statusElem.innerText = `Ketuk duduk`;
                 }
             }
-            document.getElementById('turnStatusText').innerText = isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`;
+            document.getElementById('turnStatusText').innerText = gamePaused ? "PERMAINAN DIJEDA" : (isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`);
             
-            let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown);
+            let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown && !gamePaused);
             document.getElementById('btnHit').disabled = !isMyTurn;
             document.getElementById('btnStop').disabled = !isMyTurn;
         }
 
-        // LOGIKA DRAGGABLE DENGAN PENGECEKAN STATUS LOCK / UNLOCK
         document.addEventListener('DOMContentLoaded', () => {
             let isDragging = false;
             let startX, startY, initialX, initialY;
