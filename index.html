@@ -10,9 +10,9 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            background-color: #0b0f19;
+            background-color: #090d16;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             width: 100vw;
             height: 100vh;
             height: 100dvh;
@@ -23,71 +23,83 @@
             user-select: none;
             position: fixed;
         }
+
+        /* TOP BAR */
         .top-bar {
-            background: #111827;
-            padding: 6px 12px;
+            background: linear-gradient(180deg, #131c2e 0%, #0d1424 100%);
+            padding: 6px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1f2937;
-            z-index: 20;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 30;
             flex-shrink: 0;
-            height: 52px;
+            height: 50px;
         }
-        .top-actions {
+        .top-left, .top-actions {
             display: flex;
             gap: 6px;
             align-items: center;
         }
         .btn-top-start {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(37,99,235,0.4);
-        }
-        .btn-top-start:hover { background: #1d4ed8; }
-        
-        .wa-btn {
-            background: #059669;
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+            color: #93c5fd;
+            border: 1px solid #2563eb;
             padding: 6px 10px;
             border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 10px;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(5,150,105,0.4);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.35);
         }
-        .btn:disabled, button:disabled { opacity: 0.3; cursor: not-allowed; }
-
         .btn-top-admin {
-            background: #d97706;
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            color: #ffffff;
+            border: 1px solid #fbbf24;
             padding: 6px 10px;
             border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 10px;
+            font-weight: 800;
             cursor: pointer;
             display: none;
-            box-shadow: 0 2px 5px rgba(217,119,6,0.4);
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
         }
         .btn-top-log {
-            background: #4b5563;
-            color: white;
-            border: none;
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
             padding: 6px 10px;
             border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 10px;
+            font-weight: 700;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
+        .wa-btn {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #ffffff;
+            border: 1px solid #10b981;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+        }
+        .btn:disabled, button:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* TABLE AREA */
         .table-area {
             position: relative;
             flex-grow: 1;
@@ -96,183 +108,355 @@
             justify-content: center;
             width: 100%;
             overflow: hidden;
-            padding: 8px;
+            padding: 10px 12px;
         }
         .poker-table {
             position: relative;
             width: 100%;
-            max-width: 380px;
+            max-width: 375px;
             height: 100%;
-            max-height: 520px;
-            background: radial-gradient(circle, #15803d 0%, #166534 65%, #052e16 100%);
-            border: 8px solid #854d0e;
-            border-radius: 190px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.85), 0 0 15px rgba(0,0,0,0.9);
+            max-height: 540px;
+            background: radial-gradient(ellipse at center, #1d7a46 0%, #145a32 62%, #0b3b20 100%);
+            border: 8px solid #6b3e11;
+            border-radius: 185px;
+            box-shadow:
+                inset 0 0 0 3px #462608,
+                inset 0 0 35px rgba(0, 0, 0, 0.85),
+                0 10px 30px rgba(0, 0, 0, 0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
+
+        /* CENTER INFO (POT & STATUS) */
         .center-info {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 1.5px solid rgba(250, 204, 21, 0.6);
-            text-align: center;
-            z-index: 5;
-            max-width: 210px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            gap: 6px;
+            z-index: 5;
+            pointer-events: none;
         }
-        .center-info div:first-child { font-size: 9px; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-        .center-info div:nth-child(2) { font-size: 11px; color: #facc15; font-weight: bold; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
-
-        .pot-display {
-            font-size: 13px;
-            color: #4ade80;
-            font-weight: bold;
-            background: rgba(6, 78, 59, 0.85);
-            padding: 3px 10px;
-            border-radius: 6px;
-            border: 1px solid #10b981;
+        .pot-pill {
+            background: rgba(11, 18, 32, 0.88);
+            border: 1.5px solid rgba(250, 204, 21, 0.45);
+            border-radius: 999px;
+            padding: 5px 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+        .pot-coin {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fde047 0%, #ca8a04 100%);
+            color: #422006;
+            font-size: 10px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 6px rgba(250, 204, 21, 0.8);
+        }
+        .pot-label-text {
+            font-size: 11px;
+            font-weight: 800;
+            color: #93c5fd;
             letter-spacing: 0.5px;
         }
+        .pot-amount-text {
+            font-size: 13px;
+            font-weight: 900;
+            color: #facc15;
+        }
+        .turn-pill {
+            background: rgba(11, 18, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        .turn-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #facc15;
+            box-shadow: 0 0 6px #facc15;
+        }
+        #gameStatusText {
+            display: none;
+        }
 
+        /* SEATS (EMPTY CHIP STYLE & OCCUPIED STYLE) */
         .seat {
             position: absolute;
-            background: #111827;
-            border: 2px solid #374151;
-            border-radius: 10px;
-            padding: 6px 8px;
-            width: 125px;
+            width: 96px;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.7);
             z-index: 10;
-            transition: all 0.3s ease;
-        }
-        .seat.active-turn { border-color: #facc15; box-shadow: 0 0 15px #facc15; }
-        
-        .seat.is-me {
-            width: 250px;
-            border-color: #059669;
-            padding: 10px 12px;
-            z-index: 25;
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #0f172a;
-            box-shadow: 0 0 25px rgba(5, 150, 105, 0.85);
-            touch-action: none;
-            cursor: grab;
-        }
-        .seat.is-me:active {
-            cursor: grabbing;
-        }
-        .drag-handle-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            transition: transform 0.2s ease;
+        }
+        .seat-empty-chip {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(10, 46, 26, 0.85);
+            border: 3px dashed #34d399;
+            box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a7f3d0;
+            font-size: 18px;
+            font-weight: 900;
             margin-bottom: 4px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .drag-handle {
+        .seat-empty-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #d1fae5;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            margin-bottom: 2px;
+        }
+        .seat-empty-pill {
+            background: rgba(6, 78, 59, 0.85);
+            border: 1px solid rgba(52, 211, 153, 0.45);
+            color: #6ee7b7;
             font-size: 9px;
+            font-weight: 800;
+            padding: 1px 8px;
+            border-radius: 999px;
+        }
+
+        /* OCCUPIED OTHER PLAYER */
+        .seat-occupied-box {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1.5px solid #334155;
+            border-radius: 12px;
+            padding: 4px 7px;
+            width: 102px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+        }
+        .seat.active-turn .seat-occupied-box {
+            border-color: #facc15;
+            box-shadow: 0 0 14px rgba(250, 204, 21, 0.85);
+        }
+        .seat-name {
+            font-size: 9px;
+            font-weight: 800;
+            color: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .seat-balance {
+            font-size: 8px;
+            color: #facc15;
+            font-weight: 800;
+        }
+        .seat-status {
+            font-size: 8px;
             color: #38bdf8;
-            background: rgba(30, 41, 59, 0.9);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-        .btn-lock-seat {
-            font-size: 9px;
-            background: #374151;
-            color: #f3f4f6;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-lock-seat.locked {
-            background: #b91c1c;
-            color: white;
+            font-weight: 700;
+            margin-top: 1px;
         }
 
-        .seat-name { font-size: 10px; font-weight: bold; color: #f3f4f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .seat-balance { font-size: 9px; color: #facc15; font-weight: bold; margin-top: 1px; }
-        .seat-status { 
-            font-size: 8px; 
-            color: #38bdf8; 
-            margin-top: 3px; 
-            font-weight: bold; 
-            text-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+        /* CARDS */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 44px;
+            margin: 2px 0;
+            position: relative;
         }
-
-        .card-container { display: flex; justify-content: center; align-items: center; height: 55px; margin: 4px 0; position: relative; }
-        
         .card {
-            width: 36px; 
-            height: 52px; 
-            background: #fff; 
-            border-radius: 5px;
-            display: flex; 
-            flex-direction: column; 
+            width: 30px;
+            height: 42px;
+            background: #ffffff;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            padding: 3px; 
-            font-weight: bold; 
-            font-size: 11px; 
-            line-height: 1; 
-            margin-left: -12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.6);
-            border: 1px solid #d1d5db;
+            padding: 2px;
+            font-weight: 900;
+            font-size: 9px;
+            line-height: 1;
+            margin-left: -10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.65);
+            border: 1px solid #cbd5e1;
             position: relative;
         }
         .card:first-child { margin-left: 0; }
-        
         .card .card-top {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            font-size: 10px;
+            font-size: 8px;
         }
         .card .card-center {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 15px;
+            font-size: 13px;
         }
         .card .card-bottom {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            font-size: 10px;
+            font-size: 8px;
             transform: rotate(180deg);
         }
-
-        .card.back { 
-            background: linear-gradient(135deg, #b91c1c, #7f1d1d); 
-            border: 1px solid #ffffff; 
-            box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+        .card.back {
+            background: linear-gradient(135deg, #dc2626, #7f1d1d);
+            border: 1px solid #ffffff;
         }
         .card.red { color: #dc2626; }
-        .card.black { color: #111827; }
+        .card.black { color: #0f172a; }
 
-        .seat.is-me .card-container { height: 95px; margin: 6px 0; }
-        .seat.is-me .card { width: 60px; height: 86px; font-size: 16px; margin-left: -18px; padding: 5px; }
-        .seat.is-me .card .card-top, .seat.is-me .card .card-bottom { font-size: 14px; }
-        .seat.is-me .card .card-center { font-size: 30px; }
-        .seat.is-me .seat-name { font-size: 12px; }
-        .seat.is-me .seat-balance { font-size: 11px; }
-        .seat.is-me .seat-status { font-size: 10px; text-shadow: 0 0 8px rgba(56, 189, 248, 0.9); }
+        /* MY SEAT (HERO BOTTOM CAPSULE LIKE SCREENSHOT) */
+        .seat.is-me {
+            width: 235px;
+            z-index: 25;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            touch-action: none;
+            cursor: grab;
+        }
+        .seat.is-me:active { cursor: grabbing; }
 
+        .me-top-controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            padding: 0 4px;
+        }
+        .btn-mini-ctrl {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #e2e8f0;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .btn-mini-ctrl.locked {
+            border-color: #f59e0b;
+            color: #fcd34d;
+        }
+
+        .seat.is-me .card-container {
+            height: 68px;
+            margin: 0 0 4px 0;
+        }
+        .seat.is-me .card {
+            width: 46px;
+            height: 64px;
+            margin-left: -12px;
+            padding: 3px 4px;
+            border-radius: 5px;
+        }
+        .seat.is-me .card:first-child { margin-left: 0; }
+        .seat.is-me .card .card-top,
+        .seat.is-me .card .card-bottom { font-size: 11px; }
+        .seat.is-me .card .card-center { font-size: 20px; }
+
+        .me-turn-badge {
+            background: #ca8a04;
+            color: #fef08a;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            padding: 1px 10px;
+            border-radius: 999px;
+            margin-bottom: -6px;
+            z-index: 2;
+            border: 1px solid #facc15;
+            text-transform: uppercase;
+        }
+        .me-capsule {
+            width: 100%;
+            background: linear-gradient(180deg, #131c2e 0%, #090d16 100%);
+            border: 2px solid #10b981;
+            border-radius: 999px;
+            padding: 5px 12px 5px 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+            position: relative;
+        }
+        .seat.is-me.active-turn .me-capsule {
+            border-color: #facc15;
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.85);
+        }
+        .me-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: 2px solid #93c5fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            color: #ffffff;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .me-seat-tag {
+            position: absolute;
+            bottom: -3px;
+            right: -4px;
+            background: #0f172a;
+            color: #facc15;
+            border: 1px solid #facc15;
+            font-size: 7px;
+            font-weight: 900;
+            padding: 0 3px;
+            border-radius: 4px;
+        }
+        .me-info {
+            text-align: left;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+        .me-info .seat-name {
+            font-size: 11px;
+            color: #ffffff;
+        }
+        .me-info .seat-balance {
+            font-size: 10px;
+            color: #facc15;
+        }
+        .me-info .seat-status {
+            font-size: 8px;
+            color: #38bdf8;
+        }
+
+        /* STEALTH LED */
         @keyframes blink-indicator {
             0% { opacity: 0; transform: scale(0.8); }
             50% { opacity: 1; transform: scale(1.2); }
@@ -281,9 +465,9 @@
         .stealth-led {
             position: absolute;
             top: 4px;
-            right: 6px;
-            width: 10px;
-            height: 10px;
+            right: 12px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
             z-index: 40;
             pointer-events: none;
@@ -293,30 +477,64 @@
         .stealth-led.on { background-color: #22c55e; color: #22c55e; }
         .stealth-led.off { background-color: #ef4444; color: #ef4444; }
 
+        /* BOTTOM CONTROL PANEL */
         .control-panel {
-            background: #111827;
+            background: #0d1322;
             padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #1f2937;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             z-index: 30;
             flex-shrink: 0;
-            height: 60px;
+            height: 62px;
         }
         .btn {
-            padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; color: white;
-            white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            color: white;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-        .btn-stop { background: #be123c; width: 48%; }
-        .btn-hit { background: #047857; width: 48%; }
+        .btn-stop {
+            background: linear-gradient(135deg, #881337, #4c0519);
+            border: 1px solid #be123c;
+            width: 48%;
+        }
+        .btn-hit {
+            background: linear-gradient(135deg, #065f46, #022c22);
+            border: 1px solid #10b981;
+            width: 48%;
+        }
 
+        /* MODALS */
         .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
-            align-items: center; justify-content: center; z-index: 50; padding: 15px;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 15px;
         }
-        .modal-box { background: #111827; border: 2px solid #eab308; padding: 18px; border-radius: 12px; text-align: center; max-width: 330px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
-
+        .modal-box {
+            background: #111827;
+            border: 2px solid #eab308;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 330px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
         .modal-input {
             width: 100%;
             padding: 9px 12px;
@@ -355,83 +573,59 @@
             <p id="gatekeeperSubtitle" style="font-size: 10px; color: #9ca3af; margin-bottom: 10px;">Masukkan sandi akses untuk melanjutkan:</p>
             <input type="password" id="gatekeeperPasswordInput" class="modal-input" placeholder="Masukkan Sandi..." style="text-align: center; letter-spacing: 2px; font-weight: bold;">
             <div id="gatekeeperErrorText" style="font-size: 9px; color: #ef4444; font-weight: bold; margin-bottom: 8px; min-height: 12px;"></div>
-            <button class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 10px;" onclick="validateGatekeeperLogin()">LANJUTKAN</button>
+            <button type="button" class="btn" style="background: #dc2626; width: 100%; font-size: 12px; padding: 10px;" onclick="validateGatekeeperLogin()">LANJUTKAN</button>
         </div>
     </div>
 
+    <!-- TOP BAR -->
     <div class="top-bar">
-        <div>
-            <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">Mulai Game</button>
-            <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">Admin</button>
+        <div class="top-left">
+            <button id="btnTopStart" class="btn-top-start" onclick="startNewGame()">▶ Mulai<br>Game</button>
+            <button id="btnTopAdmin" class="btn-top-admin" onclick="openAdminModal()">🛡️ Admin</button>
         </div>
         <div style="text-align: center;">
-            <div style="font-size: 11px; font-weight: bold; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7); letter-spacing: 0.5px;">SAMGONG 30</div>
-            <div style="font-size: 8px; color: #9ca3af;" id="roomDisplayLabel">Menghubungkan...</div>
+            <div style="font-size: 11px; font-weight: 900; color: #facc15; text-shadow: 0 0 6px rgba(250, 204, 21, 0.6); line-height: 1.1;">SAMGONG<br>30</div>
+            <div style="font-size: 8px; color: #9ca3af; margin-top: 1px;" id="roomDisplayLabel">Menghubungkan...</div>
         </div>
         <div class="top-actions">
-            <button class="btn-top-log" onclick="openLogModal()">Riwayat</button>
-            <button class="wa-btn" onclick="copyWhatsAppLink()">Link WA</button>
+            <button class="btn-top-log" onclick="openLogModal()">🕒 Riwayat</button>
+            <button class="wa-btn" onclick="copyWhatsAppLink()">🔗 Link<br>WA</button>
         </div>
     </div>
 
+    <!-- TABLE AREA -->
     <div class="table-area">
         <div class="poker-table">
             <div class="center-info">
                 <div id="gameStatusText">Status: Menunggu Pemain</div>
-                <div id="turnStatusText">Silakan Pilih Bangku</div>
-                <div id="potDisplayLabel" class="pot-display">POT: Rp0</div>
+                <div class="pot-pill">
+                    <div class="pot-coin">$</div>
+                    <span class="pot-label-text">POT :</span>
+                    <span id="potDisplayLabel" class="pot-amount-text">Rp0</span>
+                </div>
+                <div class="turn-pill">
+                    <span class="turn-dot"></span>
+                    <span id="turnStatusText">Silakan Pilih Bangku</span>
+                </div>
             </div>
 
-            <div id="seat-0" class="seat" onclick="handleSeatClick(0)">
-                <div class="seat-name" id="name-0">Bangku 1 (Kosong)</div>
-                <div class="seat-balance" id="balance-0"></div>
-                <div class="card-container" id="cards-0"></div>
-                <div class="seat-status" id="status-0">+ Duduk</div>
-            </div>
-            <div id="seat-1" class="seat" onclick="handleSeatClick(1)">
-                <div class="seat-name" id="name-1">Bangku 2 (Kosong)</div>
-                <div class="seat-balance" id="balance-1"></div>
-                <div class="card-container" id="cards-1"></div>
-                <div class="seat-status" id="status-1">+ Duduk</div>
-            </div>
-            <div id="seat-2" class="seat" onclick="handleSeatClick(2)">
-                <div class="seat-name" id="name-2">Bangku 3 (Kosong)</div>
-                <div class="seat-balance" id="balance-2"></div>
-                <div class="card-container" id="cards-2"></div>
-                <div class="seat-status" id="status-2">+ Duduk</div>
-            </div>
-            <div id="seat-3" class="seat" onclick="handleSeatClick(3)">
-                <div class="seat-name" id="name-3">Bangku 4 (Kosong)</div>
-                <div class="seat-balance" id="balance-3"></div>
-                <div class="card-container" id="cards-3"></div>
-                <div class="seat-status" id="status-3">+ Duduk</div>
-            </div>
-            <div id="seat-4" class="seat" onclick="handleSeatClick(4)">
-                <div class="seat-name" id="name-4">Bangku 5 (Kosong)</div>
-                <div class="seat-balance" id="balance-4"></div>
-                <div class="card-container" id="cards-4"></div>
-                <div class="seat-status" id="status-4">+ Duduk</div>
-            </div>
-            <div id="seat-5" class="seat" onclick="handleSeatClick(5)">
-                <div class="seat-name" id="name-5">Bangku 6 (Kosong)</div>
-                <div class="seat-balance" id="balance-5"></div>
-                <div class="card-container" id="cards-5"></div>
-                <div class="seat-status" id="status-5">+ Duduk</div>
-            </div>
-            <div id="seat-6" class="seat" onclick="handleSeatClick(6)">
-                <div class="seat-name" id="name-6">Bangku 7 (Kosong)</div>
-                <div class="seat-balance" id="balance-6"></div>
-                <div class="card-container" id="cards-6"></div>
-                <div class="seat-status" id="status-6">+ Duduk</div>
-            </div>
+            <div id="seat-0" class="seat" onclick="handleSeatClick(0)"></div>
+            <div id="seat-1" class="seat" onclick="handleSeatClick(1)"></div>
+            <div id="seat-2" class="seat" onclick="handleSeatClick(2)"></div>
+            <div id="seat-3" class="seat" onclick="handleSeatClick(3)"></div>
+            <div id="seat-4" class="seat" onclick="handleSeatClick(4)"></div>
+            <div id="seat-5" class="seat" onclick="handleSeatClick(5)"></div>
+            <div id="seat-6" class="seat" onclick="handleSeatClick(6)"></div>
         </div>
     </div>
 
+    <!-- BOTTOM CONTROL PANEL -->
     <div class="control-panel">
-        <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>Stop</button>
-        <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>Hit (+ Ambil Kartu)</button>
+        <button id="btnStop" class="btn btn-stop" onclick="playerStand()" disabled>✋ Stop</button>
+        <button id="btnHit" class="btn btn-hit" onclick="playerHit()" disabled>➕ Hit (+ Ambil Kartu)</button>
     </div>
 
+    <!-- MODAL SHOWDOWN -->
     <div id="modalShowdown" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; margin-bottom: 8px; font-size: 13px; text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);">HASIL / PENGUMUMAN</h3>
@@ -445,7 +639,6 @@
         <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;" id="adminPanelTitle">PANEL KONTROL ADMIN</h3>
             
-            <!-- KONTROL SUPER ADMIN: MONITORING & PAUSE/RESUME ROOM -->
             <div id="superAdminSection" style="display: none; background: #311014; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #991b1b; text-align: left;">
                 <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Super Admin - Kontrol Room Lain (1-5):</label>
                 <select id="superAdminSelectRoom" class="modal-input" onchange="loadSuperAdminRoomStatus()">
@@ -459,14 +652,12 @@
                 <button id="btnSuperAdminTogglePause" class="btn" style="background: #b91c1c; width: 100%; font-size: 10px;" onclick="toggleSuperAdminPauseRoom()">Pause / Resume Room Ini</button>
             </div>
 
-            <!-- SEKSI SETTING TARUHAN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #facc15; font-weight: bold;">Nominal Taruhan Ronde (Rp):</label>
                 <input type="number" id="adminBetAmount" class="modal-input" placeholder="Nominal Taruhan (Rp)" value="10000" step="1000">
                 <button class="btn" style="background: #d97706; width: 100%; margin-top: 2px;" onclick="submitAdminSetBet()">Simpan Taruhan</button>
             </div>
 
-            <!-- SEKSI TOP UP SALDO -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #4ade80; font-weight: bold;">Isi Ulang Saldo Pemain:</label>
                 <select id="adminSelectPlayer" class="modal-input">
@@ -476,7 +667,6 @@
                 <button class="btn" style="background: #059669; width: 100%; margin-top: 2px;" onclick="submitAdminTopUp()">Isi Ulang Saldo</button>
             </div>
 
-            <!-- SEKSI PENGURANGAN SALDO FLEKSIBEL/MANUAL ADMIN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #f87171; font-weight: bold;">Kurangi Saldo Pemain (Manual):</label>
                 <select id="adminSelectPlayerDeduct" class="modal-input">
@@ -486,7 +676,6 @@
                 <button class="btn" style="background: #dc2626; width: 100%; margin-top: 2px;" onclick="submitAdminDeduct()">Kurangi Saldo</button>
             </div>
 
-            <!-- SEKSI TOMBOL RESET / KELUAR BANGKU KHUSUS ADMIN -->
             <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
                 <label style="font-size: 10px; color: #38bdf8; font-weight: bold;">Reset / Keluar Bangku (Berdiri):</label>
                 <select id="adminSelectResetSeat" class="modal-input">
@@ -502,7 +691,6 @@
                 <button class="btn" style="background: #b91c1c; width: 100%; margin-top: 2px;" onclick="submitAdminResetSeat()">Kosongkan Bangku Ini</button>
             </div>
 
-            <!-- SEKSI TOMBOL RESET TOTAL ROOM BARU KHUSUS ADMIN -->
             <div style="background: #2d1215; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #7f1d1d; text-align: left;">
                 <label style="font-size: 10px; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 4px;">Zona Bahaya Admin:</label>
                 <button class="btn" style="background: #831843; border: 1px solid #f43f5e; width: 100%; font-size: 10px; padding: 8px; font-weight: bold;" onclick="submitAdminResetTotalRoom()">⚠️ RESET TOTAL ROOM (KOSONGKAN SEMUA)</button>
@@ -533,6 +721,7 @@
         </div>
     </div>
 
+    <!-- MODAL LOG -->
     <div id="modalLog" class="modal">
         <div class="modal-box">
             <h3 style="color: #facc15; font-size: 13px; margin-bottom: 8px;">RIWAYAT TRANSAKSI</h3>
@@ -551,12 +740,10 @@
         let activeTopUpSeatIndex = null;
         let gamePaused = false;
 
-        // Variabel untuk state Lock/Unlock Kotak Pemain Sendiri
         let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
         let savedSeatLeft = localStorage.getItem('samgong_seat_left');
         let savedSeatTop = localStorage.getItem('samgong_seat_top');
 
-        // URL Parameter & Multi-Room Configuration
         const urlParams = new URLSearchParams(window.location.search);
         let currentRoomParam = urlParams.get('room') || '1';
         
@@ -605,7 +792,7 @@
                 if (passInput === "123098") {
                     isAdmin = true;
                     isSuperAdmin = true;
-                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                    document.getElementById('btnTopAdmin').style.display = 'flex';
                     document.getElementById('modalGatekeeper').style.display = 'none';
                 } else {
                     errorText.innerText = "Sandi Master Super Admin Salah!";
@@ -614,7 +801,7 @@
                 if (passInput === requiredAdminPassword) {
                     isAdmin = true;
                     isSuperAdmin = false;
-                    document.getElementById('btnTopAdmin').style.display = 'inline-block';
+                    document.getElementById('btnTopAdmin').style.display = 'flex';
                     document.getElementById('modalGatekeeper').style.display = 'none';
                 } else if (passInput === requiredPlayerPassword) {
                     isAdmin = false;
@@ -721,11 +908,28 @@
         function copyWhatsAppLink() {
             const baseUrl = window.location.origin + window.location.pathname;
             const shareUrl = `${baseUrl}?room=${currentRoomParam}`;
-            const message = `Yuk mabar Samgong 30 di ${roomNameDisplay}! Klik link ini untuk masuk ke meja:
-${shareUrl}`;
+            const message = `Yuk mabar Samgong 30 di ${roomNameDisplay}! Klik link ini untuk masuk ke meja:\n${shareUrl}`;
             navigator.clipboard.writeText(message).then(() => {
                 alert("Link mabar berhasil disalin! Kirim ke WhatsApp.");
             });
+        }
+
+        function resetMySeatPosition(e) {
+            if (e) e.stopPropagation();
+            localStorage.removeItem('samgong_seat_left');
+            localStorage.removeItem('samgong_seat_top');
+            savedSeatLeft = null;
+            savedSeatTop = null;
+            const mySeatElem = document.querySelector('.seat.is-me');
+            if (mySeatElem) {
+                delete mySeatElem.dataset.dragged;
+                mySeatElem.style.position = 'absolute';
+                mySeatElem.style.bottom = '10px';
+                mySeatElem.style.left = '50%';
+                mySeatElem.style.top = '';
+                mySeatElem.style.right = '';
+                mySeatElem.style.transform = 'translateX(-50%)';
+            }
         }
 
         function handleSeatClick(seatIndex) {
@@ -1255,9 +1459,7 @@ ${shareUrl}`;
                 return;
             }
 
-            if (confirm("⚠️ PERINGATAN KERAS:
-Apakah Anda yakin ingin melakukan RESET TOTAL ROOM?
-Semua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu dibersihkan secara global!")) {
+            if (confirm("⚠️ PERINGATAN KERAS:\nApakah Anda yakin ingin melakukan RESET TOTAL ROOM?\nSemua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu dibersihkan secara global!")) {
                 roomRef.update({
                     currentTurn: 0,
                     isShowdown: false,
@@ -1280,14 +1482,33 @@ Semua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu d
         function openLogModal() { document.getElementById('modalLog').style.display = 'flex'; }
         function closeLogModal() { document.getElementById('modalLog').style.display = 'none'; }
 
+        function buildCardsHtml(cards, revealCards) {
+            if (!cards || cards.length === 0) return '';
+            let html = '';
+            cards.forEach((card) => {
+                if (revealCards) {
+                    const isRed = card.suit === '♥' || card.suit === '♦';
+                    html += `
+                        <div class="card ${isRed ? 'red' : 'black'}">
+                            <div class="card-top"><span>${card.value}</span><span>${card.suit}</span></div>
+                            <div class="card-center">${card.suit}</div>
+                            <div class="card-bottom"><span>${card.value}</span><span>${card.suit}</span></div>
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="card back"></div>`;
+                }
+            });
+            return html;
+        }
+
         function updateUI(data) {
             const seats = data.seats || {};
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown ?? false;
             const pot = data.pot || 0;
 
-            document.getElementById('potDisplayLabel').innerText = `POT: ${formatRupiah(pot)}`;
-
+            document.getElementById('potDisplayLabel').innerText = `${formatRupiah(pot)}`;
             document.getElementById('modalShowdown').style.display = isShowdown ? 'flex' : 'none';
             document.getElementById('btnTopStart').disabled = gamePaused || (!isShowdown && data.deck && data.deck.length > 0);
 
@@ -1340,31 +1561,26 @@ Semua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu d
                 winnerElem.innerHTML = rankingHtml;
             }
 
+            const angles = [
+                { bottom: '12px', left: '50%', transform: 'translateX(-50%)' },
+                { bottom: '92px', left: '14px', transform: 'none' },
+                { top: '122px', left: '14px', transform: 'none' },
+                { top: '18px', left: '24%', transform: 'translateX(-50%)' },
+                { top: '18px', right: '24%', transform: 'translateX(50%)' },
+                { top: '122px', right: '14px', transform: 'none' },
+                { bottom: '92px', right: '14px', transform: 'none' }
+            ];
+
             for (let i = 0; i < 7; i++) {
                 const seatElem = document.getElementById(`seat-${i}`);
-                const cardsElem = document.getElementById(`cards-${i}`);
-                const statusElem = document.getElementById(`status-${i}`);
-                const nameElem = document.getElementById(`name-${i}`);
-                const balanceElem = document.getElementById(`balance-${i}`);
                 const player = seats[i];
-
                 let isMe = (mySeat !== null && mySeat === i) || (player && player.playerId === myPlayerId);
+                let isTurn = (currentTurn === i && !isShowdown && player && !gamePaused);
 
                 let visualPosIndex = i;
                 if (mySeat !== null) {
                     visualPosIndex = (i - mySeat + 7) % 7;
                 }
-
-                // Posisi melingkar persis seperti contoh gambar referensi (Bangku 1 di bawah, melingkar ke atas searah jarum jam)
-                const angles = [
-                    { bottom: '15px', left: '50%', transform: 'translateX(-50%)' },
-                    { bottom: '90px', left: '12px', transform: 'none' },
-                    { top: '120px', left: '12px', transform: 'none' },
-                    { top: '15px', left: '22%', transform: 'translateX(-50%)' },
-                    { top: '15px', right: '22%', transform: 'translateX(50%)' },
-                    { top: '120px', right: '12px', transform: 'none' },
-                    { bottom: '90px', right: '12px', transform: 'none' }
-                ];
 
                 seatElem.style.bottom = '';
                 seatElem.style.top = '';
@@ -1377,9 +1593,16 @@ Semua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu d
                     seatElem.style[key] = posConfig[key];
                 }
 
-                if (isMe) {
+                if (isTurn) {
+                    seatElem.classList.add('active-turn');
+                } else {
+                    seatElem.classList.remove('active-turn');
+                }
+
+                let seatNumDisplay = i + 1;
+
+                if (isMe && player) {
                     seatElem.classList.add('is-me');
-                    
                     if (savedSeatLeft && savedSeatTop) {
                         seatElem.style.position = 'fixed';
                         seatElem.style.left = savedSeatLeft;
@@ -1388,124 +1611,110 @@ Semua bangku akan dikosongkan, pot diatur ke 0, game dihentikan, dan dek kartu d
                         seatElem.style.transform = 'none';
                         seatElem.dataset.dragged = "true";
                     } else if (!seatElem.dataset.dragged) {
-                        seatElem.style.bottom = '12px';
+                        seatElem.style.bottom = '10px';
                         seatElem.style.left = '50%';
                         seatElem.style.right = '';
                         seatElem.style.top = '';
                         seatElem.style.transform = 'translateX(-50%)';
                     }
-                    
-                    if (!seatElem.querySelector('.drag-handle-container')) {
-                        const handleContainer = document.createElement('div');
-                        handleContainer.className = 'drag-handle-container';
-                        
-                        const handle = document.createElement('div');
-                        handle.className = 'drag-handle';
-                        handle.innerText = '↕ Geser';
-                        
-                        const lockBtn = document.createElement('button');
-                        lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                        lockBtn.id = 'btnLockSeat';
-                        lockBtn.innerText = seatLocked ? '🔒 Kunci' : '🔓 Geser';
-                        lockBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            seatLocked = !seatLocked;
-                            localStorage.setItem('samgong_seat_locked', seatLocked);
-                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                            lockBtn.innerText = seatLocked ? '🔒 Kunci' : '🔓 Geser';
-                        };
 
-                        handleContainer.appendChild(handle);
-                        handleContainer.appendChild(lockBtn);
-                        seatElem.insertBefore(handleContainer, seatElem.firstChild);
+                    let currentCardScore = calculateScore(player.cards);
+                    let statusLabel = '';
+                    if (isShowdown && player.cards && player.cards.length > 0) {
+                        statusLabel = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
+                    } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
+                        statusLabel = (player.cards && player.cards.length === 0) ? 'Sit-Out (Saldo kurang)' : `STOP (Poin: ${currentCardScore})`;
                     } else {
-                        const lockBtn = seatElem.querySelector('#btnLockSeat');
-                        if (lockBtn) {
-                            lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
-                            lockBtn.innerText = seatLocked ? '🔒 Kunci' : '🔓 Geser';
-                        }
+                        statusLabel = `Poin: ${currentCardScore}`;
                     }
-                    
-                    cardsElem.onclick = (e) => {
-                        e.stopPropagation();
-                        if (!isAdmin) return;
-                        const currentTime = new Date().getTime();
-                        const tapLength = currentTime - lastTapTime;
-                        if (tapLength < 350 && tapLength > 0) {
-                            stealthModeActive = !stealthModeActive;
-                            triggerStealthLed(seatElem, stealthModeActive);
-                        }
-                        lastTapTime = currentTime;
-                    };
+
+                    let initialLetter = (player.name || 'P').charAt(0).toUpperCase();
+                    let cardsHtml = buildCardsHtml(player.cards, true);
+
+                    seatElem.innerHTML = `
+                        <div class="me-top-controls">
+                            <button type="button" class="btn-mini-ctrl" onclick="resetMySeatPosition(event)">↻ Reset</button>
+                            <button type="button" id="btnLockSeat" class="btn-mini-ctrl ${seatLocked ? 'locked' : ''}" onclick="toggleLockSeat(event)">${seatLocked ? '🔒 Kunci' : '🔓 Geser'}</button>
+                        </div>
+                        <div class="card-container" id="cards-${i}">${cardsHtml}</div>
+                        ${isTurn ? '<div class="me-turn-badge">GILIRAN</div>' : ''}
+                        <div class="me-capsule">
+                            <div class="me-avatar">${initialLetter}<span class="me-seat-tag">#${seatNumDisplay}</span></div>
+                            <div class="me-info">
+                                <div class="seat-name">${player.name} (Anda)</div>
+                                <div class="seat-balance">${formatRupiah(player.balance || 0)}</div>
+                                <div class="seat-status">${statusLabel}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    const cardsElem = document.getElementById(`cards-${i}`);
+                    if (cardsElem) {
+                        cardsElem.onclick = (e) => {
+                            e.stopPropagation();
+                            if (!isAdmin) return;
+                            const currentTime = new Date().getTime();
+                            const tapLength = currentTime - lastTapTime;
+                            if (tapLength < 350 && tapLength > 0) {
+                                stealthModeActive = !stealthModeActive;
+                                triggerStealthLed(seatElem, stealthModeActive);
+                            }
+                            lastTapTime = currentTime;
+                        };
+                    }
                 } else {
                     seatElem.classList.remove('is-me');
-                    const existingHandleContainer = seatElem.querySelector('.drag-handle-container');
-                    if (existingHandleContainer) existingHandleContainer.remove();
-                    cardsElem.onclick = null;
-                }
-
-                if (currentTurn === i && !isShowdown && player && !gamePaused) {
-                    seatElem.classList.add('active-turn');
-                } else {
-                    seatElem.classList.remove('active-turn');
-                }
-
-                let seatNumDisplay = i + 1;
-
-                if (player) {
-                    nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
-                    balanceElem.innerText = formatRupiah(player.balance || 0);
-                    cardsElem.innerHTML = '';
-                    
-                    let currentCardScore = calculateScore(player.cards);
-
-                    if (player.cards && player.cards.length > 0) {
-                        player.cards.forEach((card) => {
-                            const cardDiv = document.createElement('div');
-                            if (isMe || isShowdown) {
-                                const isRed = card.suit === '♥' || card.suit === '♦';
-                                cardDiv.className = `card ${isRed ? 'red' : 'black'}`;
-                                cardDiv.innerHTML = `
-                                    <div class="card-top"><span>${card.value}</span><span>${card.suit}</span></div>
-                                    <div class="card-center">${card.suit}</div>
-                                    <div class="card-bottom"><span>${card.value}</span><span>${card.suit}</span></div>
-                                `;
-                            } else {
-                                cardDiv.className = 'card back';
-                            }
-                            cardsElem.appendChild(cardDiv);
-                        });
-                    }
-
-                    if (isShowdown && player.cards && player.cards.length > 0) {
-                        statusElem.innerText = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
-                    } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
-                        if (player.cards && player.cards.length === 0) {
-                            statusElem.innerText = `Sit-Out (Saldo kurang)`;
-                        } else if (isMe) {
-                            statusElem.innerText = `STOP (Poin: ${currentCardScore})`;
+                    if (player) {
+                        let currentCardScore = calculateScore(player.cards);
+                        let statusLabel = '';
+                        if (isShowdown && player.cards && player.cards.length > 0) {
+                            statusLabel = `Skor: ${currentCardScore} ${currentCardScore > 30 ? '(Bust)' : ''}`;
+                        } else if (player.isStopped || (player.cards && player.cards.length === 0)) {
+                            statusLabel = (player.cards && player.cards.length === 0) ? 'Sit-Out' : 'STOP';
                         } else {
-                            statusElem.innerText = `STOP`;
+                            statusLabel = 'Main';
                         }
+
+                        let cardsHtml = buildCardsHtml(player.cards, isShowdown);
+
+                        seatElem.innerHTML = `
+                            <div class="seat-occupied-box">
+                                <div class="seat-name">${player.name}</div>
+                                <div class="seat-balance">${formatRupiah(player.balance || 0)}</div>
+                                <div class="card-container" id="cards-${i}">${cardsHtml}</div>
+                                <div class="seat-status">${statusLabel}</div>
+                            </div>
+                        `;
                     } else {
-                        if (isMe) {
-                            statusElem.innerText = `GILIRAN | Poin: ${currentCardScore}`;
-                        } else {
-                            statusElem.innerText = `Main`;
-                        }
+                        seatElem.innerHTML = `
+                            <div class="seat-empty-chip">+</div>
+                            <div class="seat-empty-title">Bangku ${seatNumDisplay}</div>
+                            <div class="seat-empty-pill">+ Duduk</div>
+                        `;
                     }
-                } else {
-                    nameElem.innerText = `Bangku ${seatNumDisplay}`;
-                    balanceElem.innerText = '';
-                    cardsElem.innerHTML = '';
-                    statusElem.innerText = `+ Duduk`;
                 }
             }
-            document.getElementById('turnStatusText').innerText = gamePaused ? "PERMAINAN DIJEDA" : (isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1}`);
+
+            let activeTurnPlayer = seats[currentTurn];
+            let turnSubText = activeTurnPlayer ? (activeTurnPlayer.isStopped ? 'STOP' : 'Main') : 'Kosong';
+            document.getElementById('turnStatusText').innerText = gamePaused
+                ? "PERMAINAN DIJEDA"
+                : (isShowdown ? "Game Selesai (Showdown)" : `Giliran: Bangku ${currentTurn + 1} • ${turnSubText}`);
             
             let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown && !gamePaused);
             document.getElementById('btnHit').disabled = !isMyTurn;
             document.getElementById('btnStop').disabled = !isMyTurn;
+        }
+
+        function toggleLockSeat(e) {
+            if (e) e.stopPropagation();
+            seatLocked = !seatLocked;
+            localStorage.setItem('samgong_seat_locked', seatLocked);
+            const lockBtn = document.getElementById('btnLockSeat');
+            if (lockBtn) {
+                lockBtn.className = `btn-mini-ctrl ${seatLocked ? 'locked' : ''}`;
+                lockBtn.innerText = seatLocked ? '🔒 Kunci' : '🔓 Geser';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
