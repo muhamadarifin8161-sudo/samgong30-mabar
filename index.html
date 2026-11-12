@@ -305,143 +305,152 @@
             height: 44px;
             margin-bottom: 2px;
             position: relative;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
-            z-index: 10;
+            z-index: 12;
         }
         .card {
-            width: 26px;
-            height: 38px;
-            background: #fff;
+            width: 28px;
+            height: 40px;
             border-radius: 3px;
+            margin: 0 -5px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 1px 2px;
             font-weight: 900;
-            font-size: 8.5px;
-            line-height: 1;
-            margin-left: -9px;
-            border: 1px solid #cbd5e1;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.65), 0 0 1px rgba(0,0,0,0.8);
+            background: #ffffff;
+            transition: transform 0.2s;
             position: relative;
-            transition: transform 0.15s ease;
         }
-        .card:first-child { margin-left: 0; }
-        .card.red { color: #dc2626; }
-        .card.black { color: #0f172a; }
         .card.back {
-            background: linear-gradient(135deg, #991b1b, #450a0a);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: -2px 2px 6px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, #991b1b 0%, #450a0a 100%);
+            border: 1px solid rgba(254, 202, 202, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .card.back .card-logo-30 {
+        .card-logo-30 {
             font-size: 9px;
-            font-family: serif;
             font-weight: 900;
             color: #facc15;
-            opacity: 0.55;
+            opacity: 0.75;
+            font-family: serif;
         }
-        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 7px; }
-        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; }
-        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 7px; transform: rotate(180deg); }
+        .card.red { color: #dc2626; border: 1px solid #e2e8f0; }
+        .card.black { color: #0f172a; border: 1px solid #e2e8f0; }
+        .card-top, .card-bottom {
+            font-size: 7.5px;
+            padding: 1px 2px;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card-bottom { transform: rotate(180deg); }
+        .card-center {
+            font-size: 11px;
+            text-align: center;
+            margin: auto 0;
+            line-height: 1;
+        }
 
-        /* STATUS BADGE RIBBON */
+        /* STATUS TAG RIBBON */
         .seat-status-ribbon {
-            margin-bottom: 2px;
-            z-index: 20;
+            width: 100%;
             display: flex;
             justify-content: center;
+            margin-bottom: 1px;
+            z-index: 15;
         }
         .status-pill {
-            padding: 1px 7px;
-            border-radius: 10px;
             font-size: 7.5px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 8px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            white-space: nowrap;
         }
-        .status-pill.status-turn {
+        .status-turn {
             background: #facc15;
             color: #000;
-            animation: blink-indicator 0.8s infinite alternate;
+            box-shadow: 0 0 8px #facc15;
+            animation: pulse-turn 1.2s infinite;
         }
-        .status-pill.status-main {
+        .status-main {
             background: rgba(6, 78, 59, 0.85);
-            border: 1px solid rgba(16, 185, 129, 0.5);
             color: #6ee7b7;
+            border: 1px solid #059669;
         }
-        .status-pill.status-stop {
-            background: #dc2626;
+        .status-stop {
+            background: rgba(136, 19, 55, 0.85);
+            color: #fecdd3;
+            border: 1px solid #be123c;
+        }
+        .status-bust {
+            background: rgba(220, 38, 38, 0.9);
             color: #fff;
+            border: 1px solid #ef4444;
         }
-        .status-pill.status-bust {
-            background: #7f1d1d;
-            color: #fca5a5;
-            border: 1px solid #dc2626;
+        @keyframes pulse-turn {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.96); }
         }
 
-        /* HORIZONTAL AVATAR & CHIPS PLATE */
+        /* HORIZONTAL CAPSULE PLATE */
         .player-capsule-plate {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1.5px solid rgba(51, 65, 85, 0.8);
+            border-radius: 20px;
+            padding: 2px 7px 2px 3px;
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 3px 6px;
-            border-radius: 20px;
-            background: rgba(10, 15, 29, 0.95);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
             width: 100%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            transition: all 0.25s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            transition: all 0.2s;
         }
         .seat.active-turn .player-capsule-plate {
-            border-color: #facc15 !important;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.85) !important;
-            background: rgba(15, 23, 42, 0.98);
+            border-color: #facc15;
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.7);
         }
-
         .avatar-circle {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1.5px solid #64748b;
-            color: #f1f5f9;
-            font-size: 9.5px;
-            font-weight: 900;
+            background: #1e293b;
+            border: 1.5px solid #475569;
+            color: #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 10.5px;
+            font-weight: 900;
             flex-shrink: 0;
             position: relative;
         }
-        .seat.active-turn .avatar-circle {
-            background: linear-gradient(135deg, #facc15, #f59e0b);
-            color: #000;
-            border-color: #fef08a;
-        }
         .avatar-tag {
             position: absolute;
-            bottom: -2px;
+            bottom: -3px;
             right: -3px;
-            font-size: 6px;
-            font-family: monospace;
             background: #000;
             color: #facc15;
+            font-size: 6px;
             padding: 0 2px;
-            border-radius: 6px;
-            border: 0.5px solid #64748b;
+            border-radius: 4px;
+            border: 1px solid #334155;
+            font-family: monospace;
         }
-
+        .seat.active-turn .avatar-circle {
+            background: linear-gradient(135deg, #facc15, #eab308);
+            color: #000;
+            border-color: #fff;
+        }
         .info-col {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            min-width: 0;
+            text-align: left;
+            overflow: hidden;
             flex: 1;
-            line-height: 1.1;
         }
         .player-name-text {
             font-size: 8.5px;
@@ -706,13 +715,41 @@
             </div>
 
             <!-- 7 BANGKU PEMAIN (LAYOUT PERSIS PREVIEW GAMBAR) -->
-            <div id="seat-0" class="seat" onclick="handleSeatClick(0)"></div>
-            <div id="seat-1" class="seat" onclick="handleSeatClick(1)"></div>
-            <div id="seat-2" class="seat" onclick="handleSeatClick(2)"></div>
-            <div id="seat-3" class="seat" onclick="handleSeatClick(3)"></div>
-            <div id="seat-4" class="seat" onclick="handleSeatClick(4)"></div>
-            <div id="seat-5" class="seat" onclick="handleSeatClick(5)"></div>
-            <div id="seat-6" class="seat" onclick="handleSeatClick(6)"></div>
+            <div id="seat-0" class="seat is-empty" onclick="handleSeatClick(0)" style="bottom: 10px; left: 50%; transform: translateX(-50%);">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 1</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-1" class="seat is-empty" onclick="handleSeatClick(1)" style="bottom: 22%; left: 8px;">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 2</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-2" class="seat is-empty" onclick="handleSeatClick(2)" style="top: 22%; left: 8px;">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 3</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-3" class="seat is-empty" onclick="handleSeatClick(3)" style="top: 10px; left: 28%; transform: translateX(-50%);">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 4</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-4" class="seat is-empty" onclick="handleSeatClick(4)" style="top: 10px; right: 28%; transform: translateX(50%);">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 5</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-5" class="seat is-empty" onclick="handleSeatClick(5)" style="top: 22%; right: 8px;">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 6</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
+            <div id="seat-6" class="seat is-empty" onclick="handleSeatClick(6)" style="bottom: 22%; right: 8px;">
+                <div class="ghost-stool">+</div>
+                <div class="ghost-name">Bangku 7</div>
+                <div class="ghost-badge">+ Duduk</div>
+            </div>
 
         </div>
     </div>
@@ -778,15 +815,19 @@
             <hr style="border-color: #374151; margin: 8px 0;">
             <div style="font-size: 10px; color: #cbd5e1; margin-bottom: 5px; text-align: left;">Kelola Pemain di Meja:</div>
             <div id="adminSeatList" style="max-height: 120px; overflow-y: auto; text-align: left; margin-bottom: 10px; font-size: 10px;"></div>
-            <button class="btn-top-start" style="background: #e11d48; border-color: #f43f5e; color: white; width: 100%; margin-bottom: 5px; justify-content: center;" onclick="resetRoundByAdmin()">Reset Meja / Ronde</button>
-            <button class="btn-top-log" style="width: 100%; justify-content: center;" onclick="closeModal('modalAdmin')">Tutup</button>
+            <hr style="border-color: #374151; margin: 8px 0;">
+            <button class="btn-top-start" style="background: #be123c; border-color: #e11d48; color: white; width: 100%; padding: 7px; font-size: 11px; justify-content: center; margin-bottom: 6px;" onclick="resetRoundByAdmin()">
+                🔄 Reset Ronde Ini
+            </button>
+            <button class="btn-top-log" style="width: 100%; justify-content: center; padding: 6px;" onclick="closeModal('modalAdmin')">Tutup</button>
         </div>
     </div>
 
-    <!-- MODAL SUPER ADMIN -->
+    <!-- MODAL SUPER ADMIN (HUB MULTI-ROOM) -->
     <div id="modalSuperAdmin" class="modal">
-        <div class="modal-box" style="border-color: #8b5cf6; max-width: 340px;">
-            <h3 style="color: #a78bfa; font-size: 13px; margin-bottom: 8px;">KONTROL MULTI-ROOM SUPER ADMIN</h3>
+        <div class="modal-box" style="border-color: #8b5cf6; max-width: 330px;">
+            <h3 style="color: #a78bfa; font-size: 13px; margin-bottom: 8px;">HUB KONTROL SUPER ADMIN</h3>
+            <div style="font-size: 10px; color: #cbd5e1; margin-bottom: 8px; text-align: left;">Pantau & Kendalikan Seluruh Kamar:</div>
             <div id="superAdminRoomList" style="max-height: 200px; overflow-y: auto; text-align: left; font-size: 10px; margin-bottom: 10px;">Memuat data kamar...</div>
             <button class="btn-top-log" style="width: 100%; justify-content: center;" onclick="closeModal('modalSuperAdmin')">Tutup</button>
         </div>
@@ -957,9 +998,9 @@
             led.className = `stealth-led-blink ${state ? 'on' : 'off'}`;
             seatElem.appendChild(led);
 
-            // Hilang kembali setelah berkedip (1.2 detik)
+            // Hilang kembali setelah berkedip 3 kali (1.2 detik)
             setTimeout(() => {
-                if (led) led.remove();
+                if (led && led.parentNode) led.remove();
             }, 1250);
         }
 
@@ -996,18 +1037,18 @@
         const PLAYER_PASSWORD = "12345";
         const SUPERADMIN_PASSWORD = "123098";
 
-        // KOORDINAT 7 BANGKU TEXAS HOLD'EM SESUAI PERSIS SCREENSHOT PREVIEW
+        // KOORDINAT 7 BANGKU TEXAS HOLD'EM (BALANCED ELLIPTICAL RATIO PERSIS PREVIEW)
         const SEAT_POSITIONS = [
-            { bottom: '8px', left: '50%', transform: 'translateX(-50%)' },      // Posisi 0: Bawah tengah
-            { bottom: '70px', left: '16px', transform: 'none' },                // Posisi 1: Kiri bawah
-            { top: '100px', left: '16px', transform: 'none' },                  // Posisi 2: Kiri atas
-            { top: '12px', left: '26%', transform: 'translateX(-50%)' },        // Posisi 3: Atas kiri
-            { top: '12px', right: '26%', transform: 'translateX(50%)' },        // Posisi 4: Atas kanan
-            { top: '100px', right: '16px', transform: 'none' },                 // Posisi 5: Kanan atas
-            { bottom: '70px', right: '16px', transform: 'none' }                // Posisi 6: Kanan bawah
+            { bottom: '10px', left: '50%', transform: 'translateX(-50%)' },      // Posisi 0: Bawah tengah (Hero)
+            { bottom: '22%', left: '8px', transform: 'none' },                   // Posisi 1: Kiri bawah
+            { top: '22%', left: '8px', transform: 'none' },                      // Posisi 2: Kiri atas
+            { top: '10px', left: '28%', transform: 'translateX(-50%)' },         // Posisi 3: Atas kiri
+            { top: '10px', right: '28%', transform: 'translateX(50%)' },         // Posisi 4: Atas kanan
+            { top: '22%', right: '8px', transform: 'none' },                     // Posisi 5: Kanan atas
+            { bottom: '22%', right: '8px', transform: 'none' }                   // Posisi 6: Kanan bawah
         ];
 
-        // GATEKEEPER VALIDATION
+        // GATEKEEPER VALIDATION DENGAN SESSION STORAGE AGAR REFRESH TIDAK HILANG
         function validateGatekeeperLogin() {
             let pass = document.getElementById('gatekeeperPasswordInput').value.trim();
             let errElem = document.getElementById('gatekeeperErrorText');
@@ -1017,10 +1058,11 @@
                 if (pass === SUPERADMIN_PASSWORD) {
                     isAdmin = true;
                     isSuperAdmin = true;
+                    try { sessionStorage.setItem('samgong_auth_' + currentRoomParam, 'superadmin'); } catch(e) {}
                     document.getElementById('modalGatekeeper').style.display = 'none';
                     document.getElementById('btnTopSuperAdmin').style.display = 'block';
                     document.getElementById('btnTopStart').style.display = 'none';
-                    initGame();
+                    if (window.latestRoomData) updateUI(window.latestRoomData);
                 } else {
                     errElem.innerText = "Sandi Super Admin Salah!";
                 }
@@ -1030,13 +1072,15 @@
             let expectedAdminPass = ROOM_ADMIN_PASSWORDS[currentRoomParam];
             if (pass === expectedAdminPass) {
                 isAdmin = true;
+                try { sessionStorage.setItem('samgong_auth_' + currentRoomParam, 'admin'); } catch(e) {}
                 document.getElementById('modalGatekeeper').style.display = 'none';
                 document.getElementById('btnTopAdmin').style.display = 'block';
-                initGame();
+                if (window.latestRoomData) updateUI(window.latestRoomData);
             } else if (pass === PLAYER_PASSWORD) {
                 isAdmin = false;
+                try { sessionStorage.setItem('samgong_auth_' + currentRoomParam, 'player'); } catch(e) {}
                 document.getElementById('modalGatekeeper').style.display = 'none';
-                initGame();
+                if (window.latestRoomData) updateUI(window.latestRoomData);
             } else {
                 errElem.innerText = "Sandi Salah! (Pemain: 12345 / Sandi Kamar Admin)";
             }
@@ -1065,6 +1109,7 @@
             roomRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
+                    window.latestRoomData = data;
                     gamePaused = data.isPaused || false;
                     if (data.seats) {
                         let foundMySeat = null;
@@ -1110,6 +1155,27 @@
             });
         }
 
+        // Auto-check saved auth and start Firebase connection immediately
+        try {
+            const savedAuth = sessionStorage.getItem('samgong_auth_' + currentRoomParam);
+            if (savedAuth === 'superadmin') {
+                isAdmin = true;
+                isSuperAdmin = true;
+                document.getElementById('modalGatekeeper').style.display = 'none';
+                document.getElementById('btnTopSuperAdmin').style.display = 'block';
+                document.getElementById('btnTopStart').style.display = 'none';
+            } else if (savedAuth === 'admin') {
+                isAdmin = true;
+                document.getElementById('modalGatekeeper').style.display = 'none';
+                document.getElementById('btnTopAdmin').style.display = 'block';
+            } else if (savedAuth === 'player') {
+                document.getElementById('modalGatekeeper').style.display = 'none';
+            }
+        } catch(e) {}
+
+        // Jalankan sinkronisasi realtime sejak pertama kali halaman dibuka
+        initGame();
+
         function copyWhatsAppLink() {
             const baseUrl = window.location.origin + window.location.pathname;
             const shareUrl = `${baseUrl}?room=${currentRoomParam}`;
@@ -1145,22 +1211,20 @@
                     let inputName = prompt("Masukkan Nama Panggilan Anda:", savedMyName || `Pemain ${seatIndex + 1}`);
                     if (!inputName || inputName.trim() === "") return;
                     let playerName = inputName.trim().substring(0, 15);
-                    
                     localStorage.setItem('samgong_pname', playerName);
-                    savedMyName = playerName;
 
                     let initialBalance = (seatData && seatData.balance !== undefined) ? seatData.balance : 0;
-
+                    
                     roomRef.child('seats/' + seatIndex).set({
                         playerId: myPlayerId,
                         name: playerName,
                         isStopped: false,
                         balance: initialBalance,
-                        cards: seatData && seatData.cards ? seatData.cards : []
+                        cards: (seatData && seatData.cards) ? seatData.cards : []
                     }).then(() => {
                         mySeat = seatIndex;
                         if (!seatData) {
-                            addTransactionLog(`${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0`);
+                            addTransactionLog(`👤 ${playerName} bergabung di Bangku ${seatIndex + 1} dengan saldo Rp0`);
                         }
                     });
                 } else {
@@ -1173,27 +1237,26 @@
             document.getElementById('seatTopUpInput').value = amount;
         }
 
-        function closeSeatTopUpModal() {
-            document.getElementById('modalSeatTopUp').style.display = 'none';
-            activeTopUpSeatIndex = null;
-        }
-
         function submitSeatTopUp() {
             if (activeTopUpSeatIndex === null) return;
             let amount = parseInt(document.getElementById('seatTopUpInput').value);
-            if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah top-up yang valid!");
+            if (!amount || amount <= 0) return alert("Masukkan nominal yang valid!");
 
-            roomRef.child(`seats/${activeTopUpSeatIndex}`).once('value', snap => {
-                let player = snap.val();
-                if (player) {
-                    let newBal = (player.balance || 0) + amount;
+            roomRef.child(`seats/${activeTopUpSeatIndex}`).once('value', (snap) => {
+                let s = snap.val();
+                if (s) {
+                    let newBal = (s.balance || 0) + amount;
                     roomRef.child(`seats/${activeTopUpSeatIndex}/balance`).set(newBal).then(() => {
-                        addTransactionLog(`💸 TOP-UP: Saldo ${player.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)}`);
-                        alert(`Top-up untuk ${player.name} berhasil!`);
+                        addTransactionLog(`💸 TOP-UP: Saldo ${s.name} (Bangku ${activeTopUpSeatIndex + 1}) ditambah ${formatRupiah(amount)}. Total: ${formatRupiah(newBal)}`);
                         closeSeatTopUpModal();
                     });
                 }
             });
+        }
+
+        function closeSeatTopUpModal() {
+            document.getElementById('modalSeatTopUp').style.display = 'none';
+            activeTopUpSeatIndex = null;
         }
 
         function calculateScore(cards) {
@@ -1230,123 +1293,128 @@
                     }
                 }
 
-                if (activeSeatsCount === 0) return alert("Belum ada pemain di meja!");
-                if (eligiblePlayersCount === 0) return alert(`Tidak ada pemain dengan saldo yang cukup untuk taruhan (${formatRupiah(betAmount)}). Minta Admin mengisi saldo!`);
-
-                executeStartGameWithBets();
-            });
-        }
-
-        function executeStartGameWithBets() {
-            playBetChipSound();
-
-            let deck = [];
-            for (let suit of suits) {
-                for (let val of values) {
-                    deck.push({ suit, value: val });
+                if (activeSeatsCount < 1) {
+                    return alert("Dibutuhkan minimal 1 pemain untuk mulai!");
                 }
-            }
-            deck.sort(() => Math.random() - 0.5);
+                if (eligiblePlayersCount < 1) {
+                    return alert(`Minimal 1 pemain harus memiliki saldo mencukupi taruhan (${formatRupiah(betAmount)})!`);
+                }
 
-            roomRef.once('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                const seats = data.seats || {};
-                const betAmount = data.currentBet || 10000;
+                // BUAT DAN KOCOK DECK 52 KARTU
+                let fullDeck = [];
+                for (let s of suits) {
+                    for (let v of values) {
+                        fullDeck.push({ suit: s, value: v });
+                    }
+                }
+                for (let i = fullDeck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+                }
+
+                let newPot = (data.pot || 0);
                 let updates = {};
-                let totalPotCollected = 0;
+                let firstTurnIndex = -1;
 
+                // BAGIKAN 3 KARTU AWAL KE SETIAP PEMAIN YANG SALDONYA CUKUP
                 for (let i = 0; i < 7; i++) {
                     if (seats[i]) {
-                        if ((seats[i].balance || 0) < betAmount) {
+                        if ((seats[i].balance || 0) >= betAmount) {
+                            updates[`seats/${i}/balance`] = seats[i].balance - betAmount;
+                            newPot += betAmount;
+
+                            let dealtCards = [fullDeck.pop(), fullDeck.pop(), fullDeck.pop()];
+                            updates[`seats/${i}/cards`] = dealtCards;
+                            updates[`seats/${i}/isStopped`] = false;
+
+                            if (firstTurnIndex === -1) firstTurnIndex = i;
+                        } else {
                             updates[`seats/${i}/cards`] = [];
                             updates[`seats/${i}/isStopped`] = true;
-                            addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i+1}) Sit-Out karena saldo kurang`);
-                        } else {
-                            let newBalance = seats[i].balance - betAmount;
-                            updates[`seats/${i}/cards`] = [deck.pop(), deck.pop(), deck.pop()];
-                            updates[`seats/${i}/isStopped`] = false;
-                            updates[`seats/${i}/balance`] = newBalance;
-                            totalPotCollected += betAmount;
+                            addTransactionLog(`ℹ️ ${seats[i].name} (Bangku ${i + 1}) Sit-Out karena saldo kurang dari ${formatRupiah(betAmount)}`);
                         }
                     }
                 }
 
-                let startSeat = data.lastWinnerSeat ?? 0;
-                if (!seats[startSeat] || (seats[startSeat].balance || 0) < betAmount) {
-                    startSeat = getFirstActivePlayingSeat(seats, betAmount);
-                }
-
-                updates['currentTurn'] = startSeat;
-                updates['isShowdown'] = false;
+                updates['pot'] = newPot;
+                updates['deck'] = fullDeck;
+                updates['currentTurn'] = firstTurnIndex !== -1 ? firstTurnIndex : 0;
                 updates['gameStarted'] = true;
-                updates['deck'] = deck;
-                updates['pot'] = (data.pot || 0) + totalPotCollected;
+                updates['isShowdown'] = false;
 
                 roomRef.update(updates).then(() => {
-                    addTransactionLog(`🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}. Total Pot: ${formatRupiah((data.pot || 0) + totalPotCollected)}`);
+                    playBetChipSound();
+                    addTransactionLog(`🚀 Ronde dimulai! Taruhan: ${formatRupiah(betAmount)}. Total Pot: ${formatRupiah(newPot)}`);
                 });
             });
         }
 
-        function getFirstActivePlayingSeat(seats, betAmount) {
-            for (let i = 0; i < 7; i++) {
-                if (seats[i] && (seats[i].balance || 0) >= betAmount) return i;
-            }
-            return 0;
-        }
-
-        // AKSI HIT DENGAN DUKUNGAN FITUR LICIK ADMIN (STEALTH MODE)
         function playerHit() {
             if (mySeat === null || gamePaused) return;
             roomRef.once('value', (snap) => {
                 const data = snap.val() || {};
-                if (data.currentTurn !== mySeat || data.isShowdown) return;
-                let seats = data.seats || {};
-                let player = seats[mySeat];
+                if (data.currentTurn !== mySeat || data.isShowdown || !data.gameStarted) return;
+                let player = data.seats ? data.seats[mySeat] : null;
+                if (!player || player.isStopped) return;
+
                 let deck = data.deck || [];
-                
-                if (player && player.cards && player.cards.length < 7 && deck.length > 0) {
-                    playHitSound();
-                    let drawnCard = null;
+                if (deck.length === 0) return alert("Deck kartu telah habis!");
 
-                    // FITUR RAHASIA ADMIN (STEALTH MODE): Memilih kartu terbaik jika aktif
-                    if (stealthModeActive && (isAdmin || isSuperAdmin)) {
-                        let currentScore = calculateScore(player.cards);
-                        let bestCardIndex = -1;
-                        let maxSafeScore = -1;
+                playHitSound();
 
-                        for (let i = deck.length - 1; i >= 0; i--) {
-                            let val = getCardValue(deck[i].value);
-                            if (currentScore + val <= 30) {
-                                let potentialScore = currentScore + val;
-                                if (potentialScore > maxSafeScore) {
-                                    maxSafeScore = potentialScore;
-                                    bestCardIndex = i;
-                                }
-                            }
+                // FITUR LICIK ADMIN (KARTU AMAN - ANTI BUST)
+                let drawnCard = null;
+                if ((isAdmin || isSuperAdmin) && stealthModeActive) {
+                    let currentScore = calculateScore(player.cards);
+                    let maxAllowedValue = 30 - currentScore;
+
+                    // Cari kartu yang nilainya <= batas aman
+                    let safeCardIndex = -1;
+                    for (let idx = deck.length - 1; idx >= 0; idx--) {
+                        let cardVal = getCardValue(deck[idx].value);
+                        if (cardVal <= maxAllowedValue) {
+                            safeCardIndex = idx;
+                            break;
                         }
-
-                        if (bestCardIndex !== -1) {
-                            drawnCard = deck.splice(bestCardIndex, 1)[0];
-                        } else {
-                            drawnCard = deck.pop();
-                        }
-                    } else {
-                        drawnCard = deck.pop();
                     }
 
-                    player.cards.push(drawnCard);
-                    let score = calculateScore(player.cards);
-                    
-                    let updates = {};
-                    updates[`seats/${mySeat}/cards`] = player.cards;
-                    updates['deck'] = deck;
+                    if (safeCardIndex !== -1) {
+                        drawnCard = deck.splice(safeCardIndex, 1)[0];
+                    } else {
+                        // Jika tidak ada yang aman, ambil kartu terkecil yang ada di deck
+                        let minVal = 999;
+                        let minIndex = 0;
+                        for (let idx = 0; idx < deck.length; idx++) {
+                            let val = getCardValue(deck[idx].value);
+                            if (val < minVal) {
+                                minVal = val;
+                                minIndex = idx;
+                            }
+                        }
+                        drawnCard = deck.splice(minIndex, 1)[0];
+                    }
+                } else {
+                    drawnCard = deck.pop();
+                }
 
-                    if (score > 30) {
-                        player.isStopped = true;
+                let newCards = [...(player.cards || []), drawnCard];
+                let newScore = calculateScore(newCards);
+
+                let updates = {};
+                updates[`seats/${mySeat}/cards`] = newCards;
+                updates['deck'] = deck;
+
+                if (newScore > 30) {
+                    updates[`seats/${mySeat}/isStopped`] = true;
+                    roomRef.update(updates).then(() => {
+                        addTransactionLog(`💥 ${player.name} (Bangku ${mySeat + 1}) BUST dengan skor ${newScore}!`);
+                        passTurn(mySeat);
+                    });
+                } else {
+                    if (newCards.length >= 5 || newScore === 30) {
                         updates[`seats/${mySeat}/isStopped`] = true;
                         roomRef.update(updates).then(() => {
-                            addTransactionLog(`💥 ${player.name} (Bangku ${mySeat + 1}) BUST dengan skor ${score}!`);
+                            addTransactionLog(`🛑 ${player.name} (Bangku ${mySeat + 1}) STOP otomatis di angka ${newScore}`);
                             passTurn(mySeat);
                         });
                     } else {
@@ -1463,7 +1531,7 @@
             const mySeatElem = document.querySelector('.seat.is-me');
             if (mySeatElem) {
                 mySeatElem.style.position = 'absolute';
-                mySeatElem.style.bottom = '8px';
+                mySeatElem.style.bottom = '10px';
                 mySeatElem.style.left = '50%';
                 mySeatElem.style.top = '';
                 mySeatElem.style.right = '';
@@ -1475,23 +1543,27 @@
 
         // UPDATE UI DENGAN TAMPILAN PERSIS PREVIEW GAMBAR
         function updateUI(data) {
+            if (!data) return;
             const seats = data.seats || {};
             const pot = data.pot || 0;
             const currentTurn = data.currentTurn ?? 0;
             const isShowdown = data.isShowdown || false;
 
-            document.getElementById('potDisplayLabel').innerText = `${formatRupiah(pot)}`;
+            const potElem = document.getElementById('potDisplayLabel');
+            if (potElem) potElem.innerText = `${formatRupiah(pot)}`;
             
             const activePlayer = seats[currentTurn];
             const turnLabel = document.getElementById('turnLabelInside');
-            if (gamePaused) {
-                turnLabel.textContent = "PERMAINAN DIJEDA";
-            } else if (isShowdown) {
-                turnLabel.textContent = "Game Selesai (Showdown)";
-            } else if (activePlayer && activePlayer.name) {
-                turnLabel.textContent = `Giliran: Bangku ${currentTurn + 1} • Main`;
-            } else {
-                turnLabel.textContent = "Silakan Pilih Bangku";
+            if (turnLabel) {
+                if (gamePaused) {
+                    turnLabel.textContent = "PERMAINAN DIJEDA";
+                } else if (isShowdown) {
+                    turnLabel.textContent = "Game Selesai (Showdown)";
+                } else if (activePlayer && activePlayer.name) {
+                    turnLabel.textContent = `Giliran: Bangku ${currentTurn + 1} • Main`;
+                } else {
+                    turnLabel.textContent = "Silakan Pilih Bangku";
+                }
             }
 
             for (let i = 0; i < 7; i++) {
@@ -1505,7 +1577,7 @@
                 if (mySeat !== null) {
                     relativeIndex = (i - mySeat + 7) % 7;
                 }
-                const pos = SEAT_POSITIONS[relativeIndex];
+                const pos = SEAT_POSITIONS[relativeIndex] || SEAT_POSITIONS[0];
 
                 // PEMBERSIHAN STYLE SEBELUMNYA
                 seatElem.style.top = '';
@@ -1526,7 +1598,7 @@
                         seatElem.dataset.dragged = "true";
                     } else {
                         seatElem.style.position = 'absolute';
-                        seatElem.style.bottom = pos.bottom || '8px';
+                        seatElem.style.bottom = pos.bottom || '10px';
                         seatElem.style.left = pos.left || '50%';
                         seatElem.style.transform = pos.transform || 'translateX(-50%)';
                     }
@@ -1650,12 +1722,14 @@
             }
 
             let isMyTurn = (mySeat !== null && currentTurn === mySeat && !isShowdown && !gamePaused);
-            document.getElementById('btnHit').disabled = !isMyTurn;
-            document.getElementById('btnStop').disabled = !isMyTurn;
+            const btnHit = document.getElementById('btnHit');
+            const btnStop = document.getElementById('btnStop');
+            if (btnHit) btnHit.disabled = !isMyTurn;
+            if (btnStop) btnStop.disabled = !isMyTurn;
         }
 
         function toggleSeatLock(e) {
-            e.stopPropagation();
+            if (e) e.stopPropagation();
             seatLocked = !seatLocked;
             localStorage.setItem('samgong_seat_locked', seatLocked);
             const btn = document.getElementById('btnLockSeat');
