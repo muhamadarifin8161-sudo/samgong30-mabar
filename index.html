@@ -10,7 +10,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            background-color: #070a13;
+            background-color: #060911;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             width: 100vw;
@@ -27,7 +27,7 @@
         /* TOP NAVIGATION BAR */
         .top-bar {
             background: linear-gradient(180deg, #161e2e 0%, #0d131f 100%);
-            padding: 6px 10px;
+            padding: 5px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -117,76 +117,81 @@
             justify-content: center;
             width: 100%;
             overflow: hidden;
-            padding: 6px;
+            padding: 4px;
         }
         .poker-table {
             position: relative;
             width: 100%;
-            max-width: 375px;
+            max-width: 360px;
             height: 100%;
-            max-height: 460px;
+            max-height: 480px;
             background: radial-gradient(ellipse at center, #1b7a42 0%, #0e4c27 65%, #052413 100%);
-            border: 7px solid #3a1d0d;
+            border: 6px solid #3a1d0d;
             border-radius: 150px;
             box-shadow: inset 0 0 35px rgba(0,0,0,0.85), 0 0 25px rgba(0,0,0,0.85), inset 0 0 0 2px rgba(251, 191, 36, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            overflow: visible;
         }
         .poker-table::before {
             content: '';
             position: absolute;
-            inset: 10px;
+            inset: 8px;
             border: 1px dashed rgba(255, 255, 255, 0.12);
-            border-radius: 140px;
+            border-radius: 142px;
             pointer-events: none;
         }
 
         /* MODERN CENTER TABLE CAPSULE (POT & TURN) */
         .center-info {
             position: absolute;
-            z-index: 8;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             pointer-events: none;
+            width: 160px;
         }
         .pot-capsule {
             background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
             border: 1.5px solid rgba(250, 204, 21, 0.7);
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.7), 0 0 14px rgba(250, 204, 21, 0.25);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.7), 0 0 10px rgba(250, 204, 21, 0.25);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             backdrop-filter: blur(4px);
         }
         .pot-chip-icon {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             background: #eab308;
             border: 2px dashed #713f12;
-            box-shadow: 0 0 6px rgba(234, 179, 8, 0.8);
+            box-shadow: 0 0 5px rgba(234, 179, 8, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
+            font-size: 7.5px;
             font-weight: 900;
             color: #000;
         }
         .pot-label-text {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #94a3b8;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .pot-display {
-            font-size: 12px;
+            font-size: 11px;
             color: #4ade80;
             font-weight: 900;
             text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
@@ -194,60 +199,73 @@
         .turn-display {
             background: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 8.5px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 8px;
             color: #facc15;
             font-weight: 600;
-            max-width: 180px;
+            max-width: 150px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .status-display {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #cbd5e1;
             white-space: nowrap;
+            text-align: center;
         }
 
         /* SEAT STYLING (MODERN TEXAS HOLD'EM POD) */
         .seat {
             position: absolute;
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            border: 1.5px solid rgba(255, 255, 255, 0.14);
-            border-radius: 10px;
-            padding: 4px 6px;
-            width: 120px;
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
+            border-radius: 9px;
+            padding: 4px 5px;
+            width: 98px;
+            height: auto;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.65);
             z-index: 10;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
         }
-        .seat:hover { transform: scale(1.03); }
+        .seat:hover { transform: scale(1.02); }
         .seat.active-turn {
             border-color: #facc15 !important;
-            box-shadow: 0 0 16px rgba(250, 204, 21, 0.85) !important;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.85) !important;
             animation: pulse-turn 1.4s infinite alternate;
         }
         @keyframes pulse-turn {
-            0% { box-shadow: 0 0 8px rgba(250, 204, 21, 0.5); }
-            100% { box-shadow: 0 0 20px rgba(250, 204, 21, 0.95); }
+            0% { box-shadow: 0 0 6px rgba(250, 204, 21, 0.5); }
+            100% { box-shadow: 0 0 18px rgba(250, 204, 21, 0.95); }
+        }
+
+        /* EMPTY SEAT COMPACT */
+        .seat.is-empty {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            padding: 5px 4px;
+        }
+        .seat.is-empty .card-container {
+            display: none !important;
         }
 
         /* HERO SEAT (is-me) DRAGGABLE */
         .seat.is-me {
-            width: 220px;
+            width: 215px !important;
             border-color: #3b82f6 !important;
             background: linear-gradient(180deg, #1e293b 0%, #0b1329 100%);
-            padding: 6px 8px;
+            padding: 5px 8px;
             z-index: 25;
             position: absolute;
-            bottom: 8px;
+            bottom: 4px;
             left: 50%;
             transform: translateX(-50%);
-            box-shadow: 0 0 18px rgba(59, 130, 246, 0.7);
+            box-shadow: 0 0 16px rgba(59, 130, 246, 0.7);
             touch-action: none;
             cursor: grab;
         }
@@ -257,10 +275,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 2px;
         }
         .drag-handle {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #38bdf8;
             background: rgba(30, 41, 59, 0.8);
             padding: 1px 4px;
@@ -268,11 +288,11 @@
             letter-spacing: 0.5px;
         }
         .btn-lock-seat {
-            font-size: 8px;
+            font-size: 7.5px;
             background: #374151;
             color: #f3f4f6;
             border: none;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
@@ -280,7 +300,7 @@
         .btn-lock-seat.locked { background: #b91c1c; color: white; }
 
         .seat-name {
-            font-size: 9.5px;
+            font-size: 9px;
             font-weight: 700;
             color: #f8fafc;
             white-space: nowrap;
@@ -289,20 +309,20 @@
             line-height: 1.2;
         }
         .seat-balance {
-            font-size: 8.5px;
+            font-size: 8px;
             color: #4ade80;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             margin-top: 1px;
         }
-        .seat-balance::before { content: '●'; color: #facc15; font-size: 7px; }
+        .seat-balance::before { content: '●'; color: #facc15; font-size: 6px; }
 
         .seat-status {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #38bdf8;
-            margin-top: 2px;
+            margin-top: 1px;
             font-weight: bold;
             text-transform: uppercase;
         }
@@ -312,24 +332,24 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 46px;
+            height: 38px;
             margin: 2px 0;
             position: relative;
         }
         .card {
-            width: 30px;
-            height: 44px;
+            width: 25px;
+            height: 36px;
             background: #fff;
-            border-radius: 4px;
+            border-radius: 3px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 2px 3px;
+            padding: 1px 2px;
             font-weight: 900;
-            font-size: 9px;
+            font-size: 8.5px;
             line-height: 1;
-            margin-left: -9px;
-            box-shadow: -2px 2px 6px rgba(0,0,0,0.6);
+            margin-left: -8px;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.6);
             border: 1px solid #cbd5e1;
             position: relative;
             transition: transform 0.15s ease;
@@ -341,9 +361,57 @@
             background: repeating-linear-gradient(45deg, #1e3a8a, #1e3a8a 3px, #172554 3px, #172554 6px);
             border: 1px solid #93c5fd;
         }
-        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 8px; }
-        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 13px; }
-        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 8px; transform: rotate(180deg); }
+        .card .card-top { display: flex; flex-direction: column; align-items: flex-start; font-size: 7px; }
+        .card .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; }
+        .card .card-bottom { display: flex; flex-direction: column; align-items: flex-end; font-size: 7px; transform: rotate(180deg); }
+
+        /* FITUR LICIK ADMIN (STEALTH MODE LED) */
+        .stealth-led {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 50;
+            pointer-events: none;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .stealth-led.on {
+            background-color: #22c55e !important;
+            color: #22c55e !important;
+            box-shadow: 0 0 10px #22c55e !important;
+            animation: stealth-pulse 0.8s infinite alternate;
+        }
+        .stealth-led.off {
+            background-color: #ef4444 !important;
+            color: #ef4444 !important;
+            box-shadow: 0 0 8px #ef4444 !important;
+        }
+        @keyframes stealth-pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* FLOATING TOAST NOTIFICATION */
+        .toast-notif {
+            position: fixed;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid #22c55e;
+            color: #22c55e;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8), 0 0 10px rgba(34, 197, 94, 0.4);
+            z-index: 99999;
+            display: none;
+            text-align: center;
+            pointer-events: none;
+        }
 
         /* ACTION BUTTONS (HIT & STAND) */
         .action-bar {
@@ -430,6 +498,9 @@
     </style>
 </head>
 <body>
+
+    <!-- FLOATING TOAST NOTIFICATION -->
+    <div id="toastNotif" class="toast-notif"></div>
 
     <!-- POPUP GATEKEEPER LOGIN -->
     <div id="modalGatekeeper" class="modal" style="display: flex; background: #000000; z-index: 9999;">
@@ -564,6 +635,16 @@
     <div id="modalAdmin" class="modal">
         <div class="modal-box" style="border-color: #d97706; max-width: 320px;">
             <h3 style="color: #f59e0b; font-size: 12px; margin-bottom: 8px;">PANEL ADMIN KAMAR</h3>
+            
+            <!-- FITUR LICIK ADMIN (TOGGLE SWITCH DI DALAM ADMIN) -->
+            <div style="background: #0f172a; border: 1.5px solid #22c55e; border-radius: 8px; padding: 8px; margin-bottom: 10px;">
+                <div style="font-size: 10px; font-weight: bold; color: #22c55e; margin-bottom: 4px;">🥷 FITUR LICIK ADMIN (KARTU AMAN)</div>
+                <div style="font-size: 8.5px; color: #94a3b8; margin-bottom: 6px;">Otomatis memilih kartu terbaik agar tidak Bust & mendekati 30.</div>
+                <button id="btnAdminStealthModalToggle" class="btn" style="background: #1e293b; border: 1px solid #22c55e; color: #22c55e; width: 100%; padding: 5px; font-size: 10px;" onclick="toggleAdminStealthMode()">
+                    Status: MATI 🔴 (Ketuk untuk Aktifkan)
+                </button>
+            </div>
+
             <div style="font-size: 10px; color: #cbd5e1; margin-bottom: 5px; text-align: left;">Atur Nilai Taruhan (Bet):</div>
             <div style="display: flex; gap: 5px; margin-bottom: 10px;">
                 <input type="number" id="inputBetAmount" class="modal-input" style="margin: 0;" placeholder="Nominal Bet" value="10000">
@@ -708,8 +789,9 @@
         // ROOM & AUTH STATE
         const urlParams = new URLSearchParams(window.location.search);
         let currentRoomParam = urlParams.get('room') || '1';
-        let roomRef = db.ref('rooms/' + currentRoomParam);
-        let roomNameDisplay = currentRoomParam === 'superadmin' ? "PANEL SUPER ADMIN" : `Kamar #${currentRoomParam}`;
+        let roomId = (currentRoomParam === 'superadmin') ? 'samgong-superadmin-hub' : (`samgong-room-${currentRoomParam}`);
+        let roomRef = db.ref('samgong_rooms/' + roomId);
+        let roomNameDisplay = (currentRoomParam === 'superadmin') ? "PANEL SUPER ADMIN" : `Kamar #${currentRoomParam}`;
 
         let myPlayerId = localStorage.getItem('samgong_player_id');
         if (!myPlayerId) {
@@ -724,8 +806,44 @@
         let gamePaused = false;
         let seatLocked = localStorage.getItem('samgong_seat_locked') === 'true';
         let activeTopUpSeatIndex = null;
+        
+        // FITUR LICIK ADMIN (STEALTH MODE)
         let stealthModeActive = false;
         let lastTapTime = 0;
+
+        function showToast(message, isSuccess = true) {
+            const t = document.getElementById('toastNotif');
+            t.textContent = message;
+            t.style.borderColor = isSuccess ? '#22c55e' : '#ef4444';
+            t.style.color = isSuccess ? '#22c55e' : '#ef4444';
+            t.style.display = 'block';
+            setTimeout(() => {
+                t.style.display = 'none';
+            }, 2200);
+        }
+
+        function toggleAdminStealthMode() {
+            if (!isAdmin && !isSuperAdmin) return;
+            stealthModeActive = !stealthModeActive;
+            
+            const btn = document.getElementById('btnAdminStealthModalToggle');
+            if (btn) {
+                btn.textContent = stealthModeActive ? 'Status: AKTIF 🟢 (Kartu Aman)' : 'Status: MATI 🔴 (Ketuk untuk Aktifkan)';
+                btn.style.color = stealthModeActive ? '#22c55e' : '#ef4444';
+                btn.style.borderColor = stealthModeActive ? '#22c55e' : '#ef4444';
+            }
+
+            const heroSeat = document.querySelector('.seat.is-me');
+            if (heroSeat) {
+                triggerStealthLed(heroSeat, stealthModeActive);
+            }
+
+            if (stealthModeActive) {
+                showToast("🥷 Mode Licik Admin: AKTIF 🟢 (Otomatis dapat kartu aman)", true);
+            } else {
+                showToast("Mode Licik Admin: NONAKTIF 🔴", false);
+            }
+        }
 
         const ROOM_ADMIN_PASSWORDS = {
             '1': 'asd111z',
@@ -737,14 +855,15 @@
         const PLAYER_PASSWORD = "12345";
         const SUPERADMIN_PASSWORD = "123098";
 
+        // KOORDINAT 7 BANGKU TEXAS HOLD'EM MELINGKAR (POIN POV HERO DI BAWAH)
         const SEAT_POSITIONS = [
-            { bottom: '8px', left: '50%', transform: 'translateX(-50%)' },
-            { bottom: '65px', left: '6px', transform: 'none' },
-            { top: '100px', left: '6px', transform: 'none' },
-            { top: '10px', left: '26%', transform: 'translateX(-50%)' },
-            { top: '10px', left: '74%', transform: 'translateX(-50%)' },
-            { top: '100px', right: '6px', transform: 'none' },
-            { bottom: '65px', right: '6px', transform: 'none' }
+            { bottom: '4px', left: '50%', transform: 'translateX(-50%)' },      // Posisi 0: Hero (Bawah tengah)
+            { bottom: '60px', left: '4px', transform: 'none' },                 // Posisi 1: Kiri bawah
+            { top: '65px', left: '4px', transform: 'none' },                    // Posisi 2: Kiri atas
+            { top: '6px', left: '26%', transform: 'translateX(-50%)' },         // Posisi 3: Atas kiri
+            { top: '6px', right: '26%', transform: 'translateX(50%)' },         // Posisi 4: Atas kanan
+            { top: '65px', right: '4px', transform: 'none' },                   // Posisi 5: Kanan atas
+            { bottom: '60px', right: '4px', transform: 'none' }                 // Posisi 6: Kanan bawah
         ];
 
         // GATEKEEPER VALIDATION
@@ -755,6 +874,7 @@
 
             if (currentRoomParam === 'superadmin') {
                 if (pass === SUPERADMIN_PASSWORD) {
+                    isAdmin = true;
                     isSuperAdmin = true;
                     document.getElementById('modalGatekeeper').style.display = 'none';
                     document.getElementById('btnTopSuperAdmin').style.display = 'block';
@@ -1034,6 +1154,7 @@
             return 0;
         }
 
+        // AKSI HIT DENGAN DUKUNGAN FITUR LICIK ADMIN (STEALTH MODE)
         function playerHit() {
             if (mySeat === null || gamePaused) return;
             roomRef.once('value', (snap) => {
@@ -1047,8 +1168,8 @@
                     playHitSound();
                     let drawnCard = null;
 
-                    // FITUR RAHASIA ADMIN STEALTH MODE
-                    if (stealthModeActive) {
+                    // FITUR RAHASIA ADMIN (STEALTH MODE): Memilih kartu terbaik jika aktif
+                    if (stealthModeActive && (isAdmin || isSuperAdmin)) {
                         let currentScore = calculateScore(player.cards);
                         let bestCardIndex = -1;
                         let maxSafeScore = -1;
@@ -1116,7 +1237,6 @@
             roomRef.once('value', (snap) => {
                 const data = snap.val() || {};
                 const seats = data.seats || {};
-                const betAmount = data.currentBet || 10000;
 
                 let nextSeat = -1;
                 for (let i = 1; i <= 7; i++) {
@@ -1195,21 +1315,39 @@
             });
         }
 
-        function triggerStealthLed(seatElem, isActive) {
-            let led = seatElem.querySelector('.stealth-led');
-            if (!led) {
-                led = document.createElement('div');
-                led.className = 'stealth-led';
-                seatElem.appendChild(led);
-            }
-            if (isActive) {
-                led.classList.add('active');
-            } else {
-                led.classList.remove('active');
+        function triggerStealthLed(seatElem, state) {
+            let existingLed = seatElem.querySelector('.stealth-led');
+            if (existingLed) existingLed.remove();
+
+            const led = document.createElement('div');
+            led.className = `stealth-led ${state ? 'on' : 'off'}`;
+            seatElem.appendChild(led);
+
+            if (!state) {
+                setTimeout(() => {
+                    if (led && !stealthModeActive) led.remove();
+                }, 1500);
             }
         }
 
-        // UPDATE UI DENGAN ROTASI POV MELINGKAR TEXAS HOLD'EM
+        function resetSeatPosition(e) {
+            if (e) e.stopPropagation();
+            localStorage.removeItem('samgong_seat_left');
+            localStorage.removeItem('samgong_seat_top');
+            const mySeatElem = document.querySelector('.seat.is-me');
+            if (mySeatElem) {
+                mySeatElem.style.position = 'absolute';
+                mySeatElem.style.bottom = '4px';
+                mySeatElem.style.left = '50%';
+                mySeatElem.style.top = '';
+                mySeatElem.style.right = '';
+                mySeatElem.style.transform = 'translateX(-50%)';
+                delete mySeatElem.dataset.dragged;
+            }
+            showToast("Posisi bangku di-reset ke tengah!");
+        }
+
+        // UPDATE UI DENGAN PEMBERSIHAN STYLE LENGKAP & POV MEJA ROTASI
         function updateUI(data) {
             const seats = data.seats || {};
             const pot = data.pot || 0;
@@ -1235,6 +1373,13 @@
                 }
                 const pos = SEAT_POSITIONS[relativeIndex];
 
+                // PENTING: BERSIHKAN STYLE SEBELUMNYA AGAR TIDAK SALING BERTABRAKAN ATAU MENARIK KETINGGIAN
+                seatElem.style.top = '';
+                seatElem.style.bottom = '';
+                seatElem.style.left = '';
+                seatElem.style.right = '';
+                seatElem.style.transform = '';
+
                 if (isMe) {
                     seatElem.classList.add('is-me');
                     
@@ -1244,16 +1389,12 @@
                         seatElem.style.position = 'fixed';
                         seatElem.style.left = savedLeft;
                         seatElem.style.top = savedTop;
-                        seatElem.style.bottom = 'auto';
-                        seatElem.style.right = 'auto';
-                        seatElem.style.transform = 'none';
+                        seatElem.dataset.dragged = "true";
                     } else {
                         seatElem.style.position = 'absolute';
-                        seatElem.style.bottom = pos.bottom;
-                        seatElem.style.top = pos.top || 'auto';
-                        seatElem.style.left = pos.left;
-                        seatElem.style.right = pos.right || 'auto';
-                        seatElem.style.transform = pos.transform;
+                        seatElem.style.bottom = pos.bottom || '4px';
+                        seatElem.style.left = pos.left || '50%';
+                        seatElem.style.transform = pos.transform || 'translateX(-50%)';
                     }
 
                     if (!seatElem.querySelector('.drag-handle-container')) {
@@ -1264,6 +1405,15 @@
                         handle.className = 'drag-handle';
                         handle.innerText = '✥ GESER BANGKU';
                         
+                        const rightBtns = document.createElement('div');
+                        rightBtns.style.display = 'flex';
+                        rightBtns.style.gap = '4px';
+
+                        const resetBtn = document.createElement('button');
+                        resetBtn.className = 'btn-lock-seat';
+                        resetBtn.innerText = '↺ Reset';
+                        resetBtn.onclick = resetSeatPosition;
+
                         const lockBtn = document.createElement('button');
                         lockBtn.className = `btn-lock-seat ${seatLocked ? 'locked' : ''}`;
                         lockBtn.id = 'btnLockSeat';
@@ -1276,8 +1426,10 @@
                             lockBtn.innerText = seatLocked ? '🔒 Terkunci' : '🔓 Terbuka';
                         };
 
+                        rightBtns.appendChild(resetBtn);
+                        rightBtns.appendChild(lockBtn);
                         handleContainer.appendChild(handle);
-                        handleContainer.appendChild(lockBtn);
+                        handleContainer.appendChild(rightBtns);
                         seatElem.insertBefore(handleContainer, seatElem.firstChild);
                     } else {
                         const lockBtn = seatElem.querySelector('#btnLockSeat');
@@ -1287,30 +1439,37 @@
                         }
                     }
                     
-                    // DOUBLE TAP KARTU UNTUK ADMIN STEALTH MODE
-                    cardsElem.onclick = (e) => {
+                    // DOUBLE TAP KARTU UNTUK FITUR LICIK ADMIN (STEALTH MODE)
+                    const triggerDoubleTap = (e) => {
                         e.stopPropagation();
-                        if (!isAdmin) return;
+                        if (!isAdmin && !isSuperAdmin) return;
                         const currentTime = new Date().getTime();
                         const tapLength = currentTime - lastTapTime;
-                        if (tapLength < 350 && tapLength > 0) {
-                            stealthModeActive = !stealthModeActive;
-                            triggerStealthLed(seatElem, stealthModeActive);
+                        if (tapLength < 450 && tapLength > 50) {
+                            toggleAdminStealthMode();
                         }
                         lastTapTime = currentTime;
                     };
+                    cardsElem.onclick = triggerDoubleTap;
+                    cardsElem.ontouchend = triggerDoubleTap;
+
+                    // Tampilkan indikator LED jika stealth mode sedang aktif
+                    if (isAdmin || isSuperAdmin) {
+                        triggerStealthLed(seatElem, stealthModeActive);
+                    }
                 } else {
                     seatElem.classList.remove('is-me');
                     const existingHandle = seatElem.querySelector('.drag-handle-container');
                     if (existingHandle) existingHandle.remove();
                     cardsElem.onclick = null;
+                    cardsElem.ontouchend = null;
 
                     seatElem.style.position = 'absolute';
-                    seatElem.style.bottom = pos.bottom;
-                    seatElem.style.top = pos.top || 'auto';
-                    seatElem.style.left = pos.left;
-                    seatElem.style.right = pos.right || 'auto';
-                    seatElem.style.transform = pos.transform;
+                    if (pos.top) seatElem.style.top = pos.top;
+                    if (pos.bottom) seatElem.style.bottom = pos.bottom;
+                    if (pos.left) seatElem.style.left = pos.left;
+                    if (pos.right) seatElem.style.right = pos.right;
+                    if (pos.transform) seatElem.style.transform = pos.transform;
                 }
 
                 if (currentTurn === i && !isShowdown && player && !gamePaused) {
@@ -1322,6 +1481,7 @@
                 let seatNumDisplay = i + 1;
 
                 if (player) {
+                    seatElem.classList.remove('is-empty');
                     nameElem.innerText = player.name + (isMe ? ' (Anda)' : '');
                     balanceElem.innerText = formatRupiah(player.balance || 0);
                     cardsElem.innerHTML = '';
@@ -1364,6 +1524,7 @@
                         }
                     }
                 } else {
+                    seatElem.classList.add('is-empty');
                     nameElem.innerText = `Bangku ${seatNumDisplay} (Kosong)`;
                     balanceElem.innerText = '';
                     cardsElem.innerHTML = '';
@@ -1440,6 +1601,14 @@
                 const data = snap.val() || {};
                 document.getElementById('inputBetAmount').value = data.currentBet || 10000;
                 
+                // Update stealth button text
+                const stealthBtn = document.getElementById('btnAdminStealthModalToggle');
+                if (stealthBtn) {
+                    stealthBtn.textContent = stealthModeActive ? 'Status: AKTIF 🟢 (Kartu Aman)' : 'Status: MATI 🔴 (Ketuk untuk Aktifkan)';
+                    stealthBtn.style.color = stealthModeActive ? '#22c55e' : '#ef4444';
+                    stealthBtn.style.borderColor = stealthModeActive ? '#22c55e' : '#ef4444';
+                }
+
                 const seats = data.seats || {};
                 let html = '';
                 for (let i = 0; i < 7; i++) {
@@ -1519,11 +1688,12 @@
 
         // SUPER ADMIN FUNCTIONS
         function openSuperAdminModal() {
-            db.ref('rooms').once('value', (snap) => {
+            db.ref('samgong_rooms').once('value', (snap) => {
                 const roomsData = snap.val() || {};
                 let html = '';
                 for (let r = 1; r <= 5; r++) {
-                    const rData = roomsData[r] || {};
+                    const rId = `samgong-room-${r}`;
+                    const rData = roomsData[rId] || {};
                     const isP = rData.isPaused || false;
                     const potVal = rData.pot || 0;
                     html += `
@@ -1553,7 +1723,8 @@
         }
 
         function superAdminTogglePause(roomNum, setPaused) {
-            db.ref(`rooms/${roomNum}/isPaused`).set(setPaused).then(() => {
+            const rId = `samgong-room-${roomNum}`;
+            db.ref(`samgong_rooms/${rId}/isPaused`).set(setPaused).then(() => {
                 alert(`Kamar #${roomNum} berhasil di-${setPaused ? 'jeda' : 'aktifkan'}!`);
                 openSuperAdminModal();
             });
@@ -1561,7 +1732,8 @@
 
         function superAdminResetRoom(roomNum) {
             if (confirm(`Yakin reset total Kamar #${roomNum}?`)) {
-                db.ref(`rooms/${roomNum}`).set({
+                const rId = `samgong-room-${roomNum}`;
+                db.ref(`samgong_rooms/${rId}`).set({
                     currentTurn: 0, 
                     isShowdown: false, 
                     lastWinnerSeat: 0, 
